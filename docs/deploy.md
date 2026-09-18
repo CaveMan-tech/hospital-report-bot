@@ -55,7 +55,7 @@ app, verify each entry against its primary source and flip its flag in `packs/ng
 
 ```bash
 railway status
-timeout 5 railway logs || true
+railway logs        # streams; press Ctrl+C after a few seconds
 curl https://<your-domain>/healthz
 ```
 
