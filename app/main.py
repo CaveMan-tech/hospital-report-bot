@@ -34,12 +34,12 @@ lookup_limiter = RateLimiter(limit=10, window_seconds=600)
 dedupe = DailyDedupe()
 
 
-def build_engine() -> Engine:
+async def build_engine() -> Engine:
     cfg = get_settings()
-    if cfg.store == "supabase":
-        from app.store.supabase import SupabaseStore
+    if cfg.store == "postgres":
+        from app.store.postgres import PostgresStore
 
-        store = SupabaseStore(cfg.supabase_url, cfg.supabase_service_key)
+        store = await PostgresStore.connect(cfg.database_url)
     else:
         store = MemoryStore()
     return Engine(
@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI):
         logging.getLogger(__name__).warning("DEPLOYMENT CHECK: %s", p)
     if fatal:
         raise RuntimeError("Refusing to start: " + "; ".join(fatal))
-    app.state.engine = build_engine()
+    app.state.engine = await build_engine()
     if get_settings().demo_mode:
         n = await seed(app.state.engine.store)
         logging.getLogger(__name__).info("Seeded %s sample reports", n)
@@ -74,6 +74,8 @@ async def lifespan(app: FastAPI):
     task = asyncio.create_task(purge_loop())
     yield
     task.cancel()
+    if hasattr(app.state.engine.store, "close"):
+        await app.state.engine.store.close()
 
 
 app = FastAPI(title="Hospital Pattern Bot", lifespan=lifespan)

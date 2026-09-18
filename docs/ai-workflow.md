@@ -38,5 +38,5 @@ writing tests and the evaluation runner; first drafts of message copy for the au
   recovered by subtraction.
 - **Evaluation, not vibes.** A 30-story set with a single headline metric: missed emergencies.
 - **AI output that was rejected or corrected:** _[Ikechi to fill in: e.g. the first stack choice
-  was changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table
+  and the first database choice were both changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table
   leaked a masked value by subtraction and was fixed.]_

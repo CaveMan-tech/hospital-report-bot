@@ -282,7 +282,7 @@ Hospital matching: case-insensitive fuzzy match on `hospitals.name` and `aliases
 
 ---
 
-## 6. Data model (Supabase / Postgres)
+## 6. Data model (Postgres)
 
 The full schema is `db/schema.sql`. Three tables:
 
@@ -292,9 +292,9 @@ The full schema is `db/schema.sql`. Three tables:
 
 Hospitals are part of the country pack (`hospitals.seed.json`), not a table, so a deployment is fully described by its pack. Reports reference them by pack id; an unmatched name is kept in `hospital_name_raw` and held for review.
 
-Row level security is on for every table with **no policies**: the public can read and write nothing. The app uses the service role key from the server only.
+Only the server talks to the database. On Railway it is reachable solely over the private network from the app service, so there is no public database endpoint at all. The schema is applied automatically at startup (every statement is idempotent).
 
-Patterns are computed in `app/analyst.py` from the store, so the same logic runs on Supabase and on the in-memory store used for tests: group by hospital and category over 90 days, count only `credibility = 'ok'`, require at least 5, exclude private facilities.
+Patterns are computed in `app/analyst.py` from the store, so the same logic runs on Postgres and on the in-memory store. Both stores are held to one contract test suite: group by hospital and category over 90 days, count only `credibility = 'ok'`, require at least 5, exclude private facilities.
 
 Why a threshold of 5 even for analysts (deck talking point): a count of 1 on a quiet ward can identify the reporter, and the partner organisation should never be in a position to identify anyone. Analysts only ever see redacted summaries. In breakdowns, cells under 5 are masked, and when any cell is masked the visible cells are rounded down ("10+") so the masked value cannot be found by subtraction.
 
@@ -368,9 +368,9 @@ Deck framing: any advocacy organisation in any country deploys this with a count
 | `POST /analyst/reports/{id}/{exclude,accept,hold}` | Analyst. Sets credibility. |
 | `POST /api/demo/next-day` | Demo only. Triggers F1. |
 
-Stack: Python, FastAPI + Pydantic AI, deployed as one always-on service on Railway. Supabase Postgres. OpenAI `gpt-5-mini` behind a small `extract()` wrapper. Pages are server-rendered plain HTML with a few lines of vanilla JS.
+Stack: Python, FastAPI + Pydantic AI, deployed as one always-on service on Railway. Railway Postgres (asyncpg). OpenAI `gpt-5-mini` behind a small `extract()` wrapper. Pages are server-rendered plain HTML with a few lines of vanilla JS.
 
-**The engine is framework-independent:** `engine.handle_message(session_id, channel, text)` returns replies and the new state, and knows nothing about HTTP or any chat platform. `POST /api/chat` is a thin wrapper; WhatsApp and Telegram become webhook adapters that call the same function; next-day follow-ups run as a background job in the same process. Storage sits behind a `Store` interface with Supabase and in-memory implementations, so the app runs locally and in tests with no external services. Chat page: no images, no framework, a few kilobytes, works on a weak connection.
+**The engine is framework-independent:** `engine.handle_message(session_id, channel, text)` returns replies and the new state, and knows nothing about HTTP or any chat platform. `POST /api/chat` is a thin wrapper; WhatsApp and Telegram become webhook adapters that call the same function; next-day follow-ups run as a background job in the same process. Storage sits behind a `Store` interface with Postgres and in-memory implementations, so the app runs locally and in tests with no external services. Chat page: no images, no framework, a few kilobytes, works on a weak connection.
 
 ---
 
@@ -397,7 +397,7 @@ Unit tests (few, high value): severity rules, verified-only content gate, thresh
 
 | When (Lagos) | Work | Gate |
 |---|---|---|
-| Fri night | Repo, Supabase project, schema, `ng-lagos` pack with fictional hospitals + partner organisation, seed sample reports. | |
+| Fri night | Repo, schema, `ng-lagos` pack with fictional hospitals + partner organisation, seed sample reports. | |
 | Sat AM | `/api/chat` state machine with hard-coded messages, no AI. Walk both branches by hand. | |
 | Sat PM | Extraction call + schema validation. Web chat page. Write the 30 eval stories, first eval run. | Both branches work end to end in the browser |
 | Sun AM | `/analyst` page: patterns table, detail, exclude, brief export, CSV. Ref code lookup, follow-up simulation. | Full loop works: report in, pattern on analyst screen, brief out |

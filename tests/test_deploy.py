@@ -12,7 +12,7 @@ from app.main import app, client_ip
 
 ROOT = Path(__file__).resolve().parents[1]
 GOOD = {"ref_code_secret": "x" * 32, "analyst_password": "a-long-password", "allow_unverified": False,
-        "extract_mode": "llm", "store": "supabase"}
+        "extract_mode": "llm", "store": "postgres"}
 
 
 def test_good_production_config_has_no_problems():

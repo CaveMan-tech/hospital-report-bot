@@ -9,8 +9,7 @@ class Settings(BaseSettings):
     extract_mode: str = "mock"
     openai_model: str = "openai:gpt-5-mini"
     store: str = "memory"
-    supabase_url: str = ""
-    supabase_service_key: str = ""
+    database_url: str = ""
     pack: str = "ng-lagos"
     ref_code_secret: str = "dev-only-secret"
     analyst_password: str = "change-me"
@@ -34,7 +33,7 @@ class Settings(BaseSettings):
         if self.extract_mode == "mock":
             problems.append("EXTRACT_MODE=mock is a keyword stub; set EXTRACT_MODE=llm and OPENAI_API_KEY")
         if self.store == "memory":
-            problems.append("STORE=memory loses every report on restart; set STORE=supabase")
+            problems.append("STORE=memory loses every report on restart; set STORE=postgres and DATABASE_URL")
         return problems
 
 

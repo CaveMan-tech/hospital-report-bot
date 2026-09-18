@@ -4,24 +4,26 @@ One always-on service. The engine, the chat page and the analyst view are the sa
 Run exactly **one replica with one worker**: the rate limiter and the daily dedupe salt live in
 memory on purpose, so that IP addresses never touch a database.
 
-## 1. Supabase (once)
-
-1. Create a project at supabase.com.
-2. SQL editor: paste and run `db/schema.sql`.
-3. Settings > API: copy the **Project URL** and the **service_role** key. The service key is a
-   secret. It goes in Railway variables only, never in the repository or the browser.
-
-## 2. Railway
+## 1. Create the project, database and service
 
 ```bash
 railway login
 railway init -n hospital-pattern-bot
+railway add -d postgres
+railway add -s web
+railway service web
+```
+
+## 2. Deploy
+
+```bash
 railway up --detach
 railway domain
 ```
 
 `railway.json` sets the builder (Railpack, which detects `uv.lock`), the start command and the
-`/healthz` health check.
+`/healthz` health check. The app creates its own tables on first start from `db/schema.sql`, so
+there is no migration step.
 
 ## 3. Variables
 
@@ -32,9 +34,8 @@ Set these in the Railway dashboard (Service > Variables) so secrets never enter 
 | `EXTRACT_MODE` | `llm` |
 | `OPENAI_API_KEY` | your key |
 | `OPENAI_MODEL` | `openai:gpt-5-mini` |
-| `STORE` | `supabase` |
-| `SUPABASE_URL` | project URL |
-| `SUPABASE_SERVICE_KEY` | service_role key |
+| `STORE` | `postgres` |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (a Railway reference variable: it resolves to the private-network URL, so the database is never exposed publicly) |
 | `REF_CODE_SECRET` | long random string, e.g. `openssl rand -hex 32`. **Never change it afterwards**: every issued reference code stops working if you do. |
 | `ANALYST_PASSWORD` | 10+ characters. Share it with judges in the submission notes. |
 | `ALLOW_UNVERIFIED` | `false` |
@@ -66,4 +67,5 @@ Then open `/` on a phone, send one English and one Pidgin report, and confirm th
 
 - Access logs are disabled (`--no-access-log`) so reporter IP addresses are never written anywhere.
 - `/analyst` and `/api` responses are `no-store` and `noindex`.
+- The database has no public endpoint; only the app service can reach it, over Railway's private network.
 - Analysts see redacted summaries only. There is nothing in the database that identifies a reporter.

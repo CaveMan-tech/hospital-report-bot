@@ -19,7 +19,7 @@ that it can turn into public pressure.
  Telegram (adapter) ───┘        ├─ state machine + deterministic severity rules
                                 ├─ extract()  → gpt-5-mini via Pydantic AI (structured output)
                                 ├─ country pack: verified messages, rights, contacts, asks
-                                └─ Store      → Supabase or in-memory
+                                └─ Store      → Postgres or in-memory
                                           │
                                           ▼
                           /analyst: patterns ≥ 5 reports, masked breakdowns,
@@ -51,8 +51,8 @@ Chat: http://localhost:8000 · Analyst view: http://localhost:8000/analyst (any 
 from `ANALYST_PASSWORD`).
 
 With `EXTRACT_MODE=mock` and `STORE=memory` (the defaults) it runs with no API key and no database.
-Set `EXTRACT_MODE=llm` and `OPENAI_API_KEY` for real extraction, and `STORE=supabase` after running
-`db/schema.sql` in your Supabase project.
+Set `EXTRACT_MODE=llm` and `OPENAI_API_KEY` for real extraction, and `STORE=postgres` with a
+`DATABASE_URL` for persistence. The schema in `db/schema.sql` is applied automatically at startup.
 
 `ALLOW_UNVERIFIED=true` is for local development only: it lets you see messages that have not yet
 been checked against primary sources. Leave it off anywhere real people could reach.
@@ -61,6 +61,7 @@ been checked against primary sources. Leave it off anywhere real people could re
 
 ```bash
 uv run pytest
+TEST_DATABASE_URL=postgresql://localhost/hospital_bot_test uv run pytest   # also runs the store contract on real Postgres
 uv run python -m evals.run
 ```
 
@@ -76,7 +77,7 @@ The headline metric is **missed emergencies, target zero**. Results are written 
 | `SPEC.md` | The build spec this repository was built from |
 | `app/engine/` | Channel-independent engine: state machine, severity rules, extraction, packs, reference codes |
 | `app/analyst.py` | Patterns, masked breakdowns, brief and CSV. Template fill only, no LLM |
-| `app/store/` | `Store` interface with Supabase and in-memory implementations |
+| `app/store/` | `Store` interface with Postgres and in-memory implementations, held to one contract test suite |
 | `app/main.py` | FastAPI wrapper: chat API, lookup, follow-up simulation, analyst pages |
 | `packs/ng-lagos/` | Lagos country pack (fictional hospitals) |
 | `evals/` | Evaluation set and runner |

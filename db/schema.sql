@@ -1,7 +1,7 @@
--- Hospital Pattern Bot: Supabase / Postgres schema.
--- Run once in the Supabase SQL editor. Nothing here is readable by the public:
--- row level security is on everywhere with no anon policies, and the app talks
--- to the database only from the server using the service role key.
+-- Hospital Pattern Bot: Postgres schema.
+-- Applied automatically at startup (every statement is idempotent), so there is no
+-- manual migration step. On Railway the database is reachable only over the private
+-- network from the app service; nothing talks to it from a browser.
 
 create table if not exists reports (
   id                   uuid primary key,
@@ -63,8 +63,3 @@ create table if not exists sessions (
   expires_at timestamptz not null
 );
 create index if not exists sessions_expiry_idx on sessions (expires_at);
-
-alter table reports   enable row level security;
-alter table followups enable row level security;
-alter table sessions  enable row level security;
--- Deliberately no policies: anon and authenticated roles can read and write nothing.
