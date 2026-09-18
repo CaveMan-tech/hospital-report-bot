@@ -18,6 +18,26 @@ class Settings(BaseSettings):
     demo_mode: bool = True
 
 
+    # Set automatically by Railway. Used only to decide whether the safety checks below apply.
+    railway_environment: str = ""
+
+    def production_problems(self) -> list[str]:
+        """Things that must never reach a public deployment. Empty list means good to go."""
+        problems = []
+        if self.ref_code_secret in ("dev-only-secret", "change-me-to-a-long-random-string") \
+                or len(self.ref_code_secret) < 24:
+            problems.append("REF_CODE_SECRET must be a long random string (24+ characters)")
+        if self.analyst_password in ("change-me", "demo", "") or len(self.analyst_password) < 10:
+            problems.append("ANALYST_PASSWORD must be set to something non-default (10+ characters)")
+        if self.allow_unverified:
+            problems.append("ALLOW_UNVERIFIED must be false: unverified legal text must not reach real people")
+        if self.extract_mode == "mock":
+            problems.append("EXTRACT_MODE=mock is a keyword stub; set EXTRACT_MODE=llm and OPENAI_API_KEY")
+        if self.store == "memory":
+            problems.append("STORE=memory loses every report on restart; set STORE=supabase")
+        return problems
+
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()

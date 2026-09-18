@@ -52,6 +52,15 @@ def build_engine() -> Engine:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    cfg = get_settings()
+    problems = cfg.production_problems() if cfg.railway_environment else []
+    # Secrets and the verified gate are hard stops. The rest are loud warnings so a
+    # demo deployment (mock extractor, in-memory store) is still possible on purpose.
+    fatal = [p for p in problems if p.startswith(("REF_CODE_SECRET", "ANALYST_PASSWORD", "ALLOW_UNVERIFIED"))]
+    for p in problems:
+        logging.getLogger(__name__).warning("DEPLOYMENT CHECK: %s", p)
+    if fatal:
+        raise RuntimeError("Refusing to start: " + "; ".join(fatal))
     app.state.engine = build_engine()
     if get_settings().demo_mode:
         n = await seed(app.state.engine.store)
@@ -76,8 +85,35 @@ def engine_of(request: Request) -> Engine:
 
 
 def client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for", "")
-    return forwarded.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    """Used in memory only, for rate limiting and the daily dedupe key. Never stored or logged.
+
+    Behind Railway's proxy the trustworthy value is X-Real-IP, or the right-most
+    X-Forwarded-For entry. The left-most entry is whatever the client chose to send.
+    """
+    real = request.headers.get("x-real-ip", "").strip()
+    if real:
+        return real
+    forwarded = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    if forwarded:
+        return forwarded[-1]
+    return request.client.host if request.client else "unknown"
+
+
+@app.middleware("http")
+async def privacy_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    if request.url.path.startswith(("/analyst", "/api")):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+async def robots():
+    return "User-agent: *\nDisallow: /analyst\nDisallow: /api\n"
 
 
 class ChatIn(BaseModel):
