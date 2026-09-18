@@ -31,7 +31,7 @@ def _columns(model: BaseModel) -> dict[str, Any]:
 def _insert_sql(table: str, cols: list[str]) -> str:
     names = ", ".join(cols)
     params = ", ".join(f"${i}" for i in range(1, len(cols) + 1))
-    return f"insert into {table} ({names}) values ({params})"  # noqa: S608 - names come from our models
+    return f"insert into {table} ({names}) values ({params})"  # column names come from our own models, never from user input
 
 
 def _upsert_sql(table: str, cols: list[str]) -> str:
