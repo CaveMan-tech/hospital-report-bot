@@ -1,8 +1,8 @@
 # Evaluation results
 
-- Run: 2026-09-18 20:58 UTC
-- Extractor: `mock keyword stub`, extraction version `2026-09-18.1`
-- Stories: 30 hand-written (English and Pidgin)
+- Run: 2026-09-18 22:25 UTC
+- Extractor: `mock keyword stub`, extraction version `2026-09-19.1`
+- Stories: 36 hand-written (English and Pidgin; Nigeria and Kenya packs)
 
 ## Headline: missed emergencies = 0 (target: 0)
 
@@ -13,18 +13,18 @@ check. It is missed only if it would be treated as not severe without asking.
 |---|---|---|
 | ack_clean | 1 | 1 |
 | asked | 1 | 1 |
-| category | 18 | 25 |
+| category | 23 | 31 |
 | clinical_complaint | 1 | 2 |
-| emergency_caught | 9 | 9 |
+| emergency_caught | 12 | 12 |
 | handoff | 0 | 2 |
-| hospital | 2 | 3 |
-| language | 23 | 25 |
-| no_false_alarm | 14 | 15 |
+| hospital | 4 | 5 |
+| language | 29 | 31 |
+| no_false_alarm | 17 | 18 |
 | nonsense | 0 | 3 |
-| not_nonsense | 25 | 25 |
-| patient_group | 6 | 7 |
+| not_nonsense | 31 | 31 |
+| patient_group | 8 | 9 |
 | reporter_role | 0 | 1 |
-| subtype | 5 | 9 |
+| subtype | 8 | 13 |
 | summary_redacted | 1 | 1 |
 
 | Story | Category | Decision | Result |
@@ -59,3 +59,9 @@ check. It is missed only if it would be treated as not severe without asking.
 | hand-01 | other | ask | FAIL: handoff |
 | hand-02 | other | ask | FAIL: handoff |
 | priv-01 | abuse | not_severe | PASS |
+| ke-emg-01 | emergency_refused | severe | PASS |
+| ke-emg-02 | other | ask | FAIL: category, subtype |
+| ke-emg-03 | detention | severe | PASS |
+| ke-past-01 | abuse | not_severe | PASS |
+| ke-past-02 | neglect | ask | PASS |
+| ke-lang-01 | abuse | not_severe | PASS |

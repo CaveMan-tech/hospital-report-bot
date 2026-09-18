@@ -1,0 +1,147 @@
+{
+  "S0.greeting": {
+    "verified": true,
+    "en": "Hello. This is a safe place to report what happened to you, or to someone you know, at a public hospital. You do not need to give your name. Tell me what happened, in your own words."
+  },
+  "S0.privacy": {
+    "verified": true,
+    "en": "Your words are read by an AI service to understand your report. We do not keep your original message, only a short summary with names removed."
+  },
+  "S2.danger_check": {
+    "verified": true,
+    "en": "{ack} One quick question first. Is anyone in danger right now? For example, someone who needs urgent treatment and is not getting it, or someone being held at the hospital. Reply YES or NO."
+  },
+  "S2.danger_retry": {
+    "verified": true,
+    "en": "Sorry, I did not get that. Is anyone in danger right now? Please reply YES or NO."
+  },
+  "A1.emergency_refused": {
+    "verified": false,
+    "en": "What you describe is against the law in Kenya. Article 43(2) of the Constitution says: \"A person shall not be denied emergency medical treatment.\" Section 7 of the Health Act 2017 says every person has the right to emergency medical treatment, in public and private hospitals.\n\nDo this now:\n1. If the person is getting worse, getting care comes first. Go to the nearest other hospital if you can, or call {contact:emergency}. Do not stay to argue.\n2. If you can, ask calmly for the most senior doctor or officer on duty (the medical superintendent or the casualty in-charge) and say: \"Article 43(2) of the Constitution and section 7 of the Health Act say you cannot refuse emergency treatment.\"\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
+    "note": "VERIFY with a Kenyan lawyer: Constitution Art 43(2), Health Act 2017 s.7 wording. Deliberately does not say treatment is free and does not mention the fine. See docs/research/kenya-pack.md section A."
+  },
+  "A1.detention": {
+    "verified": false,
+    "en": "Many families in Kenya have faced this, and you have options. Kenyan High Court judges have ruled many times that a hospital has no legal right to hold a patient, or a body, to force payment of a bill. The bill is still a debt, and there are proper ways to settle a debt.\n\nWhat you can do:\n1. Ask to see the hospital's medical social worker about a waiver or a payment plan. Offer to sign a written undertaking to pay in instalments.\n2. Ask for the itemised bill in writing, and note the date the patient was discharged or the date the body was first held.\n3. For free help: the Office of the Ombudsman takes complaints about public hospitals: {contact:ombudsman}. For free legal advice: {contact:legal_aid}\n\nI cannot send anyone to you. I will record this so it is counted.",
+    "note": "VERIFY with a Kenyan lawyer. Based on High Court decisions 2015 to 2026 (lead case [2015] KEHC 8096 (KLR)); courts keep the debt alive and some claims have failed. More conservative option: drop the second sentence. See research section B."
+  },
+  "A1.generic": {
+    "verified": false,
+    "en": "If someone is in danger, getting care comes first.\n\nDo this now:\n1. Go to the nearest other hospital if you can, or call {contact:emergency}.\n2. Ask for the most senior doctor or nurse on duty and tell them plainly that the patient needs help now.\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
+    "note": "VERIFY: emergency numbers need test calls."
+  },
+  "Q.hospital": {
+    "verified": true,
+    "en": "Which hospital is this?"
+  },
+  "Q.department": {
+    "verified": true,
+    "en": "Which part of the hospital? For example casualty, maternity, children's ward."
+  },
+  "Q.when": {
+    "verified": true,
+    "en": "When did this happen? Today, this week, or earlier?"
+  },
+  "Q.category_confirm": {
+    "verified": true,
+    "en": "Just to be sure I understand: is this mainly about {category_plain}? Reply YES or NO."
+  },
+  "B2.template": {
+    "verified": true,
+    "en": "What happened to you is not acceptable, and it is not just your opinion. {right_text} ({source})"
+  },
+  "B3.abuse": {
+    "verified": true,
+    "en": "What you can do:\n1. If you feel safe doing so, ask for the nurse in charge or matron of the ward and tell them what happened.\n2. Note the time, the ward, and what was said or done. If someone saw it, remember who.\n3. You do not have to confront anyone. Reporting here already counts."
+  },
+  "B3.neglect": {
+    "verified": true,
+    "en": "What you can do:\n1. Ask at the nurses' station who the nurse in charge is and which doctor is on call.\n2. If the patient is getting worse, tell me now and I will show you what to do.\n3. Note the time you asked for help and how long you waited."
+  },
+  "B3.other": {
+    "verified": true,
+    "en": "What you can do:\n1. Note the date, the department, and what happened while it is fresh.\n2. Keep any receipts, bills or papers you were given.\n3. Reporting here already counts."
+  },
+  "B4.receipt": {
+    "verified": true,
+    "en": "Your report is recorded. Your code is {ref_code}. Keep it. It is the only way to check or update your report. I did not store your name or number."
+  },
+  "B4.counted": {
+    "verified": true,
+    "en": "Your report has been counted. When enough reports about the same problem build up at a hospital, the pattern (numbers only, never stories) goes to {org_name}, who use it to push publicly for change at that hospital."
+  },
+  "B4.no_hospital": {
+    "verified": true,
+    "en": "I have recorded this, but without the hospital's name it cannot be counted with other reports. You can come back with your code and add it."
+  },
+  "B5.optin": {
+    "verified": true,
+    "en": "May I check in tomorrow to ask if anything changed? It helps show whether hospitals fix problems. Reply YES or NO."
+  },
+  "B5.yes": {
+    "verified": true,
+    "en": "Thank you. Come back here tomorrow with your code and I will ask how things are. Take care of yourself."
+  },
+  "B5.no": {
+    "verified": true,
+    "en": "No problem. Thank you for speaking up. Take care of yourself."
+  },
+  "F1.question": {
+    "verified": true,
+    "en": "Hello again. You reported {category_plain} at {hospital}. How are things now?\n1. It was sorted out\n2. Nothing has changed\n3. It got worse\n4. We have left the hospital\nReply with a number."
+  },
+  "F1.retry": {
+    "verified": true,
+    "en": "Please reply with 1, 2, 3 or 4."
+  },
+  "F2.resolved": {
+    "verified": true,
+    "en": "I am glad to hear that. Thank you for telling me. It has been recorded."
+  },
+  "F2.unchanged": {
+    "verified": true,
+    "en": "I am sorry nothing has changed. That has been recorded, and it matters: it shows the problem was not fixed."
+  },
+  "F2.left": {
+    "verified": true,
+    "en": "Thank you for telling me. It has been recorded. I hope things get better from here."
+  },
+  "F2.worse": {
+    "verified": true,
+    "en": "I am sorry to hear that. It has been recorded."
+  },
+  "E.clinical": {
+    "verified": false,
+    "en": "I cannot judge medical decisions, like whether a diagnosis or treatment was right. I can still record what happened. Complaints about a doctor's professional conduct are handled by the Kenya Medical Practitioners and Dentists Council, and about a nurse by the Nursing Council of Kenya.",
+    "note": "VERIFY: regulator names and remits."
+  },
+  "E.handoff": {
+    "verified": false,
+    "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. Please contact: {contact:safety}",
+    "note": "VERIFY: helpline numbers by test call."
+  },
+  "E.retry": {
+    "verified": true,
+    "en": "I did not quite understand that. Could you tell me what happened at the hospital, in your own words?"
+  },
+  "E.end": {
+    "verified": true,
+    "en": "I am not able to help with that here. If something happened to you at a government hospital, you can come back any time and tell me."
+  },
+  "E.expired": {
+    "verified": true,
+    "en": "That conversation has ended. You can start a new report whenever you are ready."
+  },
+  "E.unverified_fallback": {
+    "verified": true,
+    "en": "I have recorded what you told me. The guidance for this situation is still being checked, so I cannot show it yet. If anyone is in danger, please get to the nearest other hospital or emergency service now."
+  },
+  "L.not_found": {
+    "verified": true,
+    "en": "I could not find a report with that code. Please check it and try again."
+  },
+  "L.found": {
+    "verified": true,
+    "en": "Your report about {category_plain} at {hospital} is on record. Status: {status}."
+  }
+}

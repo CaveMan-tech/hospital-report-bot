@@ -1,0 +1,59 @@
+[
+  {
+    "id": "emergency",
+    "label": "Emergency numbers",
+    "text": "922 (national emergency medical line) or the Kenya Red Cross on 1199",
+    "applies_to": [
+      "A1"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "note": "922 launched Aug 2026 and is known only from news reports; 999/112 reach police and are unreliable for ambulances. TEST-CALL before verifying."
+  },
+  {
+    "id": "ombudsman",
+    "label": "Complaints about public hospitals (free)",
+    "text": "Office of the Ombudsman, toll-free 0800 221 349, complain@ombudsman.go.ke",
+    "applies_to": [
+      "detention",
+      "emergency_refused",
+      "abuse",
+      "neglect"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "note": "Seen on official site. Test-call."
+  },
+  {
+    "id": "legal_aid",
+    "label": "Free legal help",
+    "text": "National Legal Aid Service toll-free 0800 720 640, or Kituo cha Sheria on 0734 874 221.",
+    "applies_to": [
+      "detention"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "note": "Seen on official sites. Confirm they take hospital-detention cases."
+  },
+  {
+    "id": "safety",
+    "label": "Urgent support",
+    "text": "the national gender-based violence helpline 1195 (free, 24 hours), the child helpline 116 (free), or Kenya Red Cross counselling on 1199 (free).",
+    "applies_to": [
+      "handoff"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "note": "Medium confidence. Test-call each."
+  },
+  {
+    "id": "oversight",
+    "label": "If a complaint is not resolved",
+    "text": "Kenya Health Professions Oversight Authority, 0742 157 424, info@khpoa.go.ke",
+    "applies_to": [
+      "all"
+    ],
+    "verified": false,
+    "verified_on": null
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "category_plain": {
+    "emergency_refused": {
+      "en": "emergency care being refused or delayed"
+    },
+    "detention": {
+      "en": "someone being held over an unpaid bill"
+    },
+    "abuse": {
+      "en": "abuse by staff"
+    },
+    "neglect": {
+      "en": "a patient being neglected"
+    },
+    "other": {
+      "en": "a problem at the hospital"
+    }
+  },
+  "unknown_hospital": {
+    "en": "the hospital"
+  }
+}

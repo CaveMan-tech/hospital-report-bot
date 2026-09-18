@@ -49,11 +49,18 @@ def parse_yes_no(text: str) -> bool | None:
 
 
 class Engine:
-    def __init__(self, store: Store, extractor: Extractor, pack: Pack, ref_secret: str):
+    def __init__(self, store: Store, extractor: Extractor, pack: Pack | list[Pack], ref_secret: str):
+        """`pack` may be one pack or several. The first is the default; each conversation
+        picks its pack once, when it starts, and keeps it."""
+        packs = pack if isinstance(pack, list) else [pack]
         self.store = store
         self.extract = extractor
-        self.pack = pack
+        self.packs: dict[str, Pack] = {p.id: p for p in packs}
+        self.pack = packs[0]
         self.ref_secret = ref_secret
+
+    def pack_for(self, pack_id: str | None) -> Pack:
+        return self.packs.get(pack_id or "", self.pack)
 
     # ------------------------------------------------------------------ entry
 
@@ -63,6 +70,7 @@ class Engine:
         channel: Channel,
         text: str,
         dedupe_key: str | None = None,
+        pack_id: str | None = None,
     ) -> EngineReply:
         text = (text or "").strip()[:MAX_STORY_CHARS]
         session = await self.store.get_session(session_id) if session_id else None
@@ -74,7 +82,8 @@ class Engine:
             session = None
 
         if session is None:
-            session = Session(channel=channel, pack=self.pack.id, context={"lang": "en"})
+            pack = self.pack_for(pack_id)
+            session = Session(channel=channel, pack=pack.id, context={"lang": pack.languages[0]})
             if dedupe_key:
                 session.context["dedupe_key"] = dedupe_key
             await self.store.create_session(session)
@@ -109,7 +118,9 @@ class Engine:
     async def _on_story(self, s: Session, text: str):
         ctx = s.context
         ctx.setdefault("transcript", []).append({"role": "user", "text": text})
-        ex = await self.extract(ctx["transcript"])
+        pack = self.pack_for(s.pack)
+        ex = await self.extract(ctx["transcript"], pack.extraction_context())
+        ex.language = pack.language_or_default(ex.language)
         ctx["lang"] = ex.language
 
         if ex.is_nonsense:
@@ -183,7 +194,7 @@ class Engine:
             s.state = "B1"
             return replies + [question], None
 
-        rights = self.pack.rights_for(ex.category, s.context["lang"])
+        rights = self.pack_for(s.pack).rights_for(ex.category, s.context["lang"])
         s.context["rights_shown"] = [rid for rid, _ in rights]
         replies += [text for _, text in rights]
         help_key = f"B3.{ex.category}" if ex.category in ("abuse", "neglect") else "B3.other"
@@ -212,7 +223,7 @@ class Engine:
         ):
             asked.append("category_confirm")
             s.context["pending_field"] = "category_confirm"
-            plain = self.pack.category_plain(ex.category, s.context["lang"])
+            plain = self.pack_for(s.pack).category_plain(ex.category, s.context["lang"])
             return self._msg("Q.category_confirm", s, category_plain=plain)
         return None
 
@@ -228,11 +239,11 @@ class Engine:
         elif field in ("department", "when"):
             transcript = s.context.get("transcript", [])
             transcript += [
-                {"role": "bot", "text": self.pack.message(f"Q.{field}", "en")},
+                {"role": "bot", "text": self.pack_for(s.pack).message(f"Q.{field}", "en")},
                 {"role": "user", "text": text},
             ]
             s.context["transcript"] = transcript
-            fresh = await self.extract(transcript)
+            fresh = await self.extract(transcript, self.pack_for(s.pack).extraction_context())
             # Only fill gaps. An answer to a follow-up never rewrites the category or severity.
             if ex.department == "unknown":
                 ex.department = fresh.department
@@ -254,7 +265,8 @@ class Engine:
     async def _finalise(self, s: Session, ex: Extraction):
         ctx = s.context
         lang = ctx["lang"]
-        hospital = self.pack.match_hospital(ex.hospital_name_raw)
+        pack = self.pack_for(s.pack)
+        hospital = pack.match_hospital(ex.hospital_name_raw)
         code = refcode.generate()
 
         credibility = "ok"
@@ -271,7 +283,7 @@ class Engine:
         report = Report(
             ref_code_hmac=refcode.digest(code, self.ref_secret),
             channel=s.channel,
-            pack=self.pack.id,
+            pack=pack.id,
             language=lang,
             hospital_id=hospital.id if hospital else None,
             hospital_name_raw=None if hospital else ex.hospital_name_raw,
@@ -321,7 +333,7 @@ class Engine:
         report = await self._report_for(ref_code)
         if report is None:
             return None
-        s = Session(channel=channel, pack=self.pack.id, state="F1",
+        s = Session(channel=channel, pack=report.pack, state="F1",
                     context={"lang": report.language}, report_id=report.id)
         await self.store.create_session(s)
         return await self._reply(s, [self._msg("F1.question", s, **self._report_fields(report))])
@@ -358,8 +370,8 @@ class Engine:
         report = await self._report_for(ref_code)
         if report is None:
             return self.pack.message("L.not_found", lang)
-        return self.pack.message("L.found", report.language, status=report.status,
-                                 **self._report_fields(report))
+        return self.pack_for(report.pack).message("L.found", report.language, status=report.status,
+                                                  **self._report_fields(report))
 
     async def _report_for(self, ref_code: str) -> Report | None:
         if not refcode.is_wellformed(ref_code):
@@ -368,16 +380,17 @@ class Engine:
 
     def _report_fields(self, report: Report) -> dict[str, str]:
         lang = report.language
-        hospital = next((h.name for h in self.pack.hospitals if h.id == report.hospital_id), None)
+        pack = self.pack_for(report.pack)
+        hospital = next((h.name for h in pack.hospitals if h.id == report.hospital_id), None)
         return {
-            "category_plain": self.pack.category_plain(report.category, lang),
-            "hospital": hospital or report.hospital_name_raw or self.pack.label("unknown_hospital", "", lang),
+            "category_plain": pack.category_plain(report.category, lang),
+            "hospital": hospital or report.hospital_name_raw or pack.label("unknown_hospital", "", lang),
         }
 
     # --------------------------------------------------------------- helpers
 
     def _msg(self, key: str, s: Session, **fields: str) -> str:
-        text = self.pack.message(key, s.context.get("lang", "en"), **fields)
+        text = self.pack_for(s.pack).message(key, s.context.get("lang", "en"), **fields)
         return re.sub(r"^\s+", "", text)  # an empty {ack} leaves a leading space
 
     def _end(self, s: Session, keys: list[str]):

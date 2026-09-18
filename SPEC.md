@@ -56,7 +56,7 @@ These four were chosen as the problems most recognisable to anyone who has used 
 | `subtype` | `emergency_refused`: `deposit_demanded`, `no_bed_space`, `no_staff`, `other`. `detention`: `patient_held`, `body_held`. `abuse`: `verbal`, `physical`, `humiliation`, `other`. `neglect`: `left_unattended`, `staff_absent`, `calls_ignored`, `other`. |
 | `harm_outcome` | `none`, `condition_worsened`, `death`, `unknown` |
 | `time_bucket` | `day`, `night`, `weekend`, `unknown` |
-| `money_demanded` | true / false / null, with `amount_bucket`: `under_10k`, `10k_50k`, `50k_200k`, `over_200k`, `unknown` (naira) |
+| `money_demanded` | true / false / null, with `amount_bucket`: `small`, `medium`, `large`, `very_large`, `unknown`. Each pack defines the thresholds in its own currency. |
 
 **Slice privacy rule:** the threshold of 5 applies to every cell of every slice, not only the top-level pattern. A slice with fewer than 5 reports shows as "fewer than 5". Enough facets combined can describe one family.
 
@@ -250,7 +250,7 @@ One LLM call after the story, and again after each answer with running context. 
 
 ```json
 {
-  "language": "en | pcm",
+  "language": "a language code from the pack, e.g. en | pcm",
   "category": "emergency_refused | detention | abuse | neglect | other",
   "category_confidence": 0.0,
   "secondary_categories": [],
@@ -266,7 +266,7 @@ One LLM call after the story, and again after each answer with running context. 
   "harm_outcome": "none | condition_worsened | death | unknown",
   "time_bucket": "day | night | weekend | unknown",
   "money_demanded": null,
-  "amount_bucket": "under_10k | 10k_50k | 50k_200k | over_200k | unknown",
+  "amount_bucket": "small | medium | large | very_large | unknown",
   "clinical_complaint": false,
   "safety_handoff": "none | sexual_violence | self_harm | other_violence",
   "implausible": false,
@@ -349,7 +349,9 @@ packs/ng-lagos/
 
 The bot refuses to send any entry where `verified` is false. Enforced in code and covered by a test.
 
-**Stretch: `packs/ke-nairobi/`** with English + Swahili greeting, Kenyan emergency-treatment right and patient-detention context `[VERIFY: Health Act 2017 emergency treatment provision; court rulings on detention]`. Even a minimal verified pack plus a pack switcher on the demo turns "scales across geographies" from a claim into a demonstration, in front of a Nairobi audience. Gate: only after sections 1 to 7 work end to end.
+**Second pack: `packs/ke-nairobi/`** (English only). Kenyan emergency-treatment law (Constitution Art 43(2), Health Act 2017 s.7), High Court case law on detention of patients and bodies, the Patients' Rights Charter, Kenyan contacts and terminology ("casualty", "county referral hospital", "cash deposit", "waiver"), fictional Nairobi hospitals and a fictional organisation. Sourced in `docs/research/kenya-pack.md` with a confidence label per claim; every legal line and contact ships `verified: false` `[VERIFY with a Kenyan lawyer; test-call every number]`. Kiswahili is the next step and needs a fluent reviewer; nothing is machine-translated.
+
+How packs work at runtime: a deployment lists its packs in `PACKS`; each conversation picks one when it starts (`/?pack=<id>`, or a field on the first `POST /api/chat`) and keeps it. Reports carry their pack, and patterns, briefs, follow-ups and the analyst view (`/analyst?pack=<id>`) never mix packs. Languages and money buckets are defined by the pack, not by the code: the extractor receives a deployment context (country, language codes, what small/medium/large/very large mean in local currency, local terms). A test fails if any country-specific string appears in the engine. `packs/README.md` is the add-a-country guide.
 
 Deck framing: any advocacy organisation in any country deploys this with a country pack and its own name. No code changes.
 
@@ -401,7 +403,7 @@ Unit tests (few, high value): severity rules, verified-only content gate, thresh
 | Sat AM | `/api/chat` state machine with hard-coded messages, no AI. Walk both branches by hand. | |
 | Sat PM | Extraction call + schema validation. Web chat page. Write the 30 eval stories, first eval run. | Both branches work end to end in the browser |
 | Sun AM | `/analyst` page: patterns table, detail, exclude, brief export, CSV. Ref code lookup, follow-up simulation. | Full loop works: report in, pattern on analyst screen, brief out |
-| Sun PM | Tests, second eval run, README, `docs/ai-workflow.md`, polish. Draft video script. | **Sun 18:00: feature freeze.** Stretch (Kenya pack first, then WhatsApp sandbox for filming) only if everything above is green |
+| Sun PM | Tests, second eval run, README, `docs/ai-workflow.md`, polish. Draft video script. | **Sun 18:00: feature freeze.** Stretch (WhatsApp sandbox for filming) only if everything above is green |
 | Mon AM | Record video (3 to 4 min: problem, Pidgin report on a phone, emergency branch, pattern appears on the organisation's analyst screen, brief exported, pack switch, eval table). | |
 | Mon PM | Deck (PDF), written summary, final verification pass on every `verified: true` entry. **Submit by 18:00 UTC.** | |
 

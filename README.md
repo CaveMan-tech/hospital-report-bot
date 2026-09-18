@@ -37,7 +37,8 @@ that it can turn into public pressure.
 - **Patterns, not stories.** Nothing is public. Analysts see a pattern only once 5 credible reports
   exist, see redacted summaries only, and breakdown cells under 5 are masked.
 - **Scales by country pack.** Everything jurisdiction-specific is in `packs/<id>/`. A new country or
-  organisation is a new folder, not new code.
+  organisation is a new folder, not new code. Two packs ship: Lagos (English and Pidgin) and
+  Nairobi (English). Switch live with `/?pack=ke-nairobi`. See `packs/README.md`.
 
 ## Run it
 
@@ -65,7 +66,7 @@ TEST_DATABASE_URL=postgresql://localhost/hospital_bot_test uv run pytest   # als
 uv run python -m evals.run
 ```
 
-`evals/stories.jsonl` holds 30 hand-written stories: emergencies, past events, ambiguous reports,
+`evals/stories.jsonl` holds 36 hand-written stories across both packs: emergencies, past events, ambiguous reports,
 clinical complaints, out-of-scope text, prompt injection, safety handoffs and a privacy check.
 The headline metric is **missed emergencies, target zero**. Results are written to
 `evals/RESULTS.llm.md`.
@@ -79,7 +80,8 @@ The headline metric is **missed emergencies, target zero**. Results are written 
 | `app/analyst.py` | Patterns, masked breakdowns, brief and CSV. Template fill only, no LLM |
 | `app/store/` | `Store` interface with Postgres and in-memory implementations, held to one contract test suite |
 | `app/main.py` | FastAPI wrapper: chat API, lookup, follow-up simulation, analyst pages |
-| `packs/ng-lagos/` | Lagos country pack (fictional hospitals) |
+| `packs/` | Country packs: `ng-lagos`, `ke-nairobi` (fictional hospitals), and how to add one |
+| `docs/research/kenya-pack.md` | Sourced research behind the Kenya pack, with confidence labels |
 | `evals/` | Evaluation set and runner |
 | `docs/ai-workflow.md` | How AI coding tools were used |
 

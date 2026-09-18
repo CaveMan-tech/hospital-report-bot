@@ -8,9 +8,10 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-EXTRACTION_VERSION = "2026-09-18.1"
+EXTRACTION_VERSION = "2026-09-19.1"
 
-Language = Literal["en", "pcm"]
+# Language codes are defined by each country pack (e.g. "en", "pcm"), so this is not an enum.
+Language = str
 Category = Literal["emergency_refused", "detention", "abuse", "neglect", "other"]
 Department = Literal[
     "emergency", "maternity", "paediatrics", "outpatient", "ward",
@@ -24,7 +25,8 @@ SafetyHandoff = Literal["none", "sexual_violence", "self_harm", "other_violence"
 PatientGroup = Literal["newborn", "child", "adult", "pregnant", "elderly", "unknown"]
 HarmOutcome = Literal["none", "condition_worsened", "death", "unknown"]
 TimeBucket = Literal["day", "night", "weekend", "unknown"]
-AmountBucket = Literal["under_10k", "10k_50k", "50k_200k", "over_200k", "unknown"]
+# Country-neutral. Each pack says what the buckets mean in its own currency.
+AmountBucket = Literal["small", "medium", "large", "very_large", "unknown"]
 Channel = Literal["web", "whatsapp", "telegram"]
 ReportStatus = Literal["new", "resolved", "unchanged", "worse", "left", "no_response"]
 Credibility = Literal["ok", "review", "excluded"]

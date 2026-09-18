@@ -6,7 +6,8 @@
 <link rel="stylesheet" href="/static/analyst.css">
 </head>
 <body>
-<header><h1>Patterns</h1><p>{{ org_name }} · analyst view · last {{ window }} days</p></header>
+<header><h1>Patterns · {{ pack.title }}</h1><p>{{ org_name }} · analyst view · last {{ window }} days
+{% for p in packs %}{% if p.id != pack.id %} · <a href="/analyst?pack={{ p.id }}">switch to {{ p.title }}</a>{% endif %}{% endfor %}</p></header>
 {% if sample %}<p class="banner">SAMPLE DATA. Fictional hospitals, generated reports.</p>{% endif %}
 <p class="note">Anonymous, unverified reports. A pattern appears here only once {{ threshold }} separate credible
 reports exist. These are signals that warrant investigation, not rates. Do not rank hospitals with them.
@@ -23,7 +24,7 @@ reports exist. These are signals that warrant investigation, not rates. Do not r
 <td><a href="/analyst/pattern/{{ p.hospital_id }}/{{ p.category }}">Open</a></td></tr>
 {% endfor %}
 </tbody></table></div>
-<p class="actions"><a class="btn" href="/analyst/patterns.csv">Download patterns CSV</a>
-<a class="btn" href="/analyst/facets.csv">Download report facets CSV</a></p>
+<p class="actions"><a class="btn" href="/analyst/patterns.csv?pack={{ pack.id }}">Download patterns CSV</a>
+<a class="btn" href="/analyst/facets.csv?pack={{ pack.id }}">Download report facets CSV</a></p>
 {% else %}<p>No pattern has reached the threshold yet.</p>{% endif %}
 </body></html>

@@ -32,7 +32,7 @@ def patterns(reports: list[Report], pack: Pack, now: datetime | None = None) -> 
     hospitals = {h.id: h for h in pack.hospitals}
     groups: dict[tuple[str, str], list[Report]] = {}
     for r in reports:
-        h = hospitals.get(r.hospital_id or "")
+        h = hospitals.get(r.hospital_id or "") if r.pack == pack.id else None
         if h is None or h.facility_type == "private" or r.credibility == "excluded":
             continue
         if not _in_window(r, now):

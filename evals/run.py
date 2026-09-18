@@ -19,6 +19,7 @@ from pathlib import Path
 from app.config import get_settings
 from app.engine.extract import get_extractor
 from app.engine.models import EXTRACTION_VERSION, Extraction
+from app.engine.packs import Pack
 from app.engine.severity import decide
 
 HERE = Path(__file__).parent
@@ -61,11 +62,18 @@ async def main() -> int:
     extract = get_extractor(cfg.extract_mode, cfg.openai_model)
     stories = [json.loads(line) for line in (HERE / "stories.jsonl").read_text().splitlines() if line]
     sem = asyncio.Semaphore(CONCURRENCY)
+    packs: dict[str, Pack] = {}
+
+    def pack_of(story: dict) -> Pack:
+        pid = story.get("pack", "ng-lagos")
+        return packs.setdefault(pid, Pack(pid))
 
     async def run(story: dict):
         async with sem:
             try:
-                ex = await extract([{"role": "user", "text": story["text"]}])
+                pack = pack_of(story)
+                ex = await extract([{"role": "user", "text": story["text"]}], pack.extraction_context())
+                ex.language = pack.language_or_default(ex.language)  # same normalisation as the engine
             except Exception as e:  # noqa: BLE001 - a crash is a failed case, not a failed run
                 return story, None, "error", {"extractor_ok": False}, str(e)
         decision = decide(ex)
@@ -93,7 +101,7 @@ async def main() -> int:
         "",
         f"- Run: {datetime.now(UTC):%Y-%m-%d %H:%M} UTC",
         f"- Extractor: `{model}`, extraction version `{EXTRACTION_VERSION}`",
-        f"- Stories: {len(stories)} hand-written (English and Pidgin)",
+        f"- Stories: {len(stories)} hand-written (English and Pidgin; Nigeria and Kenya packs)",
         "",
         f"## Headline: missed emergencies = {len(missed)}" + (f" ({', '.join(missed)})" if missed else " (target: 0)"),
         "",

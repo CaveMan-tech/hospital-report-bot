@@ -11,5 +11,12 @@
     "767"
   ],
   "org_name": "Open Ward Initiative (demo organisation)",
-  "currency": "NGN"
+  "currency": "NGN",
+  "amount_buckets": {
+    "small": "under 10,000 naira",
+    "medium": "10,000 to 50,000 naira",
+    "large": "50,000 to 200,000 naira",
+    "very_large": "over 200,000 naira"
+  },
+  "local_terms": "'casualty' or 'emergency' = emergency department; 'pikin' = child; 'deposit' = upfront payment demanded before care"
 }

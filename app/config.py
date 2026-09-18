@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     openai_model: str = "openai:gpt-5-mini"
     store: str = "memory"
     database_url: str = ""
-    pack: str = "ng-lagos"
+    pack: str = "ng-lagos"                 # default pack
+    packs: str = "ng-lagos,ke-nairobi"     # every pack this deployment serves
     ref_code_secret: str = "dev-only-secret"
     analyst_password: str = "change-me"
     allow_unverified: bool = False

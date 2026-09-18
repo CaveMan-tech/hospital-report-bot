@@ -11,23 +11,25 @@ from datetime import UTC, datetime, timedelta
 
 from app.engine import refcode
 from app.engine.models import SUBTYPES, Followup, Report
+from app.engine.packs import Pack
 from app.store.base import Store
 
-# (hospital, category, count, department weights, patient_group weights, time weights, severe share)
+# (hospital index in the pack, category, count, department weights, patient_group weights,
+#  time weights, severe share). Index-based so every country pack gets the same demo shape.
 PLAN = [
-    ("h-harmattan", "emergency_refused", 14, {"emergency": 9, "maternity": 1},
+    (0, "emergency_refused", 14, {"emergency": 9, "maternity": 1},
      {"adult": 6, "child": 3, "elderly": 2, "pregnant": 1}, {"night": 6, "day": 3, "weekend": 2}, 0.6),
-    ("h-harmattan", "neglect", 7, {"ward": 5, "emergency": 2},
+    (0, "neglect", 7, {"ward": 5, "emergency": 2},
      {"elderly": 4, "adult": 3}, {"night": 5, "weekend": 2}, 0.15),
-    ("h-lagoonview", "abuse", 9, {"maternity": 7, "outpatient": 2},
+    (1, "abuse", 9, {"maternity": 7, "outpatient": 2},
      {"pregnant": 7, "adult": 2}, {"day": 5, "night": 4}, 0.0),
-    ("h-iroko", "detention", 6, {"maternity": 4, "ward": 2},
+    (2, "detention", 6, {"maternity": 4, "ward": 2},
      {"pregnant": 3, "adult": 2, "newborn": 1}, {"unknown": 6}, 0.5),
-    ("h-sunbird", "neglect", 8, {"maternity": 5, "paediatrics": 3},
+    (4, "neglect", 8, {"maternity": 5, "paediatrics": 3},
      {"newborn": 4, "pregnant": 3, "child": 1}, {"night": 6, "weekend": 2}, 0.25),
     # Below the threshold on purpose: these must never appear in the analyst view.
-    ("h-palmgrove", "abuse", 3, {"records": 2, "outpatient": 1}, {"elderly": 2, "adult": 1}, {"day": 3}, 0.0),
-    ("h-iroko", "abuse", 4, {"ward": 4}, {"adult": 4}, {"day": 2, "night": 2}, 0.0),
+    (3, "abuse", 3, {"records": 2, "outpatient": 1}, {"elderly": 2, "adult": 1}, {"day": 3}, 0.0),
+    (2, "abuse", 4, {"ward": 4}, {"adult": 4}, {"day": 2, "night": 2}, 0.0),
 ]
 
 SUMMARY = {
@@ -42,11 +44,13 @@ def _pick(rng: random.Random, weights: dict[str, int]) -> str:
     return rng.choices(list(weights), weights=list(weights.values()))[0]
 
 
-def build(now: datetime | None = None) -> tuple[list[Report], list[Followup]]:
-    rng = random.Random(7)
+def build(pack: Pack | None = None, now: datetime | None = None) -> tuple[list[Report], list[Followup]]:
+    pack = pack or Pack("ng-lagos")
+    rng = random.Random(7)  # per pack, so adding a country never reshuffles another's demo data
     now = now or datetime.now(UTC)
     reports, followups = [], []
-    for hospital_id, category, count, depts, groups, times, severe_share in PLAN:
+    for hospital_index, category, count, depts, groups, times, severe_share in PLAN:
+        hospital_id = pack.hospitals[hospital_index].id
         subtypes = [s for s in SUBTYPES[category] if s != "other"]
         for i in range(count):
             subtype = rng.choice(subtypes)
@@ -54,7 +58,8 @@ def build(now: datetime | None = None) -> tuple[list[Report], list[Followup]]:
             r = Report(
                 ref_code_hmac=refcode.digest(refcode.generate(), "sample"),
                 created_at=now - timedelta(days=rng.randint(1, 80), hours=rng.randint(0, 23)),
-                language=rng.choice(["en", "en", "pcm"]),
+                pack=pack.id,
+                language=rng.choice([pack.languages[0], pack.languages[0], pack.languages[-1]]),
                 hospital_id=hospital_id,
                 department=_pick(rng, depts),  # type: ignore[arg-type]
                 category=category,  # type: ignore[arg-type]
@@ -66,7 +71,7 @@ def build(now: datetime | None = None) -> tuple[list[Report], list[Followup]]:
                 harm_outcome=rng.choices(["unknown", "none", "condition_worsened", "death"], [5, 3, 3, 1])[0],
                 time_bucket=_pick(rng, times),  # type: ignore[arg-type]
                 money_demanded=True if category in ("emergency_refused", "detention") else None,
-                amount_bucket=rng.choice(["10k_50k", "50k_200k", "over_200k"])
+                amount_bucket=rng.choice(["medium", "large", "very_large"])
                 if category in ("emergency_refused", "detention") else "unknown",
                 summary_redacted=SUMMARY[category].format(subtype=subtype.replace("_", " ")),
                 followup_opt_in=status != "new",
@@ -82,12 +87,16 @@ def build(now: datetime | None = None) -> tuple[list[Report], list[Followup]]:
     return reports, followups
 
 
-async def seed(store: Store) -> int:
-    if any(r.is_sample for r in await store.list_reports()):
-        return 0
-    reports, followups = build()
-    for r in reports:
-        await store.create_report(r)
-    for f in followups:
-        await store.add_followup(f)
-    return len(reports)
+async def seed(store: Store, packs: list[Pack]) -> int:
+    existing = {r.pack for r in await store.list_reports() if r.is_sample}
+    total = 0
+    for pack in packs:
+        if pack.id in existing:
+            continue
+        reports, followups = build(pack)
+        for r in reports:
+            await store.create_report(r)
+        for f in followups:
+            await store.add_followup(f)
+        total += len(reports)
+    return total

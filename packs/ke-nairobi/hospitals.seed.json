@@ -1,0 +1,57 @@
+[
+  {
+    "id": "h-mugumo-ridge",
+    "name": "Mugumo Ridge County Referral Hospital",
+    "aliases": [
+      "Mugumo Ridge",
+      "Mugumo Ridge Hospital",
+      "MRCRH"
+    ],
+    "area": "Eastlands",
+    "facility_type": "general"
+  },
+  {
+    "id": "h-twiga-hill",
+    "name": "Twiga Hill Sub-County Hospital",
+    "aliases": [
+      "Twiga Hill",
+      "Twiga Hill Hospital",
+      "Twiga Hill Level 4"
+    ],
+    "area": "Kasarani side",
+    "facility_type": "general"
+  },
+  {
+    "id": "h-korongo-bridge",
+    "name": "Korongo Bridge Level 5 Hospital",
+    "aliases": [
+      "Korongo Bridge",
+      "Korongo Bridge Hospital",
+      "Korongo Level 5"
+    ],
+    "area": "Embakasi side",
+    "facility_type": "general"
+  },
+  {
+    "id": "h-flamingo-gate",
+    "name": "Flamingo Gate Teaching and Referral Hospital",
+    "aliases": [
+      "Flamingo Gate",
+      "Flamingo Gate Hospital",
+      "FGTRH"
+    ],
+    "area": "Lang'ata side",
+    "facility_type": "teaching"
+  },
+  {
+    "id": "h-marula-springs",
+    "name": "Marula Springs Mother and Child Hospital",
+    "aliases": [
+      "Marula Springs",
+      "Marula Springs Hospital",
+      "Marula Maternity"
+    ],
+    "area": "Westlands side",
+    "facility_type": "specialist"
+  }
+]

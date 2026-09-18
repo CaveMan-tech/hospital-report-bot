@@ -1,0 +1,19 @@
+{
+  "id": "ke-nairobi",
+  "country": "Kenya",
+  "region": "Nairobi",
+  "languages": [
+    "en"
+  ],
+  "emergency_numbers": [],
+  "org_name": "Open Ward Kenya (demo organisation)",
+  "currency": "KES",
+  "amount_buckets": {
+    "small": "under KSh 5,000",
+    "medium": "KSh 5,000 to 50,000",
+    "large": "KSh 50,000 to 500,000",
+    "very_large": "over KSh 500,000"
+  },
+  "local_terms": "'casualty' = emergency department; 'county referral hospital', 'sub-county hospital', 'Level 4/5/6' = public hospital tiers; 'cash deposit' = upfront payment demanded before care; 'waiver' = bill reduction arranged by the medical social worker; 'SHA' = Social Health Authority; 'mortuary' = where bodies are held",
+  "note": "English only. Kiswahili is the next step and needs a fluent reviewer; nothing here was machine-translated."
+}

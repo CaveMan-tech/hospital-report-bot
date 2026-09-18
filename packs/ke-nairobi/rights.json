@@ -1,0 +1,52 @@
+[
+  {
+    "id": "emergency",
+    "category": [
+      "emergency_refused"
+    ],
+    "text_en": "No one may be denied emergency medical treatment, and in an emergency you must be stabilised whether or not you can pay at that moment.",
+    "source": "Constitution of Kenya 2010, Art 43(2); Health Act 2017, s.7; Patients' Rights Charter 2013",
+    "verified": false,
+    "note": "'at that moment' is there so nobody reads it as 'free'"
+  },
+  {
+    "id": "liberty",
+    "category": [
+      "detention"
+    ],
+    "text_en": "You have the right to your freedom, your dignity and your freedom of movement. Kenyan courts have ruled that a hospital may not hold a patient or a body over an unpaid bill.",
+    "source": "Constitution, Arts 28, 29 and 39; [2015] KEHC 8096 (KLR)",
+    "verified": false
+  },
+  {
+    "id": "dignity",
+    "category": [
+      "abuse"
+    ],
+    "text_en": "You have the right to be treated with dignity and respect.",
+    "source": "Health Act 2017, s.5(2); Patients' Rights Charter 2013",
+    "verified": false
+  },
+  {
+    "id": "quality_care",
+    "category": [
+      "neglect"
+    ],
+    "text_en": "You have the right to the highest attainable standard of health care, and health workers have a duty to care for every person entrusted to them.",
+    "source": "Constitution, Art 43(1)(a); Health Act 2017, ss.5(1) and 12(2)(a)",
+    "verified": false
+  },
+  {
+    "id": "complain",
+    "category": [
+      "other",
+      "abuse",
+      "neglect",
+      "emergency_refused",
+      "detention"
+    ],
+    "text_en": "You have the right to complain about how you were treated at a health facility, to have it investigated, and to be told in writing within three months what was done.",
+    "source": "Health Act 2017, s.14; Patients' Rights Charter 2013",
+    "verified": false
+  }
+]

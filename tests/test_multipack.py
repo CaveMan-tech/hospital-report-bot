@@ -1,0 +1,141 @@
+"""Scaling across geographies: a new country is a new folder, not new code."""
+
+import os
+import re
+from pathlib import Path
+
+import pytest
+
+os.environ.update(EXTRACT_MODE="mock", STORE="memory", ALLOW_UNVERIFIED="true", DEMO_MODE="true",
+                  ANALYST_PASSWORD="pw")
+
+from fastapi.testclient import TestClient
+
+from app import analyst as A
+from app.engine.extract import mock_extract
+from app.engine.machine import Engine
+from app.engine.packs import PACKS_DIR, Pack
+from app.main import app
+from app.seed import build
+from app.store.memory import MemoryStore
+
+PACK_IDS = sorted(p.name for p in PACKS_DIR.iterdir() if p.is_dir())
+AUTH = ("a", "pw")
+KE_STORY = ("We are at Mugumo Ridge County Referral Hospital casualty right now, my brother is bleeding "
+            "and they refused to treat him until we pay a cash deposit")
+
+
+def test_both_packs_exist():
+    assert {"ng-lagos", "ke-nairobi"} <= set(PACK_IDS)
+
+
+@pytest.mark.parametrize("pack_id", PACK_IDS)
+def test_every_pack_has_the_same_message_keys_and_five_hospitals(pack_id):
+    reference = set(Pack("ng-lagos").messages)
+    pack = Pack(pack_id)
+    assert set(pack.messages) == reference
+    assert len(pack.hospitals) >= 5 and set(pack.asks) >= {"emergency_refused", "detention", "abuse", "neglect"}
+    for lang in pack.languages:                    # default language must always have text
+        assert all(m.get("en") for m in pack.messages.values()), lang
+    assert set(pack.meta["amount_buckets"]) == {"small", "medium", "large", "very_large"}
+
+
+@pytest.mark.parametrize("pack_id", PACK_IDS)
+def test_law_numbers_and_contacts_always_start_unverified(pack_id):
+    """No pack may ship a legal claim, phone number or contact that a human has not signed off."""
+    pack = Pack(pack_id)
+    risky = re.compile(r"Section \d|section \d|Article \d|Constitution|\b\d{3,4}\b|\{contact:|Council|Act 20")
+    for key, entry in pack.messages.items():
+        if risky.search(entry["en"]) and entry["verified"]:
+            pytest.fail(f"{pack_id}:{key} contains legal/contact content but is marked verified. "
+                        "If a human really verified it, add the key to VERIFIED_BY_HUMAN in this test.")
+    for c in pack.contacts.values():
+        assert "verified" in c
+
+
+def test_no_country_specific_strings_in_code():
+    code = "\n".join(p.read_text() for p in Path("app").rglob("*.py") if p.name not in {"extract.py", "seed.py"})
+    for needle in ("National Health Act", "Section 20", "767", "Lagos", "Nairobi", "naira", "KSh"):
+        assert needle not in code, needle
+
+
+def engine(store, allow=True):
+    return Engine(store, mock_extract, [Pack("ng-lagos", allow), Pack("ke-nairobi", allow)], "secret")
+
+
+async def test_kenya_conversation_gets_kenyan_law_and_never_nigerian():
+    store = MemoryStore()
+    r = await engine(store).handle_message(None, "web", KE_STORY, pack_id="ke-nairobi")
+    text = "\n".join(r.replies)
+    assert "Article 43(2)" in text and "Health Act 2017" in text and "922" in text
+    assert "National Health Act" not in text and "767" not in text and "Section 20" not in text
+    assert "Open Ward Kenya" in text
+    report = next(iter(store.reports.values()))
+    assert report.pack == "ke-nairobi" and report.hospital_id == "h-mugumo-ridge" and report.severity == "severe"
+
+
+async def test_default_pack_is_unchanged_and_unknown_pack_falls_back():
+    store = MemoryStore()
+    story = "My mother is bleeding right now at Harmattan General Hospital, refused to treat, pay deposit"
+    for pid in (None, "zz-nowhere"):
+        r = await engine(store).handle_message(None, "web", story, pack_id=pid)
+        assert "Section 20" in "\n".join(r.replies)
+    assert {x.pack for x in store.reports.values()} == {"ng-lagos"}
+
+
+async def test_pack_is_fixed_for_the_life_of_a_conversation():
+    store = MemoryStore()
+    e = engine(store)
+    r = await e.handle_message(None, "web", "hi", pack_id="ke-nairobi")
+    r = await e.handle_message(r.session_id, "web", KE_STORY, pack_id="ng-lagos")   # ignored mid-conversation
+    assert "Article 43(2)" in "\n".join(r.replies)
+
+
+async def test_pidgin_is_not_assumed_outside_nigeria():
+    store = MemoryStore()
+    r = await engine(store).handle_message(
+        None, "web", "Nurse dey shout for my pikin for ward, wetin be this wahala, dem no send us", pack_id="ke-nairobi")
+    assert "Anybody dey for danger" not in r.replies[0] and "danger right now" in r.replies[0]
+
+
+async def test_kenya_gate_blocks_unverified_law_in_production_mode():
+    store = MemoryStore()
+    r = await engine(store, allow=False).handle_message(None, "web", KE_STORY, pack_id="ke-nairobi")
+    text = "\n".join(r.replies)
+    assert "Article 43" not in text and "922" not in text and "still being checked" in text
+
+
+async def test_followup_and_lookup_use_the_reports_own_pack():
+    store = MemoryStore()
+    e = engine(store)
+    r = await e.handle_message(None, "web", "A nurse insulted my wife last week at Twiga Hill Sub-County Hospital maternity",
+                               pack_id="ke-nairobi")
+    assert "Twiga Hill Sub-County Hospital" in await e.lookup(r.ref_code)
+    f = await e.start_followup(r.ref_code)
+    assert "Twiga Hill" in f.replies[0] and (await store.get_session(f.session_id)).pack == "ke-nairobi"
+
+
+def test_patterns_never_mix_countries():
+    ng, _ = build(Pack("ng-lagos"))
+    ke, _ = build(Pack("ke-nairobi"))
+    rows = A.patterns(ng + ke, Pack("ke-nairobi"))
+    assert rows and all(r["hospital_id"].startswith("h-") and "Harmattan" not in r["hospital"] for r in rows)
+    assert {r["hospital"] for r in rows} <= {h.name for h in Pack("ke-nairobi").hospitals}
+    brief = A.brief(rows[0], Pack("ke-nairobi", allow_unverified=True))
+    assert "Open Ward Kenya" in brief and "National Health Act" not in brief
+
+
+def test_pack_switch_over_http():
+    with TestClient(app) as c:
+        page = c.get("/?pack=ke-nairobi").text
+        assert 'window.PACK = "ke-nairobi"' in page and "Open Ward Kenya" in page and "switch to Nigeria (Lagos)" in page
+        r = c.post("/api/chat", json={"text": KE_STORY, "pack": "ke-nairobi"}).json()
+        assert "Article 43(2)" in "\n".join(r["replies"])
+        ke = c.get("/analyst?pack=ke-nairobi", auth=AUTH).text
+        assert "Mugumo Ridge" in ke and "Harmattan" not in ke and "Kenya (Nairobi)" in ke
+        ng = c.get("/analyst", auth=AUTH).text
+        assert "Harmattan" in ng and "Mugumo" not in ng
+        assert c.get("/analyst/pattern/h-mugumo-ridge/emergency_refused", auth=AUTH).status_code == 200
+        assert "Mugumo Ridge" in c.get("/analyst/patterns.csv?pack=ke-nairobi", auth=AUTH).text
+        total = sum(len(c.get(p).content) for p in ("/?pack=ke-nairobi", "/static/app.css", "/static/chat.js"))
+        assert total < 10_000

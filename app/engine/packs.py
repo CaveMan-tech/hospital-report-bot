@@ -49,6 +49,27 @@ class Pack:
     def org_name(self) -> str:
         return self.meta["org_name"]
 
+    @property
+    def languages(self) -> list[str]:
+        return self.meta["languages"]
+
+    @property
+    def title(self) -> str:
+        return f"{self.meta['country']} ({self.meta['region']})"
+
+    def language_or_default(self, lang: str | None) -> str:
+        return lang if lang in self.languages else self.languages[0]
+
+    def extraction_context(self) -> str:
+        """What the extractor needs to know about this deployment. No legal content."""
+        buckets = "; ".join(f"{k} = {v}" for k, v in self.meta["amount_buckets"].items())
+        return (
+            f"Country: {self.meta['country']}. Region: {self.meta['region']}.\n"
+            f"Language codes in use: {', '.join(self.languages)}.\n"
+            f"Currency: {self.meta['currency']}. Amount buckets: {buckets}.\n"
+            f"Local terms: {self.meta.get('local_terms', 'none')}."
+        )
+
     def _check(self, kind: str, key: str, verified: bool) -> None:
         if verified:
             return

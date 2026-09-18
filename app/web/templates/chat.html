@@ -9,7 +9,7 @@
 <body>
 <header>
   <h1>Report a hospital problem</h1>
-  <p>Private. No name needed. Run by {{ org_name }}.</p>
+  <p>Private. No name needed. Run by {{ pack.org_name }}.</p>
 </header>
 <main id="log" aria-live="polite"></main>
 <form id="form" autocomplete="off">
@@ -19,8 +19,10 @@
 <footer>
   <button type="button" class="link" id="new">Start a new report</button>
   <button type="button" class="link" id="check">Check a report with my code</button>
-  {% if demo_mode %}<button type="button" class="link" id="nextday">Demo: simulate next day</button>{% endif %}
+  {% if demo_mode %}<button type="button" class="link" id="nextday">Demo: simulate next day</button>
+  {% for p in packs %}{% if p.id != pack.id %}<a class="link" href="/?pack={{ p.id }}">Demo: switch to {{ p.title }}</a>{% endif %}{% endfor %}{% endif %}
 </footer>
+<script>window.PACK = {{ pack.id|tojson }};</script>
 <script src="/static/chat.js" defer></script>
 </body>
 </html>

@@ -27,7 +27,7 @@
   }
   async function send(text) {
     btn.disabled = true;
-    try { show(await post('/api/chat', { session_id: sid, channel: 'web', text })); }
+    try { show(await post('/api/chat', { session_id: sid, channel: 'web', pack: window.PACK, text })); }
     catch (e) { add(e.message, 'sys err'); }
     finally { btn.disabled = false; box.focus(); }
   }

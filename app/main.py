@@ -34,6 +34,11 @@ lookup_limiter = RateLimiter(limit=10, window_seconds=600)
 dedupe = DailyDedupe()
 
 
+def _pack_ids(cfg) -> list[str]:
+    ids = [p.strip() for p in cfg.packs.split(",") if p.strip()]
+    return [cfg.pack, *[p for p in ids if p != cfg.pack]]  # default first
+
+
 async def build_engine() -> Engine:
     cfg = get_settings()
     if cfg.store == "postgres":
@@ -45,7 +50,7 @@ async def build_engine() -> Engine:
     return Engine(
         store=store,
         extractor=get_extractor(cfg.extract_mode, cfg.openai_model),
-        pack=get_pack(cfg.pack, cfg.allow_unverified),
+        pack=[get_pack(pid, cfg.allow_unverified) for pid in _pack_ids(cfg)],
         ref_secret=cfg.ref_code_secret,
     )
 
@@ -63,7 +68,7 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("Refusing to start: " + "; ".join(fatal))
     app.state.engine = await build_engine()
     if get_settings().demo_mode:
-        n = await seed(app.state.engine.store)
+        n = await seed(app.state.engine.store, list(app.state.engine.packs.values()))
         logging.getLogger(__name__).info("Seeded %s sample reports", n)
 
     async def purge_loop():
@@ -121,6 +126,7 @@ async def robots():
 class ChatIn(BaseModel):
     session_id: str | None = None
     channel: Channel = "web"
+    pack: str | None = Field(default=None, max_length=32)  # only read when a conversation starts
     text: str = Field(default="", max_length=4000)
 
 
@@ -129,9 +135,10 @@ class CodeIn(BaseModel):
 
 
 @app.get("/", response_class=HTMLResponse)
-async def chat_page(request: Request, engine: Engine = Depends(engine_of)):
+async def chat_page(request: Request, pack: str | None = None, engine: Engine = Depends(engine_of)):
+    current = engine.pack_for(pack)
     return templates.TemplateResponse(request, "chat.html", {
-        "org_name": engine.pack.org_name, "demo_mode": get_settings().demo_mode})
+        "pack": current, "packs": list(engine.packs.values()), "demo_mode": get_settings().demo_mode})
 
 
 @app.post("/api/chat", response_model=EngineReply)
@@ -139,7 +146,8 @@ async def chat(body: ChatIn, request: Request, engine: Engine = Depends(engine_o
     ip = client_ip(request)
     if not chat_limiter.allow(ip):
         raise HTTPException(429, "Too many messages. Please wait a few minutes.")
-    return await engine.handle_message(body.session_id, body.channel, body.text, dedupe_key=dedupe.key(ip))
+    return await engine.handle_message(body.session_id, body.channel, body.text,
+                                       dedupe_key=dedupe.key(ip), pack_id=body.pack)
 
 
 @app.post("/api/report/lookup")
@@ -174,6 +182,13 @@ def analyst_auth(creds: HTTPBasicCredentials = Depends(basic)) -> None:
         raise HTTPException(401, "Wrong password", headers={"WWW-Authenticate": 'Basic realm="Analyst"'})
 
 
+def _pack_of_hospital(engine: Engine, hospital_id: str):
+    for p in engine.packs.values():
+        if any(h.id == hospital_id for h in p.hospitals):
+            return p
+    raise HTTPException(404, "No pattern above the threshold for that hospital and category.")
+
+
 def _pattern_or_404(rows: list[dict], hospital_id: str, category: str) -> dict:
     for p in rows:
         if p["hospital_id"] == hospital_id and p["category"] == category:
@@ -183,11 +198,13 @@ def _pattern_or_404(rows: list[dict], hospital_id: str, category: str) -> dict:
 
 
 @app.get("/analyst", response_class=HTMLResponse, dependencies=[Depends(analyst_auth)])
-async def analyst_home(request: Request, engine: Engine = Depends(engine_of)):
-    reports = await engine.store.list_reports()
-    rows = A.patterns(reports, engine.pack)
+async def analyst_home(request: Request, pack: str | None = None, engine: Engine = Depends(engine_of)):
+    current = engine.pack_for(pack)
+    reports = [r for r in await engine.store.list_reports() if r.pack == current.id]
+    rows = A.patterns(reports, current)
     return templates.TemplateResponse(request, "analyst.html", {
-        "org_name": engine.pack.org_name, "patterns": rows, "threshold": A.THRESHOLD,
+        "pack": current, "packs": list(engine.packs.values()),
+        "org_name": current.org_name, "patterns": rows, "threshold": A.THRESHOLD,
         "window": A.WINDOW_DAYS, "sample": any(p["includes_sample_data"] for p in rows),
         "held_back": sum(r.credibility == "review" for r in reports)})
 
@@ -196,34 +213,36 @@ async def analyst_home(request: Request, engine: Engine = Depends(engine_of)):
          dependencies=[Depends(analyst_auth)])
 async def analyst_pattern(hospital_id: str, category: str, request: Request,
                           engine: Engine = Depends(engine_of)):
+    pack = _pack_of_hospital(engine, hospital_id)
     reports = await engine.store.list_reports()
-    pattern = _pattern_or_404(A.patterns(reports, engine.pack), hospital_id, category)
+    pattern = _pattern_or_404(A.patterns(reports, pack), hospital_id, category)
     rs = A.pattern_reports(reports, hospital_id, category)
     return templates.TemplateResponse(request, "pattern.html", {
-        "org_name": engine.pack.org_name, "p": pattern, "reports": rs, "slices": A.slices(rs),
-        "brief": A.brief(pattern, engine.pack)})
+        "pack": pack, "org_name": pack.org_name, "p": pattern, "reports": rs, "slices": A.slices(rs),
+        "brief": A.brief(pattern, pack)})
 
 
 @app.get("/analyst/brief/{hospital_id}/{category}.md", response_class=PlainTextResponse,
          dependencies=[Depends(analyst_auth)])
 async def analyst_brief(hospital_id: str, category: str, engine: Engine = Depends(engine_of)):
-    rows = A.patterns(await engine.store.list_reports(), engine.pack)
-    text = A.brief(_pattern_or_404(rows, hospital_id, category), engine.pack)
+    pack = _pack_of_hospital(engine, hospital_id)
+    rows = A.patterns(await engine.store.list_reports(), pack)
+    text = A.brief(_pattern_or_404(rows, hospital_id, category), pack)
     name = f"brief-{hospital_id}-{category}.md"
     return PlainTextResponse(text, media_type="text/markdown",
                              headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
 
 @app.get("/analyst/patterns.csv", dependencies=[Depends(analyst_auth)])
-async def analyst_patterns_csv(engine: Engine = Depends(engine_of)):
-    text = A.patterns_csv(A.patterns(await engine.store.list_reports(), engine.pack))
+async def analyst_patterns_csv(pack: str | None = None, engine: Engine = Depends(engine_of)):
+    text = A.patterns_csv(A.patterns(await engine.store.list_reports(), engine.pack_for(pack)))
     return PlainTextResponse(text, media_type="text/csv",
                              headers={"Content-Disposition": 'attachment; filename="patterns.csv"'})
 
 
 @app.get("/analyst/facets.csv", dependencies=[Depends(analyst_auth)])
-async def analyst_facets_csv(engine: Engine = Depends(engine_of)):
-    text = A.facets_csv(await engine.store.list_reports(), engine.pack)
+async def analyst_facets_csv(pack: str | None = None, engine: Engine = Depends(engine_of)):
+    text = A.facets_csv(await engine.store.list_reports(), engine.pack_for(pack))
     return PlainTextResponse(text, media_type="text/csv",
                              headers={"Content-Disposition": 'attachment; filename="facets.csv"'})
 

@@ -36,6 +36,9 @@ writing tests and the evaluation runner; first drafts of message copy for the au
 - **Tests alongside code.** Privacy promises are executable: tests assert that the raw story and the
   reference code are never stored, that small groups never appear, and that masked cells cannot be
   recovered by subtraction.
+- **Research with receipts.** The Kenya pack was built from a sourced research file
+  (`docs/research/kenya-pack.md`) in which every claim carries a confidence label and a primary
+  source, and everything still ships unverified until a human checks it.
 - **Evaluation, not vibes.** A 30-story set with a single headline metric: missed emergencies.
 - **AI output that was rejected or corrected:** _[Ikechi to fill in: e.g. the first stack choice
   and the first database choice were both changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table
