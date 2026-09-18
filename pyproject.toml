@@ -28,4 +28,4 @@ testpaths = ["tests"]
 line-length = 110
 
 [tool.ruff.lint]
-ignore = ["B008"]  # Depends() in defaults is the FastAPI idiom
+ignore = ["B008", "ISC004"]  # Depends() in defaults is the FastAPI idiom

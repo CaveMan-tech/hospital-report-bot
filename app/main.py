@@ -2,22 +2,27 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
+from app import analyst as A
 from app.config import get_settings
 from app.engine.extract import get_extractor
 from app.engine.machine import Engine
 from app.engine.models import Channel, EngineReply
 from app.engine.packs import get_pack
 from app.ratelimit import DailyDedupe, RateLimiter
+from app.seed import seed
 from app.store.memory import MemoryStore
 
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +53,18 @@ def build_engine() -> Engine:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.engine = build_engine()
+    if get_settings().demo_mode:
+        n = await seed(app.state.engine.store)
+        logging.getLogger(__name__).info("Seeded %s sample reports", n)
+
+    async def purge_loop():
+        while True:  # expired sessions may still hold an unfinished story; do not keep them
+            await asyncio.sleep(600)
+            await app.state.engine.store.purge_expired_sessions()
+
+    task = asyncio.create_task(purge_loop())
     yield
+    task.cancel()
 
 
 app = FastAPI(title="Hospital Pattern Bot", lifespan=lifespan)
@@ -106,6 +122,85 @@ async def demo_next_day(body: CodeIn, request: Request, engine: Engine = Depends
     if reply is None:
         raise HTTPException(404, "No report with that code.")
     return reply
+
+
+# ---------------------------------------------------------------- analyst view
+# The partner organisation's side. Nothing here is public.
+
+basic = HTTPBasic(realm="Analyst")
+
+
+def analyst_auth(creds: HTTPBasicCredentials = Depends(basic)) -> None:
+    expected = get_settings().analyst_password.encode()
+    if not secrets.compare_digest(creds.password.encode(), expected):
+        raise HTTPException(401, "Wrong password", headers={"WWW-Authenticate": 'Basic realm="Analyst"'})
+
+
+def _pattern_or_404(rows: list[dict], hospital_id: str, category: str) -> dict:
+    for p in rows:
+        if p["hospital_id"] == hospital_id and p["category"] == category:
+            return p
+    # Below-threshold groups are indistinguishable from groups that do not exist.
+    raise HTTPException(404, "No pattern above the threshold for that hospital and category.")
+
+
+@app.get("/analyst", response_class=HTMLResponse, dependencies=[Depends(analyst_auth)])
+async def analyst_home(request: Request, engine: Engine = Depends(engine_of)):
+    reports = await engine.store.list_reports()
+    rows = A.patterns(reports, engine.pack)
+    return templates.TemplateResponse(request, "analyst.html", {
+        "org_name": engine.pack.org_name, "patterns": rows, "threshold": A.THRESHOLD,
+        "window": A.WINDOW_DAYS, "sample": any(p["includes_sample_data"] for p in rows),
+        "held_back": sum(r.credibility == "review" for r in reports)})
+
+
+@app.get("/analyst/pattern/{hospital_id}/{category}", response_class=HTMLResponse,
+         dependencies=[Depends(analyst_auth)])
+async def analyst_pattern(hospital_id: str, category: str, request: Request,
+                          engine: Engine = Depends(engine_of)):
+    reports = await engine.store.list_reports()
+    pattern = _pattern_or_404(A.patterns(reports, engine.pack), hospital_id, category)
+    rs = A.pattern_reports(reports, hospital_id, category)
+    return templates.TemplateResponse(request, "pattern.html", {
+        "org_name": engine.pack.org_name, "p": pattern, "reports": rs, "slices": A.slices(rs),
+        "brief": A.brief(pattern, engine.pack)})
+
+
+@app.get("/analyst/brief/{hospital_id}/{category}.md", response_class=PlainTextResponse,
+         dependencies=[Depends(analyst_auth)])
+async def analyst_brief(hospital_id: str, category: str, engine: Engine = Depends(engine_of)):
+    rows = A.patterns(await engine.store.list_reports(), engine.pack)
+    text = A.brief(_pattern_or_404(rows, hospital_id, category), engine.pack)
+    name = f"brief-{hospital_id}-{category}.md"
+    return PlainTextResponse(text, media_type="text/markdown",
+                             headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+
+@app.get("/analyst/patterns.csv", dependencies=[Depends(analyst_auth)])
+async def analyst_patterns_csv(engine: Engine = Depends(engine_of)):
+    text = A.patterns_csv(A.patterns(await engine.store.list_reports(), engine.pack))
+    return PlainTextResponse(text, media_type="text/csv",
+                             headers={"Content-Disposition": 'attachment; filename="patterns.csv"'})
+
+
+@app.get("/analyst/facets.csv", dependencies=[Depends(analyst_auth)])
+async def analyst_facets_csv(engine: Engine = Depends(engine_of)):
+    text = A.facets_csv(await engine.store.list_reports(), engine.pack)
+    return PlainTextResponse(text, media_type="text/csv",
+                             headers={"Content-Disposition": 'attachment; filename="facets.csv"'})
+
+
+@app.post("/analyst/reports/{report_id}/{action}", dependencies=[Depends(analyst_auth)])
+async def analyst_set_credibility(report_id: str, action: str, request: Request,
+                                  engine: Engine = Depends(engine_of)):
+    new = {"exclude": "excluded", "accept": "ok", "hold": "review"}.get(action)
+    report = await engine.store.get_report(report_id)
+    if new is None or report is None:
+        raise HTTPException(404)
+    report.credibility = new  # type: ignore[assignment]
+    await engine.store.save_report(report)
+    back = request.headers.get("referer") or "/analyst"
+    return RedirectResponse(back, status_code=303)
 
 
 @app.get("/healthz")

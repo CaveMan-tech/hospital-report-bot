@@ -284,98 +284,19 @@ Hospital matching: case-insensitive fuzzy match on `hospitals.name` and `aliases
 
 ## 6. Data model (Supabase / Postgres)
 
-```sql
-create extension if not exists pgcrypto;
+The full schema is `db/schema.sql`. Three tables:
 
-create table hospitals (
-  id            uuid primary key default gen_random_uuid(),
-  pack          text not null default 'ng-lagos',
-  name          text not null,          -- PoC: fictional names only
-  aliases       text[] not null default '{}',
-  area          text,
-  facility_type text not null default 'general'
-                check (facility_type in ('general','teaching','specialist','phc','private')),
-  created_at    timestamptz not null default now()
-);
+- **`reports`**: one row per report. Structured fields and facets (section 2), `summary_redacted`, `ref_code_hmac`, `credibility` (`ok`, `review`, `excluded`), `dedupe_key`, `extraction_version`, `extra jsonb` for future facets, `is_sample`. Never the raw story, never the code, never an identifier.
+- **`followups`**: next-day answers, linked to a report.
+- **`sessions`**: short-lived conversation state. The raw story lives in `context` only while the chat is active, is removed the moment the report row is written, and unfinished sessions are purged after 2 hours.
 
-create table reports (
-  id                   uuid primary key default gen_random_uuid(),
-  ref_code_hmac        text not null unique,   -- HMAC-SHA256(server secret, code)
-  created_at           timestamptz not null default now(),
-  channel              text not null check (channel in ('web','whatsapp','telegram')),
-  language             text not null default 'en',
-  hospital_id          uuid references hospitals(id),
-  hospital_name_raw    text,
-  department           text not null default 'unknown',
-  category             text not null
-                       check (category in ('emergency_refused','detention','abuse','neglect','other')),
-  secondary_categories text[] not null default '{}',
-  severity             text not null check (severity in ('severe','not_severe')),
-  incident_timing      text not null default 'unknown',
-  is_ongoing           boolean,
-  reporter_role        text not null default 'unknown',
-  patient_group        text not null default 'unknown',
-  subtype              text not null default 'other',
-  harm_outcome         text not null default 'unknown',
-  time_bucket          text not null default 'unknown',
-  money_demanded       boolean,
-  amount_bucket        text not null default 'unknown',
-  extra                jsonb not null default '{}',   -- future facets without a migration
-  extraction_version   text not null,                 -- prompt+schema version, enables re-processing
-  summary_redacted     text,
-  rights_shown         text[] not null default '{}',
-  escalation_shown     boolean not null default false,
-  followup_opt_in      boolean not null default false,
-  followup_due_at      timestamptz,
-  status               text not null default 'new'
-                       check (status in ('new','resolved','unchanged','worse','left','no_response')),
-  credibility          text not null default 'ok'
-                       check (credibility in ('ok','review','excluded')),
-  dedupe_key           text,                   -- see abuse controls; unlinkable after 24h
-  is_sample            boolean not null default false
-);
-create index reports_pattern_idx on reports (hospital_id, category, created_at);
+Hospitals are part of the country pack (`hospitals.seed.json`), not a table, so a deployment is fully described by its pack. Reports reference them by pack id; an unmatched name is kept in `hospital_name_raw` and held for review.
 
-create table followups (
-  id         uuid primary key default gen_random_uuid(),
-  report_id  uuid not null references reports(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  status     text not null check (status in ('resolved','unchanged','worse','left'))
-);
+Row level security is on for every table with **no policies**: the public can read and write nothing. The app uses the service role key from the server only.
 
-create table sessions (
-  id         uuid primary key default gen_random_uuid(),
-  channel    text not null,
-  state      text not null default 'S0',
-  context    jsonb not null default '{}',     -- raw story removed once report is written
-  report_id  uuid references reports(id),
-  created_at timestamptz not null default now(),
-  expires_at timestamptz not null default now() + interval '2 hours'
-);
+Patterns are computed in `app/analyst.py` from the store, so the same logic runs on Supabase and on the in-memory store used for tests: group by hospital and category over 90 days, count only `credibility = 'ok'`, require at least 5, exclude private facilities.
 
--- Analyst-only. Patterns that crossed the threshold. Never granted to anon.
-create view patterns as
-select h.id as hospital_id, h.name as hospital, r.category,
-       count(*) as reports_90d,
-       count(*) filter (where r.status in ('resolved','unchanged','worse','left')) as followed_up,
-       count(*) filter (where r.status in ('unchanged','worse')) as unchanged_or_worse,
-       count(*) filter (where r.credibility = 'review') as flagged,
-       bool_or(r.is_sample) as includes_sample_data
-from reports r join hospitals h on h.id = r.hospital_id
-where r.credibility <> 'excluded'
-  and h.facility_type <> 'private'
-  and r.created_at > now() - interval '90 days'
-group by h.id, h.name, r.category
-having count(*) filter (where r.credibility = 'ok') >= 5;
-
-alter table hospitals enable row level security;
-alter table reports   enable row level security;
-alter table followups enable row level security;
-alter table sessions  enable row level security;
--- No anon grants on anything. All reads and writes go through server routes with the service role.
-```
-
-Why a threshold of 5 even for analysts (deck talking point): a count of 1 on a quiet ward can identify the reporter, and the partner organisation should never be in a position to identify anyone. Analysts only ever see redacted summaries.
+Why a threshold of 5 even for analysts (deck talking point): a count of 1 on a quiet ward can identify the reporter, and the partner organisation should never be in a position to identify anyone. Analysts only ever see redacted summaries. In breakdowns, cells under 5 are masked, and when any cell is masked the visible cells are rounded down ("10+") so the masked value cannot be found by subtraction.
 
 Reference codes: 12 chars, Crockford base32 (about 60 bits), shown as `XXXX-XXXX-XXXX`. Stored as HMAC with a server secret, so a leaked table cannot be brute-forced. Lookup endpoint is rate-limited.
 
@@ -440,10 +361,11 @@ Deck framing: any advocacy organisation in any country deploys this with a count
 |---|---|
 | `POST /api/chat` | `{ session_id?, channel, pack?, text }` returns `{ session_id, replies[], state, ref_code? }`. All bot logic behind this one endpoint; other channels are thin adapters. |
 | `POST /api/report/lookup` | `{ ref_code }` returns redacted summary and status. Rate-limited. |
-| `GET /api/analyst/patterns` | Analyst. Reads `patterns`; `?format=csv` for export. |
-| `GET /api/analyst/patterns/:hospital/:category` | Analyst. Redacted summaries + breakdown. |
-| `GET /api/analyst/brief/:hospital/:category` | Analyst. Template-filled markdown brief. |
-| `POST /api/analyst/reports/:id/exclude` | Analyst. Sets `credibility = 'excluded'`. |
+| `GET /analyst` | Analyst (password). Patterns table. |
+| `GET /analyst/pattern/{hospital}/{category}` | Analyst. Breakdowns, brief, redacted summaries, exclude / count-it actions. |
+| `GET /analyst/brief/{hospital}/{category}.md` | Analyst. Template-filled markdown brief. |
+| `GET /analyst/patterns.csv`, `GET /analyst/facets.csv` | Analyst. Exports. Facets are week-level, no summaries. |
+| `POST /analyst/reports/{id}/{exclude,accept,hold}` | Analyst. Sets credibility. |
 | `POST /api/demo/next-day` | Demo only. Triggers F1. |
 
 Stack: Python, FastAPI + Pydantic AI, deployed as one always-on service on Railway. Supabase Postgres. OpenAI `gpt-5-mini` behind a small `extract()` wrapper. Pages are server-rendered plain HTML with a few lines of vanilla JS.

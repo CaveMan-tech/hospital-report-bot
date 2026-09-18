@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ p.hospital }} · {{ p.category_plain }}</title>
+<link rel="stylesheet" href="/static/analyst.css">
+</head>
+<body>
+<header><p><a href="/analyst">← All patterns</a></p>
+<h1>{{ p.reports_90d }} unverified reports of {{ p.category_plain }}</h1><p>{{ p.hospital }} · {{ org_name }}</p></header>
+{% if p.includes_sample_data %}<p class="banner">SAMPLE DATA. Fictional hospital, generated reports.</p>{% endif %}
+
+<section><h2>Breakdown</h2>
+<p class="note">Any group with fewer than 5 reports is masked. Enough detail combined can identify a family.</p>
+<div class="grid">
+{% for field, cells in slices.items() %}
+<table class="slice"><thead><tr><th>{{ field.replace("_", " ") }}</th><th class="n">Reports</th></tr></thead><tbody>
+{% for value, n in cells %}<tr><td>{{ value.replace("_", " ") }}</td><td class="n">{{ n }}</td></tr>{% endfor %}
+</tbody></table>
+{% endfor %}
+</div></section>
+
+<section><h2>Pattern brief</h2>
+<pre id="brief">{{ brief }}</pre>
+<p class="actions"><button class="btn" id="copy" type="button">Copy brief</button>
+<a class="btn" href="/analyst/brief/{{ p.hospital_id }}/{{ p.category }}.md">Download .md</a></p></section>
+
+<section><h2>Reports behind this pattern</h2>
+<p class="note">Redacted summaries only. Original messages are never kept.</p>
+<div class="scroll"><table><thead><tr><th>Week</th><th>Summary</th><th>Details</th><th>Follow-up</th><th>Credibility</th><th></th></tr></thead><tbody>
+{% for r in reports %}
+<tr class="{{ 'held' if r.credibility == 'review' }}"><td>{{ r.created_at.strftime("%G-W%V") }}</td><td>{{ r.summary_redacted }}</td>
+<td>{{ r.subtype.replace("_"," ") }} · {{ r.department }} · {{ r.patient_group }} · {{ r.time_bucket }}{% if r.severity == "severe" %} · <strong>in danger</strong>{% endif %}</td>
+<td>{{ r.status.replace("_"," ") }}</td><td>{{ "held for review" if r.credibility == "review" else "counted" }}</td>
+<td class="row-actions">
+{% if r.credibility == "review" %}<form method="post" action="/analyst/reports/{{ r.id }}/accept"><button>Count it</button></form>{% endif %}
+<form method="post" action="/analyst/reports/{{ r.id }}/exclude"><button>Exclude</button></form></td></tr>
+{% endfor %}
+</tbody></table></div></section>
+<script>
+document.getElementById('copy').onclick = async e => {
+  try { await navigator.clipboard.writeText(document.getElementById('brief').textContent); e.target.textContent = 'Copied'; }
+  catch (_) { e.target.textContent = 'Select and copy manually'; }
+};
+</script>
+</body></html>
