@@ -1,0 +1,26 @@
+[
+  {
+    "category": "emergency_refused",
+    "ask_text": "Publish your emergency admission policy and confirm in writing that no patient is turned away or delayed for a deposit.",
+    "law_line": "Section 20 of the National Health Act 2014 forbids any provider from refusing emergency medical treatment for any reason.",
+    "verified": false
+  },
+  {
+    "category": "detention",
+    "ask_text": "Publish your policy on unpaid bills and confirm in writing that no patient or body is held over a debt.",
+    "law_line": "Holding a person over a debt engages the constitutional right to personal liberty.",
+    "verified": false
+  },
+  {
+    "category": "abuse",
+    "ask_text": "Publish how patients can report staff conduct safely, and how many conduct complaints were received and acted on this year.",
+    "law_line": "The Patients' Bill of Rights guarantees treatment with respect and dignity.",
+    "verified": false
+  },
+  {
+    "category": "neglect",
+    "ask_text": "Publish staffing levels per shift for the affected departments and the plan to cover nights and weekends.",
+    "law_line": "The Patients' Bill of Rights guarantees quality care and urgent attention when needed.",
+    "verified": false
+  }
+]

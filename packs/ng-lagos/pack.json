@@ -1,0 +1,15 @@
+{
+  "id": "ng-lagos",
+  "country": "Nigeria",
+  "region": "Lagos",
+  "languages": [
+    "en",
+    "pcm"
+  ],
+  "emergency_numbers": [
+    "112",
+    "767"
+  ],
+  "org_name": "Open Ward Initiative (demo organisation)",
+  "currency": "NGN"
+}

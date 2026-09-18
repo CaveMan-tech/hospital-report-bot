@@ -1,0 +1,182 @@
+{
+  "S0.greeting": {
+    "verified": true,
+    "en": "Hello. This is a safe place to report what happened to you, or to someone you know, at a government hospital. You do not need to give your name. Tell me what happened, in your own words. You can write in English or Pidgin.",
+    "pcm": "Hello. For here, you fit report wetin happen to you or your person for government hospital. You no need give your name. Just tell me wetin happen, as e take happen. You fit write am for English or Pidgin."
+  },
+  "S0.privacy": {
+    "verified": true,
+    "en": "Your words are read by an AI service to understand your report. We do not keep your original message, only a short summary with names removed.",
+    "pcm": "Na AI dey read wetin you write make e understand your report. We no dey keep your original message, na only short summary wey no get name."
+  },
+  "S2.danger_check": {
+    "verified": true,
+    "en": "{ack} One quick question first. Is anyone in danger right now? For example, someone who needs urgent treatment and is not getting it, or someone being held at the hospital. Reply YES or NO.",
+    "pcm": "{ack} One quick question first. Anybody dey for danger as we dey talk so? Like person wey need treatment sharp sharp but dem never treat am, or person wey dem hold for hospital. Reply YES or NO."
+  },
+  "S2.danger_retry": {
+    "verified": true,
+    "en": "Sorry, I did not get that. Is anyone in danger right now? Please reply YES or NO.",
+    "pcm": "Abeg, I no too understand. Anybody dey for danger now now? Reply YES or NO."
+  },
+  "A1.emergency_refused": {
+    "verified": false,
+    "en": "What you describe is against the law. Section 20 of the National Health Act says no hospital or health worker may refuse a person emergency treatment for any reason.\n\nDo this now:\n1. If the person is getting worse, getting care comes first. Call 112 or 767 (free in Lagos), or go to the nearest other hospital. Do not stay to argue.\n2. If you can, ask calmly for the most senior doctor or officer on duty and say: \"Section 20 of the National Health Act says you cannot refuse emergency treatment.\"\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
+    "pcm": "Wetin you talk so, law no gree am. Section 20 of National Health Act talk say no hospital or health worker fit refuse to treat person wey get emergency, for any reason.\n\nDo this one now:\n1. If the person condition dey worse, make e get treatment first. Call 112 or 767 (e free for Lagos), or carry am go another hospital wey near. No stay dey argue.\n2. If you fit, ask gently for the most senior doctor or officer wey dey duty, tell am: \"Section 20 of National Health Act talk say una no fit refuse emergency treatment.\"\n3. Write the time, the department, and who you follow talk.\n\nI no fit send anybody come meet you. But I go record am make e count.",
+    "note": "VERIFY: NHA 2014 s.20(1),(2) wording and penalties; 112 and 767 for Lagos. TBD: keep or drop step 2."
+  },
+  "A1.detention": {
+    "verified": false,
+    "en": "Many people in Nigeria have faced this, and you have options. A hospital bill is a debt, and there are proper ways to settle a debt.\n\nWhat you can do:\n1. Ask to speak to the hospital's medical social services (social welfare) unit about a payment plan or waiver.\n2. Ask for the itemised bill in writing.\n3. Free legal help: {contact:legal_aid}\n\nI cannot send anyone to you. I will record this so it is counted.",
+    "pcm": "Plenty people for Nigeria don face this kind thing, and you get options. Hospital bill na debt, and correct way dey to settle debt.\n\nWetin you fit do:\n1. Ask make you see the hospital medical social services (social welfare) people, make una talk about how you go pay small small or whether dem fit waive am.\n2. Ask make dem give you the bill for paper, with everything wey dem charge written.\n3. Free lawyer help: {contact:legal_aid}\n\nI no fit send anybody come meet you. But I go record am make e count.",
+    "note": "VERIFY: social services unit name at Lagos general hospitals; legal_aid contact."
+  },
+  "A1.generic": {
+    "verified": false,
+    "en": "If someone is in danger, getting care comes first.\n\nDo this now:\n1. Call 112 or 767 (free in Lagos), or go to the nearest other hospital if you can.\n2. Ask for the most senior doctor or nurse on duty and tell them plainly that the patient needs help now.\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
+    "pcm": "If person dey for danger, make e get treatment first.\n\nDo this one now:\n1. Call 112 or 767 (e free for Lagos), or carry the person go another hospital wey near if you fit.\n2. Ask for the most senior doctor or nurse wey dey duty, tell am straight say the patient need help now now.\n3. Write the time, the department, and who you follow talk.\n\nI no fit send anybody come meet you. But I go record am make e count.",
+    "note": "VERIFY: 112 and 767 for Lagos."
+  },
+  "Q.hospital": {
+    "verified": true,
+    "en": "Which hospital is this?",
+    "pcm": "Which hospital be this?"
+  },
+  "Q.department": {
+    "verified": true,
+    "en": "Which part of the hospital? For example emergency, maternity, children's ward.",
+    "pcm": "Which side for the hospital? Like emergency, maternity, children ward."
+  },
+  "Q.when": {
+    "verified": true,
+    "en": "When did this happen? Today, this week, or earlier?",
+    "pcm": "When e happen? Today, this week, or e don tey?"
+  },
+  "Q.category_confirm": {
+    "verified": true,
+    "en": "Just to be sure I understand: is this mainly about {category_plain}? Reply YES or NO.",
+    "pcm": "Make I sure say I understand: na {category_plain} be the main matter? Reply YES or NO."
+  },
+  "B2.template": {
+    "verified": true,
+    "en": "What happened to you is not acceptable, and it is not just your opinion. {right_text} ({source})",
+    "pcm": "Wetin dem do you no correct, and no be only you talk am. {right_text} ({source})"
+  },
+  "B3.abuse": {
+    "verified": true,
+    "en": "What you can do:\n1. If you feel safe doing so, ask for the nurse in charge or matron of the ward and tell them what happened.\n2. Note the time, the ward, and what was said or done. If someone saw it, remember who.\n3. You do not have to confront anyone. Reporting here already counts.",
+    "pcm": null
+  },
+  "B3.neglect": {
+    "verified": true,
+    "en": "What you can do:\n1. Ask at the nurses' station who the nurse in charge is and which doctor is on call.\n2. If the patient is getting worse, tell me now and I will show you what to do.\n3. Note the time you asked for help and how long you waited.",
+    "pcm": null
+  },
+  "B3.other": {
+    "verified": true,
+    "en": "What you can do:\n1. Note the date, the department, and what happened while it is fresh.\n2. Keep any receipts, bills or papers you were given.\n3. Reporting here already counts.",
+    "pcm": null
+  },
+  "B4.receipt": {
+    "verified": true,
+    "en": "Your report is recorded. Your code is {ref_code}. Keep it. It is the only way to check or update your report. I did not store your name or number.",
+    "pcm": "We don record your report. Your code na {ref_code}. Keep am well. Na only that code you fit use check or update your report. I no keep your name or number."
+  },
+  "B4.counted": {
+    "verified": true,
+    "en": "Your report has been counted. When enough reports about the same problem build up at a hospital, the pattern (numbers only, never stories) goes to {org_name}, who use it to push publicly for change at that hospital.",
+    "pcm": "We don count your report. When plenty report about the same wahala gather for one hospital, the pattern (na only numbers, no be story) go reach {org_name}, wey go use am push for change for that hospital for public."
+  },
+  "B4.no_hospital": {
+    "verified": true,
+    "en": "I have recorded this, but without the hospital's name it cannot be counted with other reports. You can come back with your code and add it.",
+    "pcm": null
+  },
+  "B5.optin": {
+    "verified": true,
+    "en": "May I check in tomorrow to ask if anything changed? It helps show whether hospitals fix problems. Reply YES or NO.",
+    "pcm": "I fit check on you tomorrow to ask whether anything change? E go help show whether hospital dey fix matter. Reply YES or NO."
+  },
+  "B5.yes": {
+    "verified": true,
+    "en": "Thank you. Come back here tomorrow with your code and I will ask how things are. Take care of yourself.",
+    "pcm": "Thank you. Come back here tomorrow with your code, I go ask how e dey go. Take care of yourself."
+  },
+  "B5.no": {
+    "verified": true,
+    "en": "No problem. Thank you for speaking up. Take care of yourself.",
+    "pcm": "No wahala. Thank you say you talk. Take care of yourself."
+  },
+  "F1.question": {
+    "verified": true,
+    "en": "Hello again. You reported {category_plain} at {hospital}. How are things now?\n1. It was sorted out\n2. Nothing has changed\n3. It got worse\n4. We have left the hospital\nReply with a number.",
+    "pcm": "Hello again. You report {category_plain} for {hospital}. How e dey now?\n1. Dem don sort am\n2. Nothing change\n3. E don worse\n4. We don comot for the hospital\nReply with number."
+  },
+  "F1.retry": {
+    "verified": true,
+    "en": "Please reply with 1, 2, 3 or 4.",
+    "pcm": "Abeg reply with 1, 2, 3 or 4."
+  },
+  "F2.resolved": {
+    "verified": true,
+    "en": "I am glad to hear that. Thank you for telling me. It has been recorded.",
+    "pcm": "I happy to hear that one. Thank you. We don record am."
+  },
+  "F2.unchanged": {
+    "verified": true,
+    "en": "I am sorry nothing has changed. That has been recorded, and it matters: it shows the problem was not fixed.",
+    "pcm": "Sorry say nothing change. We don record am, and e matter: e show say dem no fix the problem."
+  },
+  "F2.left": {
+    "verified": true,
+    "en": "Thank you for telling me. It has been recorded. I hope things get better from here.",
+    "pcm": "Thank you. We don record am. I hope say things go better from here."
+  },
+  "F2.worse": {
+    "verified": true,
+    "en": "I am sorry to hear that. It has been recorded.",
+    "pcm": "Sorry to hear that one. We don record am."
+  },
+  "E.clinical": {
+    "verified": false,
+    "en": "I cannot judge medical decisions, like whether a diagnosis or treatment was right. I can still record what happened. Complaints about a doctor's professional conduct are handled by the Medical and Dental Council of Nigeria.",
+    "pcm": null,
+    "note": "VERIFY: MDCN complaint route."
+  },
+  "E.handoff": {
+    "verified": false,
+    "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. Please contact: {contact:dsva}",
+    "pcm": null,
+    "note": "VERIFY: Lagos DSVA contact."
+  },
+  "E.retry": {
+    "verified": true,
+    "en": "I did not quite understand that. Could you tell me what happened at the hospital, in your own words?",
+    "pcm": "I no too understand. Abeg tell me wetin happen for the hospital, as e take happen."
+  },
+  "E.end": {
+    "verified": true,
+    "en": "I am not able to help with that here. If something happened to you at a government hospital, you can come back any time and tell me.",
+    "pcm": "I no fit help with that one for here. If something happen to you for government hospital, you fit come back any time tell me."
+  },
+  "E.expired": {
+    "verified": true,
+    "en": "That conversation has ended. You can start a new report whenever you are ready.",
+    "pcm": "That conversation don end. You fit start new report anytime."
+  },
+  "E.unverified_fallback": {
+    "verified": true,
+    "en": "I have recorded what you told me. The guidance for this situation is still being checked, so I cannot show it yet. If anyone is in danger, please get to the nearest other hospital or emergency service now.",
+    "pcm": "I don record wetin you tell me. We still dey check the advice for this kind matter, so I no fit show am yet. If anybody dey for danger, abeg carry am go another hospital wey near now now."
+  },
+  "L.not_found": {
+    "verified": true,
+    "en": "I could not find a report with that code. Please check it and try again.",
+    "pcm": "I no see any report with that code. Abeg check am well, try again."
+  },
+  "L.found": {
+    "verified": true,
+    "en": "Your report about {category_plain} at {hospital} is on record. Status: {status}.",
+    "pcm": "Your report about {category_plain} for {hospital} dey our record. Status: {status}."
+  }
+}

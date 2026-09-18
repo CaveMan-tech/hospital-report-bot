@@ -1,0 +1,24 @@
+[
+  {
+    "id": "legal_aid",
+    "label": "Free legal help",
+    "text": "[contact pending verification]",
+    "applies_to": [
+      "detention"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "note": "VERIFY: Lagos Office of the Public Defender, Legal Aid Council, NHRC with numbers"
+  },
+  {
+    "id": "dsva",
+    "label": "Domestic and sexual violence support",
+    "text": "[contact pending verification]",
+    "applies_to": [
+      "handoff"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "note": "VERIFY: Lagos DSVA line"
+  }
+]

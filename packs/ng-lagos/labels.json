@@ -1,0 +1,28 @@
+{
+  "category_plain": {
+    "emergency_refused": {
+      "en": "emergency care being refused or delayed",
+      "pcm": "say dem refuse or delay emergency treatment"
+    },
+    "detention": {
+      "en": "someone being held over an unpaid bill",
+      "pcm": "say dem hold person because of bill"
+    },
+    "abuse": {
+      "en": "abuse by staff",
+      "pcm": "say staff abuse person"
+    },
+    "neglect": {
+      "en": "a patient being neglected",
+      "pcm": "say dem abandon patient"
+    },
+    "other": {
+      "en": "a problem at the hospital",
+      "pcm": "wahala for the hospital"
+    }
+  },
+  "unknown_hospital": {
+    "en": "the hospital",
+    "pcm": "the hospital"
+  }
+}

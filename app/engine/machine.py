@@ -1,0 +1,391 @@
+"""The engine. One entry point, no knowledge of HTTP or any chat platform.
+
+    Engine.handle_message(session_id, channel, text) -> EngineReply
+
+Web chat, WhatsApp, Telegram and anything later are thin adapters around this.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from datetime import datetime, timedelta, timezone
+
+from app.store.base import Store
+
+from . import refcode
+from .extract import Extractor
+from .models import Channel, EngineReply, Extraction, Followup, Report, Session
+from .packs import Pack
+from .severity import decide
+
+log = logging.getLogger(__name__)
+
+MAX_QUESTIONS = 3
+LOW_CONFIDENCE = 0.6
+MAX_STORY_CHARS = 4000
+
+_YES = {"yes", "y", "yeah", "yep", "yea", "true", "ok", "okay", "sure", "beeni", "ehen", "1"}
+_NO = {"no", "n", "nope", "nah", "rara", "mba", "false", "2"}
+_YES_PHRASES = ("na so", "e dey", "yes o", "in danger", "person dey")
+_NO_PHRASES = ("no o", "not now", "nobody", "no one", "e no dey")
+_FOLLOWUP_STATUS = {"1": "resolved", "2": "unchanged", "3": "worse", "4": "left"}
+
+
+def parse_yes_no(text: str) -> bool | None:
+    low = re.sub(r"[^a-z0-9 ]", " ", text.lower()).strip()
+    if not low:
+        return None
+    first = low.split()[0]
+    if first in _YES:
+        return True
+    if first in _NO:
+        return False
+    if any(p in low for p in _NO_PHRASES):
+        return False
+    if any(p in low for p in _YES_PHRASES):
+        return True
+    return None
+
+
+class Engine:
+    def __init__(self, store: Store, extractor: Extractor, pack: Pack, ref_secret: str):
+        self.store = store
+        self.extract = extractor
+        self.pack = pack
+        self.ref_secret = ref_secret
+
+    # ------------------------------------------------------------------ entry
+
+    async def handle_message(
+        self,
+        session_id: str | None,
+        channel: Channel,
+        text: str,
+        dedupe_key: str | None = None,
+    ) -> EngineReply:
+        text = (text or "").strip()[:MAX_STORY_CHARS]
+        session = await self.store.get_session(session_id) if session_id else None
+
+        prefix: list[str] = []
+        if session and (session.expired or session.state == "DONE"):
+            if session.expired:
+                prefix = [self._msg("E.expired", session)]
+            session = None
+
+        if session is None:
+            session = Session(channel=channel, pack=self.pack.id, context={"lang": "en"})
+            if dedupe_key:
+                session.context["dedupe_key"] = dedupe_key
+            await self.store.create_session(session)
+            if len(text.split()) < 4:  # "hi", "hello", empty: greet and wait for the story
+                greeting = [self._msg("S0.greeting", session), self._msg("S0.privacy", session)]
+                return await self._reply(session, prefix + greeting)
+
+        handler = {
+            "S1": self._on_story,
+            "S2": self._on_danger_answer,
+            "A2": self._on_severe_hospital,
+            "B1": self._on_field_answer,
+            "B5": self._on_optin,
+            "F1": self._on_followup_choice,
+            "FS2": self._on_followup_danger,
+        }[session.state]
+        replies, ref_code = await handler(session, text)
+        return await self._reply(session, prefix + replies, ref_code)
+
+    async def _reply(self, session: Session, replies: list[str], ref_code: str | None = None) -> EngineReply:
+        await self.store.save_session(session)
+        return EngineReply(
+            session_id=session.id,
+            replies=[r for r in replies if r],
+            state=session.state,
+            ref_code=ref_code,
+            done=session.state == "DONE",
+        )
+
+    # ------------------------------------------------------------ S1: story
+
+    async def _on_story(self, s: Session, text: str):
+        ctx = s.context
+        ctx.setdefault("transcript", []).append({"role": "user", "text": text})
+        ex = await self.extract(ctx["transcript"])
+        ctx["lang"] = ex.language
+
+        if ex.is_nonsense:
+            if ctx.get("retried"):
+                return self._end(s, ["E.end"])
+            ctx["retried"] = True
+            ctx["transcript"] = []
+            return [self._msg("E.retry", s)], None
+
+        if ex.safety_handoff != "none":
+            # Out of scope for patterns. Hand off, store nothing.
+            return self._end(s, ["E.handoff"])
+
+        ctx["extraction"] = ex.model_dump()
+        decision = decide(ex)
+        if decision == "severe":
+            return await self._severe(s, ex, ack=ex.ack)
+        if decision == "ask":
+            s.state = "S2"
+            return [self._msg("S2.danger_check", s, ack=ex.ack)], None
+        return await self._non_severe(s, ex, lead=[ex.ack])
+
+    # ----------------------------------------------------- S2: danger check
+
+    async def _on_danger_answer(self, s: Session, text: str):
+        ex = self._ex(s)
+        answer = parse_yes_no(text)
+        if answer is None:
+            if not s.context.get("danger_retried"):
+                s.context["danger_retried"] = True
+                return [self._msg("S2.danger_retry", s)], None
+            answer = True  # Still unclear: showing emergency steps costs little, missing one costs a lot.
+        s.context["danger_answer"] = answer
+        if decide(ex, danger_answer=answer) == "severe":
+            return await self._severe(s, ex)
+        return await self._non_severe(s, ex)
+
+    # -------------------------------------------------------- severe branch
+
+    async def _severe(self, s: Session, ex: Extraction, ack: str = ""):
+        s.context["severity"] = "severe"
+        s.context["escalation_shown"] = True
+        replies = [ack, self._escalation(s, ex.category)]
+        if not ex.hospital_name_raw:
+            s.state = "A2"
+            return replies + [self._msg("Q.hospital", s)], None
+        more, code = await self._finalise(s, ex)
+        return replies + more, code
+
+    def _escalation(self, s: Session, category: str) -> str:
+        key = f"A1.{category}" if category in ("emergency_refused", "detention") else "A1.generic"
+        return self._msg(key, s)
+
+    async def _on_severe_hospital(self, s: Session, text: str):
+        ex = self._ex(s)
+        ex.hospital_name_raw = text[:120] or None
+        return await self._finalise(s, ex)
+
+    # ---------------------------------------------------- non-severe branch
+
+    async def _non_severe(self, s: Session, ex: Extraction, lead: list[str] | None = None):
+        s.context["severity"] = "not_severe"
+        replies = list(lead or [])
+        if ex.clinical_complaint and not s.context.get("clinical_shown"):
+            s.context["clinical_shown"] = True
+            replies.append(self._msg("E.clinical", s))
+
+        question = self._next_question(s, ex)
+        if question:
+            s.context["extraction"] = ex.model_dump()
+            s.state = "B1"
+            return replies + [question], None
+
+        rights = self.pack.rights_for(ex.category, s.context["lang"])
+        s.context["rights_shown"] = [rid for rid, _ in rights]
+        replies += [text for _, text in rights]
+        help_key = f"B3.{ex.category}" if ex.category in ("abuse", "neglect") else "B3.other"
+        replies.append(self._msg(help_key, s))
+        more, code = await self._finalise(s, ex)
+        return replies + more, code
+
+    def _next_question(self, s: Session, ex: Extraction) -> str | None:
+        asked: list[str] = s.context.setdefault("asked", [])
+        if len(asked) >= MAX_QUESTIONS:
+            return None
+        still_missing = {
+            "hospital": not ex.hospital_name_raw,
+            "department": ex.department == "unknown",
+            "when": ex.incident_timing == "unknown",
+        }
+        for field in ("hospital", "department", "when"):
+            if still_missing[field] and field not in asked:
+                asked.append(field)
+                s.context["pending_field"] = field
+                return self._msg(f"Q.{field}", s)
+        if (
+            ex.category != "other"
+            and ex.category_confidence < LOW_CONFIDENCE
+            and "category_confirm" not in asked
+        ):
+            asked.append("category_confirm")
+            s.context["pending_field"] = "category_confirm"
+            plain = self.pack.category_plain(ex.category, s.context["lang"])
+            return self._msg("Q.category_confirm", s, category_plain=plain)
+        return None
+
+    async def _on_field_answer(self, s: Session, text: str):
+        ex = self._ex(s)
+        field = s.context.pop("pending_field", None)
+        if field == "hospital":
+            ex.hospital_name_raw = text[:120] or None
+        elif field == "category_confirm":
+            if parse_yes_no(text) is False:
+                ex.category, ex.subtype = "other", "other"
+            ex.category_confidence = 1.0
+        elif field in ("department", "when"):
+            transcript = s.context.get("transcript", [])
+            transcript += [
+                {"role": "bot", "text": self.pack.message(f"Q.{field}", "en")},
+                {"role": "user", "text": text},
+            ]
+            s.context["transcript"] = transcript
+            fresh = await self.extract(transcript)
+            # Only fill gaps. An answer to a follow-up never rewrites the category or severity.
+            if ex.department == "unknown":
+                ex.department = fresh.department
+            if ex.incident_timing == "unknown":
+                ex.incident_timing = fresh.incident_timing
+            if ex.is_ongoing is None:
+                ex.is_ongoing = fresh.is_ongoing
+            if ex.time_bucket == "unknown":
+                ex.time_bucket = fresh.time_bucket
+            if ex.patient_group == "unknown":
+                ex.patient_group = fresh.patient_group
+            # A follow-up answer can reveal an emergency ("e dey happen now").
+            if decide(ex, s.context.get("danger_answer")) == "severe":
+                return await self._severe(s, ex)
+        return await self._non_severe(s, ex)
+
+    # --------------------------------------------------- receipt and opt-in
+
+    async def _finalise(self, s: Session, ex: Extraction):
+        ctx = s.context
+        lang = ctx["lang"]
+        hospital = self.pack.match_hospital(ex.hospital_name_raw)
+        code = refcode.generate()
+
+        credibility = "ok"
+        dedupe_key = ctx.get("dedupe_key")
+        if ex.implausible:
+            credibility = "review"
+        elif ex.hospital_name_raw and hospital is None:
+            credibility = "review"  # unknown hospital name: a human should look
+        elif dedupe_key and await self.store.find_recent_duplicate(
+            dedupe_key, hospital.id if hospital else None, ex.category
+        ):
+            credibility = "review"
+
+        report = Report(
+            ref_code_hmac=refcode.digest(code, self.ref_secret),
+            channel=s.channel,
+            pack=self.pack.id,
+            language=lang,
+            hospital_id=hospital.id if hospital else None,
+            hospital_name_raw=None if hospital else ex.hospital_name_raw,
+            department=ex.department,
+            category=ex.category,
+            secondary_categories=ex.secondary_categories,
+            severity=ctx.get("severity", "not_severe"),
+            incident_timing=ex.incident_timing,
+            is_ongoing=ex.is_ongoing,
+            reporter_role=ex.reporter_role,
+            patient_group=ex.patient_group,
+            subtype=ex.subtype,
+            harm_outcome=ex.harm_outcome,
+            time_bucket=ex.time_bucket,
+            money_demanded=ex.money_demanded,
+            amount_bucket=ex.amount_bucket,
+            summary_redacted=ex.summary_redacted,
+            rights_shown=ctx.get("rights_shown", []),
+            escalation_shown=ctx.get("escalation_shown", False),
+            credibility=credibility,
+            dedupe_key=dedupe_key,
+        )
+        await self.store.create_report(report)
+
+        # The raw story has done its job. Remove it from the session now, not at expiry.
+        s.context = {"lang": lang}
+        s.report_id = report.id
+        s.state = "B5"
+
+        replies = [self._msg("B4.receipt", s, ref_code=code)]
+        replies.append(self._msg("B4.counted" if ex.hospital_name_raw else "B4.no_hospital", s))
+        replies.append(self._msg("B5.optin", s))
+        return replies, code
+
+    async def _on_optin(self, s: Session, text: str):
+        yes = parse_yes_no(text) is True
+        report = await self.store.get_report(s.report_id) if s.report_id else None
+        if report and yes:
+            report.followup_opt_in = True
+            report.followup_due_at = datetime.now(timezone.utc) + timedelta(days=1)
+            await self.store.save_report(report)
+        return self._end(s, ["B5.yes" if yes else "B5.no"])
+
+    # ------------------------------------------------------------ follow-up
+
+    async def start_followup(self, ref_code: str, channel: Channel = "web") -> EngineReply | None:
+        report = await self._report_for(ref_code)
+        if report is None:
+            return None
+        s = Session(channel=channel, pack=self.pack.id, state="F1",
+                    context={"lang": report.language}, report_id=report.id)
+        await self.store.create_session(s)
+        return await self._reply(s, [self._msg("F1.question", s, **self._report_fields(report))])
+
+    async def _on_followup_choice(self, s: Session, text: str):
+        status = _FOLLOWUP_STATUS.get(text.strip()[:1])
+        report = await self.store.get_report(s.report_id) if s.report_id else None
+        if status is None or report is None:
+            return [self._msg("F1.retry", s)], None
+        await self.store.add_followup(Followup(report_id=report.id, status=status))  # type: ignore[arg-type]
+        report.status = status  # type: ignore[assignment]
+        await self.store.save_report(report)
+        if status == "worse":
+            s.state = "FS2"
+            return [self._msg("F2.worse", s), self._msg("S2.danger_check", s, ack="")], None
+        if status == "unchanged":
+            help_key = f"B3.{report.category}" if report.category in ("abuse", "neglect") else "B3.other"
+            return self._end(s, ["F2.unchanged", help_key])
+        return self._end(s, [f"F2.{status}"])
+
+    async def _on_followup_danger(self, s: Session, text: str):
+        report = await self.store.get_report(s.report_id) if s.report_id else None
+        category = report.category if report else "other"
+        if parse_yes_no(text) is False:
+            help_key = f"B3.{category}" if category in ("abuse", "neglect") else "B3.other"
+            return self._end(s, [help_key])
+        if report:
+            report.escalation_shown = True
+            await self.store.save_report(report)
+        s.state = "DONE"
+        return [self._escalation(s, category)], None
+
+    async def lookup(self, ref_code: str, lang: str = "en") -> str:
+        report = await self._report_for(ref_code)
+        if report is None:
+            return self.pack.message("L.not_found", lang)
+        return self.pack.message("L.found", report.language, status=report.status,
+                                 **self._report_fields(report))
+
+    async def _report_for(self, ref_code: str) -> Report | None:
+        if not refcode.is_wellformed(ref_code):
+            return None
+        return await self.store.get_report_by_ref(refcode.digest(ref_code, self.ref_secret))
+
+    def _report_fields(self, report: Report) -> dict[str, str]:
+        lang = report.language
+        hospital = next((h.name for h in self.pack.hospitals if h.id == report.hospital_id), None)
+        return {
+            "category_plain": self.pack.category_plain(report.category, lang),
+            "hospital": hospital or report.hospital_name_raw or self.pack.label("unknown_hospital", "", lang),
+        }
+
+    # --------------------------------------------------------------- helpers
+
+    def _msg(self, key: str, s: Session, **fields: str) -> str:
+        text = self.pack.message(key, s.context.get("lang", "en"), **fields)
+        return re.sub(r"^\s+", "", text)  # an empty {ack} leaves a leading space
+
+    def _end(self, s: Session, keys: list[str]):
+        replies = [self._msg(k, s) for k in keys]
+        s.state = "DONE"
+        s.context = {"lang": s.context.get("lang", "en")}
+        return replies, None
+
+    @staticmethod
+    def _ex(s: Session) -> Extraction:
+        return Extraction.model_validate(s.context.get("extraction", {}))

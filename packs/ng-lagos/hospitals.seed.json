@@ -1,0 +1,53 @@
+[
+  {
+    "id": "h-harmattan",
+    "name": "Harmattan General Hospital",
+    "aliases": [
+      "Harmattan General",
+      "Harmattan GH",
+      "Harmattan"
+    ],
+    "area": "Mainland",
+    "facility_type": "general"
+  },
+  {
+    "id": "h-lagoonview",
+    "name": "Lagoon View General Hospital",
+    "aliases": [
+      "Lagoon View",
+      "Lagoonview General"
+    ],
+    "area": "Island",
+    "facility_type": "general"
+  },
+  {
+    "id": "h-iroko",
+    "name": "Iroko District Hospital",
+    "aliases": [
+      "Iroko Hospital",
+      "Iroko District"
+    ],
+    "area": "Ikorodu axis",
+    "facility_type": "general"
+  },
+  {
+    "id": "h-palmgrove",
+    "name": "Palm Grove Teaching Hospital",
+    "aliases": [
+      "Palm Grove",
+      "PGTH"
+    ],
+    "area": "Mainland",
+    "facility_type": "teaching"
+  },
+  {
+    "id": "h-sunbird",
+    "name": "Sunbird Mother and Child Hospital",
+    "aliases": [
+      "Sunbird",
+      "Sunbird Maternity"
+    ],
+    "area": "Badagry axis",
+    "facility_type": "specialist"
+  }
+]

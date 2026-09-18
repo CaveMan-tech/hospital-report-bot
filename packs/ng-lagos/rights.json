@@ -1,0 +1,39 @@
+[
+  {
+    "id": "dignity",
+    "category": [
+      "abuse"
+    ],
+    "text_en": "You have the right to be treated with respect and dignity.",
+    "text_pcm": "You get right make dem treat you with respect.",
+    "source": "Patients' Bill of Rights (2018)",
+    "verified": false,
+    "note": "VERIFY exact wording"
+  },
+  {
+    "id": "quality_care",
+    "category": [
+      "neglect"
+    ],
+    "text_en": "You have the right to quality care, and to urgent attention when you need it.",
+    "text_pcm": "You get right to better care, and make dem attend to you quick when you need am.",
+    "source": "Patients' Bill of Rights (2018)",
+    "verified": false,
+    "note": "VERIFY exact wording"
+  },
+  {
+    "id": "complain",
+    "category": [
+      "other",
+      "abuse",
+      "neglect",
+      "emergency_refused",
+      "detention"
+    ],
+    "text_en": "You have the right to complain and to be heard.",
+    "text_pcm": "You get right to complain, and make dem hear you.",
+    "source": "Patients' Bill of Rights (2018)",
+    "verified": false,
+    "note": "VERIFY exact wording"
+  }
+]
