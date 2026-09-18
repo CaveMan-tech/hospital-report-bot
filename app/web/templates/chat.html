@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report a hospital problem</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header>
+  <h1>Report a hospital problem</h1>
+  <p>Private. No name needed. Run by {{ org_name }}.</p>
+</header>
+<main id="log" aria-live="polite"></main>
+<form id="form" autocomplete="off">
+  <textarea id="text" rows="2" placeholder="Tell me what happened…" aria-label="Your message" required></textarea>
+  <button type="submit">Send</button>
+</form>
+<footer>
+  <button type="button" class="link" id="new">Start a new report</button>
+  <button type="button" class="link" id="check">Check a report with my code</button>
+  {% if demo_mode %}<button type="button" class="link" id="nextday">Demo: simulate next day</button>{% endif %}
+</footer>
+<script src="/static/chat.js" defer></script>
+</body>
+</html>
