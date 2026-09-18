@@ -32,7 +32,7 @@ dedupe = DailyDedupe()
 def build_engine() -> Engine:
     cfg = get_settings()
     if cfg.store == "supabase":
-        from app.store.supabase import SupabaseStore  # noqa: PLC0415
+        from app.store.supabase import SupabaseStore
 
         store = SupabaseStore(cfg.supabase_url, cfg.supabase_service_key)
     else:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.engine.models import Followup, Report, Session
 
@@ -51,7 +51,7 @@ class MemoryStore:
     async def find_recent_duplicate(
         self, dedupe_key: str, hospital_id: str | None, category: str
     ) -> bool:
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        cutoff = datetime.now(UTC) - timedelta(hours=24)
         return any(
             r.dedupe_key == dedupe_key
             and r.hospital_id == hospital_id

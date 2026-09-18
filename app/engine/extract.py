@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from .models import Extraction, normalise_subtype
 
@@ -104,7 +104,7 @@ def make_llm_extractor(model: str) -> Extractor:
 # Mock extractor: crude keywords, good enough to drive the state machine locally.
 # --------------------------------------------------------------------------
 
-_PCM = re.compile(r"\b(dey|wetin|abeg|dem|una|no gree|wahala|sharp sharp|comot|wey|don)\b", re.I)
+_PCM = re.compile(r"\b(dey|wetin|abeg|dem|una|no gree|wahala|sharp sharp|comot|wey|don)\b", re.IGNORECASE)
 _HOSPITAL = re.compile(r"\b((?:[A-Z][\w']+ ){1,4}(?:General |Teaching |District |Mother and Child )?Hospital)\b")
 
 
@@ -147,9 +147,7 @@ async def mock_extract(transcript: list[dict[str, str]]) -> Extraction:
         ex.is_ongoing, ex.incident_timing = True, "ongoing"
     elif _has(low, "last month", "last year", "months ago", "in june", "e don tey"):
         ex.is_ongoing, ex.incident_timing = False, "older"
-    elif _has(low, "last week", "this week", "few days ago"):
-        ex.is_ongoing, ex.incident_timing = False, "this_week"
-    elif _has(low, "yesterday"):
+    elif _has(low, "last week", "this week", "few days ago") or _has(low, "yesterday"):
         ex.is_ongoing, ex.incident_timing = False, "this_week"
     elif "today" in low:
         ex.incident_timing = "today"

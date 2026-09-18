@@ -12,7 +12,7 @@ import hmac
 import secrets
 import time
 from collections import defaultdict, deque
-from datetime import date
+from datetime import UTC, date, datetime
 
 
 class RateLimiter:
@@ -37,7 +37,7 @@ class DailyDedupe:
         self._salt = b""
 
     def key(self, ip: str) -> str:
-        today = date.today()
+        today = datetime.now(UTC).date()
         if today != self._day:
             self._day, self._salt = today, secrets.token_bytes(32)
         return hmac.new(self._salt, ip.encode(), hashlib.sha256).hexdigest()[:32]

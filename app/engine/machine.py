@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.store.base import Store
 
@@ -311,7 +311,7 @@ class Engine:
         report = await self.store.get_report(s.report_id) if s.report_id else None
         if report and yes:
             report.followup_opt_in = True
-            report.followup_due_at = datetime.now(timezone.utc) + timedelta(days=1)
+            report.followup_due_at = datetime.now(UTC) + timedelta(days=1)
             await self.store.save_report(report)
         return self._end(s, ["B5.yes" if yes else "B5.no"])
 
