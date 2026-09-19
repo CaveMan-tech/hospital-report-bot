@@ -9,6 +9,7 @@ EXTRACT_MODE=mock uses a keyword stub so the whole engine runs with no API key.
 from __future__ import annotations
 
 import logging
+import os
 import re
 from collections.abc import Awaitable, Callable
 
@@ -33,12 +34,22 @@ is_nonsense=true if there is no real report in it.
 
 Field guidance:
 - language: one of the language codes listed in the deployment context ("pcm" means Nigerian
-  Pidgin). If the writer's language is not listed, use "en".
+  Pidgin). If the writer's language is not listed, use "en". Pidgin markers: dey, dem, wetin,
+  abeg, una, pikin, wahala, "no gree", "don" as past tense, "for" meaning "at". A message that is
+  mostly Pidgin is "pcm" even if it contains English words. Examples that are "pcm":
+  "Doctor no dey, dem just leave us for corridor." / "The nurse dey shout for my sister, she
+  insult am well well." / "E don reach two days wey dem hold am for there."
 - category:
   emergency_refused = emergency care refused or delayed until a deposit or other condition is met.
-  detention = a patient or a body held at the hospital over an unpaid bill.
+    This includes being turned away or kept waiting at the door with "no bed space", "no doctor",
+    "go and buy a card first", "bring a police report first": the hospital has not taken the
+    patient on. Prefer this over neglect when the person needs urgent care and has not been admitted.
+  detention = a patient or a body held at the hospital over an unpaid bill. Subtype patient_held
+    when a living person is kept (including a mother kept after giving birth); body_held only
+    when the remains of someone who died are not released.
   abuse = verbal or physical abuse or humiliation by staff.
-  neglect = patient left unattended, staff absent, calls for help ignored.
+  neglect = a patient the hospital HAS taken on (admitted, on a ward, being seen) is left
+    unattended, staff are absent, or calls for help are ignored.
   other = anything else, including purely clinical complaints (wrong diagnosis, surgical error).
 - category_confidence: 0 to 1. Be honest; use below 0.6 when genuinely unsure.
 - subtype: emergency_refused: deposit_demanded | no_bed_space | no_staff | other.
@@ -51,13 +62,17 @@ Field guidance:
 - severity: "severe" if someone appears to be in danger right now, "not_severe" if clearly not,
   "uncertain" otherwise. When in doubt, say "uncertain".
 - patient_group: newborn | child | adult | pregnant | elderly | unknown. Never record an exact age.
+  A woman in labour, giving birth, or who has just given birth is "pregnant". It describes the
+  PATIENT, not the person writing.
 - harm_outcome: none | condition_worsened | death | unknown.
 - time_bucket: day | night | weekend | unknown, only if the writer says.
 - money_demanded / amount_bucket: small | medium | large | very_large | unknown, using the
   thresholds in the deployment context. Never record the exact amount.
 - clinical_complaint: true if the complaint is about medical judgement rather than conduct.
 - safety_handoff: sexual_violence, self_harm or other_violence if the report is about those;
-  else none.
+  else none. self_harm includes the WRITER saying they want to die or end their life, in any
+  phrasing ("I wan end my life", "I no wan live again", "make I just die"). When this is set,
+  is_nonsense must be false.
 - implausible: true if the story is internally inconsistent or reads as fabricated or spam.
 - is_nonsense: true if there is no report at all (greetings only, gibberish, abuse, off-topic).
 - summary_redacted: one or two neutral sentences. NO names, ages, phone numbers, bed numbers,
@@ -90,11 +105,22 @@ def clean(ex: Extraction) -> Extraction:
     return ex
 
 
-def make_llm_extractor(model: str) -> Extractor:
+def make_llm_extractor(model: str, api_key: str = "", reasoning_effort: str = "minimal") -> Extractor:
     """Pydantic AI agent. Invalid output is rejected and retried by the library."""
     from pydantic_ai import Agent
 
-    agent = Agent(model, output_type=Extraction, instructions=INSTRUCTIONS, retries=2)
+    os.environ.setdefault("PYDANTIC_AI_NO_BANNER", "1")
+    resolved, settings = model, None
+    if api_key and model.startswith("openai:"):
+        # The key comes from our settings (.env or the host's variables), so it does not
+        # need to be exported into the process environment.
+        from pydantic_ai.models.openai import OpenAIResponsesModel, OpenAIResponsesModelSettings
+        from pydantic_ai.providers.openai import OpenAIProvider
+
+        resolved = OpenAIResponsesModel(model.split(":", 1)[1], provider=OpenAIProvider(api_key=api_key))
+        settings = OpenAIResponsesModelSettings(openai_reasoning_effort=reasoning_effort)
+    agent = Agent(resolved, output_type=Extraction, instructions=INSTRUCTIONS, retries=2,
+                  model_settings=settings)
 
     async def extract(transcript: list[dict[str, str]], context: str = "") -> Extraction:
         result = await agent.run(_render(transcript, context))
@@ -192,7 +218,7 @@ async def mock_extract(transcript: list[dict[str, str]], context: str = "") -> E
     return clean(ex)
 
 
-def get_extractor(mode: str, model: str) -> Extractor:
+def get_extractor(mode: str, model: str, api_key: str = "", reasoning_effort: str = "minimal") -> Extractor:
     if mode == "mock":
         return mock_extract
-    return make_llm_extractor(model)
+    return make_llm_extractor(model, api_key, reasoning_effort)

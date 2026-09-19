@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -6,9 +7,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    extract_mode: str = "mock"
+    extract_mode: Literal["mock", "llm"] = "mock"   # "llm" = real language model, letters not digits
     openai_model: str = "openai:gpt-5-mini"
-    store: str = "memory"
+    openai_api_key: str = ""
+    # gpt-5-mini "thinks" before answering. Minimal keeps a reply near 4s instead of 15 to 20s,
+    # with no loss on the evaluation set. A distressed person should not wait on a spinner.
+    openai_reasoning_effort: Literal["minimal", "low", "medium", "high"] = "minimal"
+    store: Literal["memory", "postgres"] = "memory"
     database_url: str = ""
     pack: str = "ng-lagos"                 # default pack
     packs: str = "ng-lagos,ke-nairobi"     # every pack this deployment serves

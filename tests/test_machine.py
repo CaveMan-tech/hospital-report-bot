@@ -177,3 +177,49 @@ async def test_gate_blocks_unverified_escalation_in_production_mode(store):
     r = await say(engine, None, "My mother is bleeding right now at Harmattan General Hospital, refused to treat, deposit")
     text = "\n".join(r.replies)
     assert "Section 20" not in text and "still being checked" in text
+
+
+async def test_self_harm_is_caught_even_if_the_model_misses_it(store):
+    async def oblivious(transcript, context=""):
+        from app.engine.models import Extraction
+        return Extraction(category="other", is_nonsense=True)   # worst case: model sees nothing
+
+    engine = Engine(store, oblivious, Pack("ng-lagos", allow_unverified=True), "s")
+    for text in ("I don tire. After wetin dem do my pikin I just wan end my life.", "I wan die"):
+        r = await engine.handle_message(None, "web", text) if len(text.split()) > 3 else None
+        if r is None:   # short message: greet first, then the message
+            g = await engine.handle_message(None, "web", "hi")
+            r = await engine.handle_message(g.session_id, "web", text)
+        assert r.done and "trained to help" in r.replies[0]
+    assert store.reports == {}
+
+
+def test_safety_net_does_not_fire_on_third_person_or_ordinary_stories():
+    from app.engine.models import Extraction
+    from app.engine.severity import apply_safety_net
+    for text in ("my father wan die for that ward, nobody attend to am",
+                 "they left her to die on a bench", "the nurse raised her voice at me"):
+        assert apply_safety_net(Extraction(), text).safety_handoff == "none", text
+    assert apply_safety_net(Extraction(), "the attendant raped a patient").safety_handoff == "sexual_violence"
+
+
+def test_summary_scrub_removes_identifiers_the_model_let_through():
+    from app.engine.severity import scrub_summary
+    story = "My name is Mrs Folake Adeyemi, 08031234567, bed 14. Nurse Bisi insulted me."
+    leaked = "Mrs Folake Adeyemi (0803 123 4567) in bed 14 says Nurse Bisi insulted her."
+    out = scrub_summary(leaked, story)
+    for bad in ("Folake", "Adeyemi", "0803", "bed 14", "Bisi"):
+        assert bad not in out, (bad, out)
+    assert "insulted her" in out
+    clean = "A patient reports that a nurse refused to change her dressing last week."
+    assert scrub_summary(clean, story) == clean
+
+
+def test_pidgin_detected_by_markers_only_where_the_pack_supports_it():
+    from app.engine.models import Extraction
+    from app.engine.severity import apply_safety_net
+    text = "Dem hold my brother for hospital since three days, dem no gree make e comot, e still dey there."
+    assert apply_safety_net(Extraction(language="en"), text, ["en", "pcm"]).language == "pcm"
+    assert apply_safety_net(Extraction(language="en"), text, ["en"]).language == "en"
+    english = "They have held my brother at the hospital for three days and will not let him leave."
+    assert apply_safety_net(Extraction(language="en"), english, ["en", "pcm"]).language == "en"

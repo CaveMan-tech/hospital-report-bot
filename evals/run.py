@@ -20,7 +20,7 @@ from app.config import get_settings
 from app.engine.extract import get_extractor
 from app.engine.models import EXTRACTION_VERSION, Extraction
 from app.engine.packs import Pack
-from app.engine.severity import decide
+from app.engine.severity import apply_safety_net, decide
 
 HERE = Path(__file__).parent
 CONCURRENCY = 5
@@ -59,7 +59,8 @@ def check(expect: dict, ex: Extraction, decision: str) -> dict[str, bool]:
 
 async def main() -> int:
     cfg = get_settings()
-    extract = get_extractor(cfg.extract_mode, cfg.openai_model)
+    extract = get_extractor(cfg.extract_mode, cfg.openai_model, cfg.openai_api_key,
+                            cfg.openai_reasoning_effort)
     stories = [json.loads(line) for line in (HERE / "stories.jsonl").read_text().splitlines() if line]
     sem = asyncio.Semaphore(CONCURRENCY)
     packs: dict[str, Pack] = {}
@@ -73,7 +74,8 @@ async def main() -> int:
             try:
                 pack = pack_of(story)
                 ex = await extract([{"role": "user", "text": story["text"]}], pack.extraction_context())
-                ex.language = pack.language_or_default(ex.language)  # same normalisation as the engine
+                ex = apply_safety_net(ex, story["text"], pack.languages)             # same post-processing as the engine
+                ex.language = pack.language_or_default(ex.language)
             except Exception as e:  # noqa: BLE001 - a crash is a failed case, not a failed run
                 return story, None, "error", {"extractor_ok": False}, str(e)
         decision = decide(ex)
@@ -100,7 +102,8 @@ async def main() -> int:
         "# Evaluation results",
         "",
         f"- Run: {datetime.now(UTC):%Y-%m-%d %H:%M} UTC",
-        f"- Extractor: `{model}`, extraction version `{EXTRACTION_VERSION}`",
+        f"- Extractor: `{model}`, extraction version `{EXTRACTION_VERSION}`"
+        + ("" if cfg.extract_mode == "mock" else f", reasoning effort `{cfg.openai_reasoning_effort}`"),
         f"- Stories: {len(stories)} hand-written (English and Pidgin; Nigeria and Kenya packs)",
         "",
         f"## Headline: missed emergencies = {len(missed)}" + (f" ({', '.join(missed)})" if missed else " (target: 0)"),

@@ -17,7 +17,7 @@ from . import refcode
 from .extract import Extractor
 from .models import Channel, EngineReply, Extraction, Followup, Report, Session
 from .packs import Pack
-from .severity import decide
+from .severity import apply_safety_net, decide
 
 log = logging.getLogger(__name__)
 
@@ -120,8 +120,15 @@ class Engine:
         ctx.setdefault("transcript", []).append({"role": "user", "text": text})
         pack = self.pack_for(s.pack)
         ex = await self.extract(ctx["transcript"], pack.extraction_context())
+        ex = apply_safety_net(ex, " ".join(t["text"] for t in ctx["transcript"] if t["role"] == "user"),
+                              pack.languages)
         ex.language = pack.language_or_default(ex.language)
         ctx["lang"] = ex.language
+
+        if ex.safety_handoff != "none":
+            # Out of scope for patterns. Hand off, store nothing. Checked before "nonsense"
+            # so that a short message like "I wan die" is never met with a retry prompt.
+            return self._end(s, ["E.handoff"])
 
         if ex.is_nonsense:
             if ctx.get("retried"):
@@ -129,10 +136,6 @@ class Engine:
             ctx["retried"] = True
             ctx["transcript"] = []
             return [self._msg("E.retry", s)], None
-
-        if ex.safety_handoff != "none":
-            # Out of scope for patterns. Hand off, store nothing.
-            return self._end(s, ["E.handoff"])
 
         ctx["extraction"] = ex.model_dump()
         decision = decide(ex)

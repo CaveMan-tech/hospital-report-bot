@@ -49,7 +49,8 @@ async def build_engine() -> Engine:
         store = MemoryStore()
     return Engine(
         store=store,
-        extractor=get_extractor(cfg.extract_mode, cfg.openai_model),
+        extractor=get_extractor(cfg.extract_mode, cfg.openai_model, cfg.openai_api_key,
+                                cfg.openai_reasoning_effort),
         pack=[get_pack(pid, cfg.allow_unverified) for pid in _pack_ids(cfg)],
         ref_secret=cfg.ref_code_secret,
     )

@@ -40,3 +40,12 @@ def test_clearly_past_skips_the_check():
 
 def test_user_no_means_not_severe_for_soft_categories():
     assert decide(ex(category="neglect", is_ongoing=True), danger_answer=False) == "not_severe"
+
+
+def test_staff_whistleblower_is_asked_not_assumed():
+    e = ex(category="emergency_refused", is_ongoing=True, reporter_role="staff")
+    assert decide(e) == "ask"
+    assert decide(e, danger_answer=True) == "severe"
+    assert decide(e, danger_answer=False) == "not_severe"   # they said nobody is in danger: believe them
+    assert decide(ex(category="emergency_refused", is_ongoing=True, reporter_role="staff",
+                     critical_condition=True)) == "severe"
