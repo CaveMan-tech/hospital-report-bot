@@ -42,3 +42,9 @@
 {"id": "role-06", "text": "I work in the accounts office at Korongo Bridge Level 5 Hospital. We are instructed not to clear any patient for discharge until the bill is paid in full, even if they stay for weeks. Right now there are mothers in the maternity wing who were discharged a month ago.", "expect": {"reporter_role": "staff", "category": ["detention"], "language": "en", "must_ask": true}, "pack": "ke-nairobi"}
 {"id": "role-07", "text": "They kept my pikin for emergency for three hours last week, no doctor come see am. Wetin be this kind hospital.", "expect": {"reporter_role": "relative", "category": ["neglect", "emergency_refused"], "patient_group": "child", "language": "pcm"}}
 {"id": "role-08", "text": "The treatment I got there was terrible and nobody cared.", "expect": {"reporter_role": "patient", "category": ["neglect", "other", "abuse"], "language": "en"}}
+{"id": "intent-01", "text": "I would like to report an issue.", "expect": {"has_incident": false}}
+{"id": "intent-02", "text": "Good afternoon. I want to make a complaint about a hospital.", "expect": {"has_incident": false}}
+{"id": "intent-03", "text": "Abeg I wan report something wey happen.", "expect": {"has_incident": false}}
+{"id": "intent-04", "text": "Hello, what is this service and can you help me?", "expect": {"has_incident": false}}
+{"id": "intent-05", "text": "I want to report that they refused to treat my brother at the gate because we had no money.", "expect": {"has_incident": true, "category": ["emergency_refused"]}}
+{"id": "intent-06", "text": "Please help, my wife is dying and nobody is attending to her.", "expect": {"has_incident": true, "severity": "severe"}}

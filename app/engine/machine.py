@@ -127,6 +127,8 @@ class Engine:
         if yes_no:
             return [QuickReply(label=pack.quick("yes", lang), value="yes"),
                     QuickReply(label=pack.quick("no", lang), value="no")]
+        if s.state == "S1" and s.context.get("asked_for_story") and not s.context.get("danger_answer"):
+            return [QuickReply(label=pack.quick("danger", lang), value=f"{TAP}danger")]
         if s.state == "F1":
             return [QuickReply(label=pack.quick("followup", lang, n), value=n) for n in ("1", "2", "3", "4")]
         field = s.context.get("pending_field") if s.state == "B1" else None
@@ -161,6 +163,14 @@ class Engine:
 
     async def _on_story(self, s: Session, text: str):
         ctx = s.context
+        if ctx.get("asked_for_story") and not ctx.get("danger_answer") and parse_yes_no(text) is True:
+            text = f"{TAP}danger"  # they typed YES to "if someone is in danger…" instead of tapping
+        if text == f"{TAP}danger":
+            # Danger first, story later. Nothing is stored until they say what happened.
+            ctx["danger_answer"] = True
+            ctx["escalation_shown"] = True
+            ctx["generic_escalation_sent"] = True
+            return [self._msg("A1.generic", s), self._msg("S1.after_danger", s)], None
         ctx.setdefault("transcript", []).append({"role": "user", "text": text})
         pack = self.pack_for(s.pack)
         ex, degraded = await self._extract(ctx["transcript"], pack)
@@ -186,8 +196,18 @@ class Engine:
             ctx["transcript"] = []
             return [self._msg("E.retry", s)], None
 
+        if not ex.has_incident and not ctx.get("degraded"):
+            # "I would like to report an issue" is an intention, not a report. Do not sympathise
+            # with nothing, do not run triage on nothing, and never store an empty report. Ask.
+            # The danger button stays one tap away for someone who cannot type more right now.
+            ctx["asked_for_story"] = ctx.get("asked_for_story", 0) + 1
+            if ctx["asked_for_story"] > 2:
+                return self._end(s, ["E.end"])
+            ctx["transcript"] = []  # an announcement carries nothing worth keeping or re-reading
+            return [self._msg("S1.tell_me", s)], None
+
         ctx["extraction"] = ex.model_dump()
-        decision = decide(ex)
+        decision = decide(ex, ctx.get("danger_answer"))
         if ctx.get("degraded") and decision == "not_severe":
             decision = "ask"  # a keyword guess is never allowed to skip the danger question
         # The acknowledgement is pre-written, like everything else a reporter reads.
@@ -219,7 +239,10 @@ class Engine:
     async def _severe(self, s: Session, ex: Extraction, ack: str = ""):
         s.context["severity"] = "severe"
         s.context["escalation_shown"] = True
-        replies = [ack, self._escalation(s, ex.category, ex.subtype)]
+        escalation = self._escalation(s, ex.category, ex.subtype)
+        if s.context.get("generic_escalation_sent") and escalation == self._msg("A1.generic", s):
+            escalation = ""  # they already have it from the danger button; do not repeat it
+        replies = [ack, escalation]
         if not ex.hospital_name_raw:
             s.state = "A2"
             return replies + [self._msg("Q.hospital", s)], None
@@ -396,7 +419,17 @@ class Engine:
         s.state = "B5"
 
         replies = [self._msg("B4.receipt", s, ref_code=code)]
-        replies.append(self._msg("B4.counted" if ex.hospital_name_raw else "B4.no_hospital", s))
+        # Only say "counted" when it is. A held report is recorded, not yet counted, and saying
+        # otherwise would be a small lie at the exact moment we are asking to be trusted.
+        if not ex.hospital_name_raw:
+            outcome = "B4.no_hospital"
+        elif reason == "unknown_hospital":
+            outcome = "B4.unknown_hospital"
+        elif credibility == "review":
+            outcome = "B4.recorded"      # deliberately vague: do not teach a spammer what tripped
+        else:
+            outcome = "B4.counted"
+        replies.append(self._msg(outcome, s))
         replies.append(self._msg("B5.optin", s))
         return replies, code
 

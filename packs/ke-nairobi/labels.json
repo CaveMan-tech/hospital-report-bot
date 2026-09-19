@@ -67,6 +67,9 @@
       "outpatient": {
         "en": "Outpatient / clinic"
       }
+    },
+    "danger": {
+      "en": "Someone is in danger right now"
     }
   }
 }

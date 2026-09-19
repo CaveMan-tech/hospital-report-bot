@@ -48,6 +48,9 @@ writing tests and the evaluation runner; first drafts of message copy for the au
   early brainstorming had no source at all (the one real study says nearly the opposite), that
   two rights lines overstated the official text, and that a crisis line, not the sexual-violence
   agency, is the right handoff for someone who wants to end their life. All corrected.
+- **The author broke it by using it.** Typing "I would like to report an issue" produced sympathy
+  for nothing, a danger check on nothing, an empty stored report and a false "your report has been
+  counted". Fixed the same hour, with tests and six new evaluation stories.
 - **Evaluation, not vibes.** A 30-story set with a single headline metric: missed emergencies.
 - **AI output that was rejected or corrected:** _[Ikechi to fill in: e.g. the first stack choice
   and the first database choice were both changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table

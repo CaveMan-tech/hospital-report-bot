@@ -84,7 +84,12 @@ Field guidance:
   phrasing ("I wan end my life", "I no wan live again", "make I just die"). When this is set,
   is_nonsense must be false.
 - implausible: true if the story is internally inconsistent or reads as fabricated or spam.
-- is_nonsense: true if there is no report at all (greetings only, gibberish, abuse, off-topic).
+- is_nonsense: true if there is no report at all (gibberish, abuse, off-topic).
+- has_incident: true if the message describes, even briefly or vaguely, something that happened or
+  is happening at a hospital ("they have not attended to us", "nurse insult me"). false if it only
+  announces a wish to report or complain, greets, or asks what this service is ("I would like to
+  report an issue", "I want to make a complaint", "good afternoon, can you help me?"). If the
+  writer says someone is in danger, dying or being refused care, has_incident is true.
 - summary_redacted: one or two neutral sentences. NO names, ages, phone numbers, bed numbers,
   exact dates or anything else that could identify a person.
 - missing_fields: any of hospital, department, when that the writer has not given.
@@ -143,6 +148,10 @@ _PCM = re.compile(r"\b(dey|wetin|abeg|dem|una|no gree|wahala|sharp sharp|comot|w
 _HOSPITAL = re.compile(r"\b([A-Z][\w'\-]* (?:(?:[A-Z0-9][\w'\-]*|and) ){0,6}Hospital)\b")
 
 
+_INTENT_ONLY = re.compile(r"\b(would like to|want to|wan|need to|like to|how do i|can i|can you)\b.*"
+                          r"\b(report|complain|complaint|help|talk|tell you|ask)\b")
+
+
 def _has(text: str, *words: str) -> bool:
     return any(w in text for w in words)
 
@@ -155,6 +164,10 @@ async def mock_extract(transcript: list[dict[str, str]], context: str = "") -> E
 
     if len(low.split()) < 4 and not _HOSPITAL.search(story):
         ex.is_nonsense = True
+        return clean(ex)
+    if _INTENT_ONLY.search(low) and len(low.split()) < 14 and not _has(
+            low, "refus", "slap", "insult", "deposit", "nobody", "held", "detain", "dying", "bleed"):
+        ex.has_incident = False
         return clean(ex)
 
     if _has(low, "rape", "sexually", "molest"):

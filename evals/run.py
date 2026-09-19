@@ -35,6 +35,10 @@ def check(expect: dict, ex: Extraction, decision: str) -> dict[str, bool]:
     if "safety_handoff" in expect:
         out["handoff"] = ex.safety_handoff == expect["safety_handoff"]
         return out
+    if "has_incident" in expect:
+        out["has_incident"] = ex.has_incident == expect["has_incident"]
+        if not expect["has_incident"]:
+            return out
     out["not_nonsense"] = not ex.is_nonsense
     if expect.get("severity") == "severe":
         out["emergency_caught"] = decision in ("severe", "ask")

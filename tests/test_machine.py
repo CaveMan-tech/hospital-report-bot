@@ -426,3 +426,62 @@ def test_emergency_message_no_longer_asserts_a_legal_conclusion_or_free_care():
     assert "against the law" not in msg and "does not say the treatment is free" in msg
     assert "must not refuse a person emergency medical treatment for any reason" in msg
     assert "767 or 112" in msg and "N100,000" not in msg and "imprison" not in msg
+
+
+# ---------------------------------------------------------------- an intention is not a report
+
+async def test_saying_you_want_to_report_is_not_a_report(engine, store):
+    r = await say(engine, None, "I would like to report an issue.")
+    text = " ".join(r.replies)
+    assert "sorry this happened" not in text and "danger right now? " not in text   # nothing happened yet
+    assert "Tell me what happened" in text and r.state == "S1"
+    assert [q.value for q in r.quick_replies] == ["tap:danger"]                     # danger is one tap away
+    assert store.reports == {}
+
+    r = await say(engine, r.session_id, "A nurse slapped me last week at Harmattan General Hospital maternity ward")
+    assert r.ref_code and len(store.reports) == 1                                   # now there is something to record
+
+
+async def test_never_stores_a_report_with_nothing_in_it(engine, store):
+    r = await say(engine, None, "I would like to report an issue.")
+    r = await say(engine, r.session_id, "I want to make a complaint please")
+    assert r.state == "S1" and store.reports == {}
+    r = await say(engine, r.session_id, "can you help me with something")
+    assert r.done and store.reports == {}                                           # politely ends; nothing stored
+
+
+async def test_danger_button_gives_help_first_and_records_only_once_there_is_a_story(engine, store):
+    r = await say(engine, None, "I would like to report an issue.")
+    r = await say(engine, r.session_id, "tap:danger")
+    text = "\n".join(r.replies)
+    assert "767 or 112" in text and "tell me in a few words" in text
+    assert r.state == "S1" and store.reports == {} and r.quick_replies == []
+
+    r = await say(engine, r.session_id, "Nobody is attending to my father on the ward at Iroko District Hospital, no doctor anywhere")
+    text = "\n".join(r.replies)
+    assert text.count("767 or 112") == 0                                            # not repeated: they already have it
+    assert "danger right now" not in text and r.ref_code                            # and not asked again
+    report = next(iter(store.reports.values()))
+    assert report.severity == "severe" and report.escalation_shown and report.category == "neglect"
+
+
+async def test_the_receipt_only_says_counted_when_it_is(engine, store):
+    r = await say(engine, None, "A nurse slapped me last week at London ABC Hospital maternity ward")
+    text = "\n".join(r.replies)
+    assert "has been counted" not in text and "did not recognise that hospital" in text
+    assert next(iter(store.reports.values())).credibility == "review"
+
+    story = "A nurse slapped me last week at Harmattan General Hospital maternity ward"
+    first = await say(engine, None, story, dedupe_key="same")
+    second = await say(engine, None, story, dedupe_key="same")
+    assert "has been counted" in "\n".join(first.replies)
+    second_text = "\n".join(second.replies)
+    assert "has been counted" not in second_text and "will review your report" in second_text
+    assert "duplicate" not in second_text.lower()                                   # do not teach a spammer what tripped
+
+
+async def test_typing_yes_after_being_offered_the_danger_button_works_like_tapping_it(engine, store):
+    r = await say(engine, None, "I would like to report an issue.")
+    r = await say(engine, r.session_id, "Yes")
+    assert "767 or 112" in "\n".join(r.replies) and "did not quite understand" not in " ".join(r.replies)
+    assert store.reports == {}

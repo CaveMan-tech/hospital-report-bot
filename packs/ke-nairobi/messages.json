@@ -248,5 +248,21 @@
   "S0.voice": {
     "verified": true,
     "en": "Your recording is sent to an AI service to be turned into text, then deleted. We never keep your voice. Check the words in the box, fix anything that is wrong, then press Send."
+  },
+  "S1.tell_me": {
+    "verified": true,
+    "en": "Of course. Tell me what happened, in your own words. A few lines is enough: what happened, and at which hospital. If someone is in danger right now, tap the button below."
+  },
+  "S1.after_danger": {
+    "verified": true,
+    "en": "When you can, tell me in a few words what is happening and at which hospital, so that it can be recorded."
+  },
+  "B4.unknown_hospital": {
+    "verified": true,
+    "en": "I did not recognise that hospital's name, so a person will check your report before it is counted with other reports."
+  },
+  "B4.recorded": {
+    "verified": true,
+    "en": "A person will review your report before it is counted with other reports."
   }
 }

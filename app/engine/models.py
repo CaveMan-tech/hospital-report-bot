@@ -73,6 +73,9 @@ class Extraction(BaseModel):
     safety_handoff: SafetyHandoff = "none"
     implausible: bool = False
     is_nonsense: bool = False
+    # False when the message only announces a wish to report, greets or asks a question, and
+    # describes nothing that happened. "I would like to report an issue" is not a report.
+    has_incident: bool = True
     summary_redacted: str = ""
     ack: str = ""  # unused: acknowledgements are pre-written in the pack. Kept so old payloads validate.
     missing_fields: list[MissingField] = Field(default_factory=list)

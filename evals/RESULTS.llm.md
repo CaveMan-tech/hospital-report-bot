@@ -1,8 +1,8 @@
 # Evaluation results
 
-- Run: 2026-09-19 13:21 UTC
+- Run: 2026-09-19 14:02 UTC
 - Extractor: `openai:gpt-5-mini`, extraction version `2026-09-19.1`, reasoning effort `minimal`
-- Stories: 44 hand-written (English and Pidgin; Nigeria and Kenya packs)
+- Stories: 50 hand-written (English and Pidgin; Nigeria and Kenya packs)
 
 ## Headline: missed emergencies = 0 (target: 0)
 
@@ -13,17 +13,18 @@ check. It is missed only if it would be treated as not severe without asking.
 |---|---|---|
 | ack_clean | 1 | 1 |
 | asked | 3 | 3 |
-| category | 39 | 39 |
+| category | 40 | 40 |
 | clinical_complaint | 2 | 2 |
-| emergency_caught | 12 | 12 |
+| emergency_caught | 13 | 13 |
 | handoff | 2 | 2 |
+| has_incident | 6 | 6 |
 | hospital | 5 | 5 |
 | language | 39 | 39 |
 | no_false_alarm | 21 | 21 |
 | nonsense | 3 | 3 |
-| not_nonsense | 39 | 39 |
+| not_nonsense | 41 | 41 |
 | patient_group | 12 | 12 |
-| reporter_role | 8 | 9 |
+| reporter_role | 9 | 9 |
 | subtype | 13 | 13 |
 | summary_redacted | 1 | 1 |
 
@@ -67,9 +68,15 @@ check. It is missed only if it would be treated as not severe without asking.
 | ke-lang-01 | abuse | not_severe | PASS |
 | role-01 | emergency_refused | ask | PASS |
 | role-02 | neglect | ask | PASS |
-| role-03 | abuse | not_severe | PASS |
-| role-04 | abuse | not_severe | FAIL: reporter_role |
+| role-03 | neglect | not_severe | PASS |
+| role-04 | abuse | not_severe | PASS |
 | role-05 | abuse | not_severe | PASS |
 | role-06 | detention | ask | PASS |
 | role-07 | neglect | not_severe | PASS |
 | role-08 | neglect | ask | PASS |
+| intent-01 | other | ask | PASS |
+| intent-02 | other | ask | PASS |
+| intent-03 | other | ask | PASS |
+| intent-04 | other | ask | PASS |
+| intent-05 | emergency_refused | severe | PASS |
+| intent-06 | neglect | severe | PASS |

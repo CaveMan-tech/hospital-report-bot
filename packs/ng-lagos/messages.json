@@ -335,5 +335,25 @@
     "verified": true,
     "en": "Your recording is sent to an AI service to be turned into text, then deleted. We never keep your voice. Check the words in the box, fix anything that is wrong, then press Send.",
     "pcm": "We go send your recording give AI make e turn am to words, then we delete am. We no dey keep your voice. Check the words for the box, correct anything wey no correct, then press Send."
+  },
+  "S1.tell_me": {
+    "verified": true,
+    "en": "Of course. Tell me what happened, in your own words. A few lines is enough: what happened, and at which hospital. If someone is in danger right now, tap the button below.",
+    "pcm": "No wahala. Tell me wetin happen, as e take happen. Small talk don do: wetin happen, and for which hospital. If anybody dey for danger now now, press the button wey dey down."
+  },
+  "S1.after_danger": {
+    "verified": true,
+    "en": "When you can, tell me in a few words what is happening and at which hospital, so that it can be recorded.",
+    "pcm": "When you fit, tell me small wetin dey happen and for which hospital, make we fit record am."
+  },
+  "B4.unknown_hospital": {
+    "verified": true,
+    "en": "I did not recognise that hospital's name, so a person will check your report before it is counted with other reports.",
+    "pcm": "I no sabi that hospital name, so person go check your report before we count am join other reports."
+  },
+  "B4.recorded": {
+    "verified": true,
+    "en": "A person will review your report before it is counted with other reports.",
+    "pcm": "Person go look your report before we count am join other reports."
   }
 }
