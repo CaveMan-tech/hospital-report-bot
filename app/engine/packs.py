@@ -130,6 +130,10 @@ class Pack:
         entry = self.labels[group][key] if group != "unknown_hospital" else self.labels[group]
         return entry.get(lang) or entry["en"]
 
+    def quick(self, key: str, lang: str, sub: str | None = None) -> str:
+        entry = self.labels["quick"][key][sub] if sub else self.labels["quick"][key]
+        return entry.get(lang) or entry["en"]
+
     def category_plain(self, category: str, lang: str) -> str:
         return self.label("category_plain", category, lang)
 

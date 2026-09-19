@@ -151,6 +151,14 @@ class Session(BaseModel):
         return _now() >= self.expires_at
 
 
+class QuickReply(BaseModel):
+    """A tap-to-answer option. `value` is what the channel sends back as the user's message.
+    Web renders these as buttons; WhatsApp and Telegram have native equivalents."""
+
+    label: str
+    value: str
+
+
 class EngineReply(BaseModel):
     """What every channel adapter receives back from the engine."""
 
@@ -159,3 +167,4 @@ class EngineReply(BaseModel):
     state: str
     ref_code: str | None = None
     done: bool = False
+    quick_replies: list[QuickReply] = Field(default_factory=list)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import secrets
 from contextlib import asynccontextmanager
@@ -28,6 +29,9 @@ from app.store.memory import MemoryStore
 logging.basicConfig(level=logging.INFO)
 WEB = Path(__file__).parent / "web"
 templates = Jinja2Templates(directory=WEB / "templates")
+# Version static URLs by content, so a phone never keeps running last week's script after a deploy.
+ASSET_V = hashlib.sha256(b"".join(p.read_bytes() for p in sorted((WEB / "static").iterdir()))).hexdigest()[:8]
+templates.env.globals["asset_v"] = ASSET_V
 
 chat_limiter = RateLimiter(limit=40, window_seconds=600)
 lookup_limiter = RateLimiter(limit=10, window_seconds=600)

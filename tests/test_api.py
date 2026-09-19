@@ -45,3 +45,10 @@ def test_total_failure_still_tells_the_reporter_what_to_do():
         assert r.status_code == 503
         assert "nearest other hospital" in r.json()["detail"] and "Traceback" not in r.text
         assert "nearest other hospital" in c.get("/").text          # offline text is baked into the page
+
+
+def test_static_urls_are_versioned():
+    import re
+    with TestClient(app) as c:
+        page = c.get("/").text
+        assert re.search(r"/static/chat\.js\?v=[0-9a-f]{8}", page) and re.search(r"/static/app\.css\?v=[0-9a-f]{8}", page)

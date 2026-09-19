@@ -22,7 +22,7 @@ Judging criteria (25% each): uniqueness, scalability across geographies, AI codi
 ## 1. Design rules
 
 1. **Assume the user is angry, tired, stressed, or all three.** Acknowledge first. One free-text story. Never a form.
-2. **Maximum three follow-up questions.** The AI extracts the rest.
+2. **Maximum three follow-up questions.** The AI extracts the rest. Every closed question (danger check, opt-in, follow-up status, when, which department) comes with tap-to-answer options, so nobody has to type YES. Options are part of the engine's reply (`quick_replies`), so WhatsApp and Telegram adapters can render them natively; tapped `when` and `department` answers map directly to field values with no AI call.
 3. **Safety check before anything else.**
 4. **The AI writes nothing a reporter reads.** It classifies and extracts. Every message, including the acknowledgement, is pre-written in the pack; legal claims and phone numbers additionally need a human `verified` flag; numbers in briefs are template-filled. Deterministic nets run on top of the model for handoff phrases, Pidgin detection and scrubbing identifiers from summaries.
 5. **No clinical judgement.** Rights and conduct only.

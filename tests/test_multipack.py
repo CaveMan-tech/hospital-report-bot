@@ -39,6 +39,7 @@ def test_every_pack_has_the_same_message_keys_and_five_hospitals(pack_id):
     for lang in pack.languages:                    # default language must always have text
         assert all(m.get("en") for m in pack.messages.values()), lang
     assert set(pack.meta["amount_buckets"]) == {"small", "medium", "large", "very_large"}
+    assert set(pack.labels["quick"]) == {"yes", "no", "followup", "when", "department"} and set(pack.labels["quick"]["followup"]) == {"1", "2", "3", "4"}
 
 
 RISKY = re.compile(r"[Ss]ection \d|Article \d|Constitution|\b\d{3,4}\b|\{contact:|Council|Act 20|High Court")

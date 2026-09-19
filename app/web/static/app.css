@@ -10,6 +10,8 @@ main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:
 .m{max-width:88%;padding:10px 12px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .bot{background:var(--bot);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
 .me{background:var(--me);color:var(--me-fg);align-self:flex-end;border-bottom-right-radius:4px}
+.quick{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;max-width:100%}
+.quick button{background:var(--bot);color:var(--fg);border:2px solid var(--me);padding:0 18px;min-height:48px;font-weight:600;text-align:left}
 .sys{align-self:center;color:var(--mut);font-size:.85rem;text-align:center}
 .err{color:var(--warn)}
 .code{font:600 1.05rem ui-monospace,Menlo,monospace;letter-spacing:.06em}

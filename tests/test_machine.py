@@ -310,3 +310,67 @@ async def test_degraded_reports_are_not_counted_until_an_analyst_accepts_them(st
         await engine.handle_message(r.session_id, "web", "no")
     assert len(store.reports) == 6
     assert A.patterns(list(store.reports.values()), Pack("ng-lagos")) == []
+
+
+# ---------------------------------------------------------------- tap-to-answer
+
+async def test_closed_questions_come_with_tap_to_answer_options(engine, store):
+    r = await say(engine, None, "hi")
+    assert r.quick_replies == []                                           # open question: no buttons
+    r = await say(engine, r.session_id, "A nurse slapped me and insulted me in front of everybody")
+    assert [(q.label, q.value) for q in r.quick_replies] == [("Yes", "yes"), ("No", "no")]   # danger check
+    r = await say(engine, r.session_id, "no")
+    assert r.state == "B1" and r.quick_replies == []                       # "which hospital?" is open
+    r = await say(engine, r.session_id, "Lagoon View General Hospital")
+    r = await say(engine, r.session_id, "maternity")
+    r = await say(engine, r.session_id, "last week")
+    assert r.state == "B5" and [q.value for q in r.quick_replies] == ["yes", "no"]            # opt-in
+    code = r.ref_code
+    r = await say(engine, r.session_id, "yes")
+    assert r.done and r.quick_replies == []
+    f = await engine.start_followup(code)
+    assert [q.value for q in f.quick_replies] == ["1", "2", "3", "4"]
+    assert f.quick_replies[1].label == "Nothing has changed"
+    f = await say(engine, f.session_id, "3")
+    assert f.state == "FS2" and [q.value for q in f.quick_replies] == ["yes", "no"]
+
+
+async def test_tap_options_follow_the_reporters_language(engine):
+    r = await say(engine, None, "Nurse slap my pikin last week for Harmattan General Hospital children ward, wetin be this wahala")
+    code = r.ref_code
+    await say(engine, r.session_id, "no")
+    f = await engine.start_followup(code)
+    assert f.quick_replies[2].label == "E don worse"
+
+
+async def test_tapped_when_and_department_need_no_ai_call(store):
+    calls = 0
+
+    async def counting(transcript, context=""):
+        nonlocal calls
+        calls += 1
+        return await mock_extract(transcript, context)
+
+    engine = Engine(store, counting, Pack("ng-lagos", allow_unverified=True), "s")
+    r = await engine.handle_message(None, "web", "A nurse slapped me and insulted me in front of everybody")
+    r = await engine.handle_message(r.session_id, "web", "no")
+    r = await engine.handle_message(r.session_id, "web", "Lagoon View General Hospital")
+    assert [q.label for q in r.quick_replies][:3] == ["Emergency", "Maternity", "Children's ward"]
+    before = calls
+    r = await engine.handle_message(r.session_id, "web", "tap:maternity")
+    assert [q.value for q in r.quick_replies] == ["tap:today", "tap:this_week", "tap:older"]
+    r = await engine.handle_message(r.session_id, "web", "tap:older")
+    assert calls == before and r.ref_code                                  # two answers, zero AI calls
+    report = next(iter(store.reports.values()))
+    assert report.department == "maternity" and report.incident_timing == "older"
+
+
+async def test_typed_answers_still_work_and_junk_taps_are_ignored(engine, store):
+    r = await say(engine, None, "A nurse slapped me and insulted me in front of everybody")
+    r = await say(engine, r.session_id, "no")
+    r = await say(engine, r.session_id, "Lagoon View General Hospital")
+    r = await say(engine, r.session_id, "tap:<script>")                    # not an option: ignored, not stored
+    r = await say(engine, r.session_id, "last week")                       # typed answer goes through the extractor
+    assert r.ref_code
+    report = next(iter(store.reports.values()))
+    assert report.department == "unknown" and report.incident_timing == "this_week"

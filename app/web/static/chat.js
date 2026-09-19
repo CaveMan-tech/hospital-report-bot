@@ -23,11 +23,27 @@
     if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : window.OFFLINE);
     return data;
   }
+  function clearQuick() { const q = document.getElementById('quick'); if (q) q.remove(); }
+  function quick(options) {
+    if (!options || !options.length) return;
+    const row = document.createElement('div');
+    row.id = 'quick'; row.className = 'quick';
+    options.forEach(o => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = o.label;
+      b.onclick = () => { add(o.label, 'me'); send(o.value); };
+      row.appendChild(b);
+    });
+    log.appendChild(row);
+    row.scrollIntoView({ block: 'end' });
+  }
   function show(data) {
     setSid(data.done ? null : data.session_id);
     data.replies.forEach((t, i) => setTimeout(() => add(t, 'bot'), i * 250));
+    setTimeout(() => quick(data.quick_replies), data.replies.length * 250);
   }
   async function send(text) {
+    clearQuick();
     btn.disabled = true;
     try { show(await post('/api/chat', { session_id: sid, channel: 'web', pack: window.PACK, text })); }
     catch (e) { add(e.message, 'sys err'); }

@@ -18,5 +18,55 @@
   },
   "unknown_hospital": {
     "en": "the hospital"
+  },
+  "quick": {
+    "yes": {
+      "en": "Yes"
+    },
+    "no": {
+      "en": "No"
+    },
+    "followup": {
+      "1": {
+        "en": "It was sorted out"
+      },
+      "2": {
+        "en": "Nothing has changed"
+      },
+      "3": {
+        "en": "It got worse"
+      },
+      "4": {
+        "en": "We have left the hospital"
+      }
+    },
+    "when": {
+      "today": {
+        "en": "Today"
+      },
+      "this_week": {
+        "en": "This week"
+      },
+      "older": {
+        "en": "Earlier"
+      }
+    },
+    "department": {
+      "emergency": {
+        "en": "Casualty"
+      },
+      "maternity": {
+        "en": "Maternity"
+      },
+      "paediatrics": {
+        "en": "Children's ward"
+      },
+      "ward": {
+        "en": "Another ward"
+      },
+      "outpatient": {
+        "en": "Outpatient / clinic"
+      }
+    }
   }
 }

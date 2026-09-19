@@ -16,12 +16,13 @@ from app.store.base import Store
 
 from . import refcode
 from .extract import Extractor, mock_extract
-from .models import Channel, EngineReply, Extraction, Followup, Report, Session
+from .models import Channel, EngineReply, Extraction, Followup, QuickReply, Report, Session
 from .packs import Pack
 from .severity import apply_safety_net, decide
 
 log = logging.getLogger(__name__)
 
+TAP = "tap:"  # prefix on quick-reply values that map straight to a field value
 MAX_QUESTIONS = 3
 LOW_CONFIDENCE = 0.6
 MAX_STORY_CHARS = 4000
@@ -114,7 +115,26 @@ class Engine:
             state=session.state,
             ref_code=ref_code,
             done=session.state == "DONE",
+            quick_replies=self._quick_replies(session),
         )
+
+    def _quick_replies(self, s: Session) -> list[QuickReply]:
+        """Tap-to-answer for every closed question. A stressed person, or one who does not type
+        easily, should never have to spell out YES."""
+        pack, lang = self.pack_for(s.pack), s.context.get("lang", "en")
+        yes_no = s.state in ("S2", "B5", "FS2") or (
+            s.state == "B1" and s.context.get("pending_field") == "category_confirm")
+        if yes_no:
+            return [QuickReply(label=pack.quick("yes", lang), value="yes"),
+                    QuickReply(label=pack.quick("no", lang), value="no")]
+        if s.state == "F1":
+            return [QuickReply(label=pack.quick("followup", lang, n), value=n) for n in ("1", "2", "3", "4")]
+        field = s.context.get("pending_field") if s.state == "B1" else None
+        if field in ("when", "department"):
+            # Values are prefixed so a tap is recognised exactly and needs no AI call.
+            return [QuickReply(label=pack.quick(field, lang, key), value=f"{TAP}{key}")
+                    for key in pack.labels["quick"][field]]
+        return []
 
     # ------------------------------------------------- extraction, fail-safe
 
@@ -274,6 +294,15 @@ class Engine:
             if parse_yes_no(text) is False:
                 ex.category, ex.subtype = "other", "other"
             ex.category_confidence = 1.0
+        elif field in ("department", "when") and text.startswith(TAP):
+            # A tapped option maps directly: instant, and it works when the AI is down.
+            value = text[len(TAP):]
+            if field == "department" and value in self.pack_for(s.pack).labels["quick"]["department"]:
+                ex.department = value  # type: ignore[assignment]
+            elif field == "when" and value in ("today", "this_week", "older"):
+                ex.incident_timing = value  # type: ignore[assignment]
+                if value == "older":
+                    ex.is_ongoing = False if ex.is_ongoing is None else ex.is_ongoing
         elif field in ("department", "when"):
             transcript = s.context.get("transcript", [])
             transcript += [

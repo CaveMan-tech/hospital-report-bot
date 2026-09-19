@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Report a hospital problem</title>
-<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/app.css?v={{ asset_v }}">
 </head>
 <body>
 <header>
@@ -23,6 +23,6 @@
   {% for p in packs %}{% if p.id != pack.id %}<a class="link" href="/?pack={{ p.id }}">Demo: switch to {{ p.title }}</a>{% endif %}{% endfor %}{% endif %}
 </footer>
 <script>window.PACK = {{ pack.id|tojson }}; window.OFFLINE = {{ pack.message("E.unavailable")|tojson }};</script>
-<script src="/static/chat.js" defer></script>
+<script src="/static/chat.js?v={{ asset_v }}" defer></script>
 </body>
 </html>
