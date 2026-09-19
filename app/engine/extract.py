@@ -58,6 +58,16 @@ Field guidance:
 - hospital_name_raw: the hospital name exactly as written, or null.
 - incident_timing and is_ongoing: is_ongoing=true only if it is happening now; false only if
   the writer clearly places it in the past; otherwise null.
+  A continuing practice ("it happens every night", "we are instructed to") is is_ongoing=true.
+- reporter_role: who is WRITING, relative to the hospital being reported.
+  patient = it happened to the writer ("the treatment I got", "they slapped me").
+  relative = it happened to the writer's family member or friend they are caring for.
+  witness = the writer saw it happen to someone they have no tie to.
+  staff = the writer WORKS AT the hospital being reported, in any job (doctor, nurse, cleaner,
+    accounts, security). Only when they say so.
+  A health worker who was a patient or relative at this hospital is patient or relative, NOT staff,
+  even if they mention their profession. Mentioning a nurse or doctor does not make the writer staff.
+  unknown = genuinely cannot tell.
 - critical_condition: true if the patient is described as in a life-threatening state now.
 - severity: "severe" if someone appears to be in danger right now, "not_severe" if clearly not,
   "uncertain" otherwise. When in doubt, say "uncertain".

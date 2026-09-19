@@ -80,14 +80,14 @@ def decide(ex: Extraction, danger_answer: bool | None = None) -> Decision:
     if danger_answer is True:
         return "severe"
 
-    if ex.category in ("emergency_refused", "detention") and ex.is_ongoing is not False:
-        # A staff member describing a practice ("management tells us to collect deposits")
-        # is not necessarily beside a patient in danger. Ask, do not assume either way.
-        # "People have died waiting" makes the model flag a critical condition, but it does not
-        # mean a particular patient is in danger this minute. So staff are always asked.
+    if ex.category in ("emergency_refused", "detention"):
+        # A member of staff describing a practice ("we are told to collect deposits", "people have
+        # died waiting") trips the critical and timing signals in both directions, and is not
+        # necessarily beside a patient in danger this minute. So staff are always asked.
         if ex.reporter_role == "staff":
             return "ask" if danger_answer is None else "not_severe"  # True was handled above
-        return "severe"
+        if ex.is_ongoing is not False:
+            return "severe"
 
     if ex.category == "neglect" and ex.is_ongoing is True and ex.critical_condition:
         return "severe"

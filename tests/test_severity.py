@@ -50,3 +50,10 @@ def test_staff_whistleblower_is_asked_not_assumed():
     # "people have died waiting" trips the critical flag; staff are still asked, not assumed
     assert decide(ex(category="emergency_refused", is_ongoing=True, reporter_role="staff",
                      critical_condition=True)) == "ask"
+
+
+def test_staff_describing_a_past_or_continuing_practice_is_still_asked():
+    for ongoing, timing in ((False, "this_month"), (None, "unknown"), (True, "ongoing")):
+        for category in ("emergency_refused", "detention"):
+            e = ex(category=category, reporter_role="staff", is_ongoing=ongoing, incident_timing=timing)
+            assert decide(e) == "ask", (category, ongoing)

@@ -1,8 +1,8 @@
 # Evaluation results
 
-- Run: 2026-09-19 11:22 UTC
+- Run: 2026-09-19 11:31 UTC
 - Extractor: `openai:gpt-5-mini`, extraction version `2026-09-19.1`, reasoning effort `minimal`
-- Stories: 36 hand-written (English and Pidgin; Nigeria and Kenya packs)
+- Stories: 44 hand-written (English and Pidgin; Nigeria and Kenya packs)
 
 ## Headline: missed emergencies = 0 (target: 0)
 
@@ -12,33 +12,33 @@ check. It is missed only if it would be treated as not severe without asking.
 | Check | Passed | Of |
 |---|---|---|
 | ack_clean | 1 | 1 |
-| asked | 1 | 1 |
-| category | 31 | 31 |
+| asked | 3 | 3 |
+| category | 39 | 39 |
 | clinical_complaint | 2 | 2 |
 | emergency_caught | 12 | 12 |
 | handoff | 2 | 2 |
 | hospital | 5 | 5 |
-| language | 31 | 31 |
-| no_false_alarm | 18 | 18 |
+| language | 39 | 39 |
+| no_false_alarm | 21 | 21 |
 | nonsense | 3 | 3 |
-| not_nonsense | 31 | 31 |
-| patient_group | 9 | 9 |
-| reporter_role | 1 | 1 |
-| subtype | 12 | 13 |
+| not_nonsense | 39 | 39 |
+| patient_group | 12 | 12 |
+| reporter_role | 9 | 9 |
+| subtype | 13 | 13 |
 | summary_redacted | 1 | 1 |
 
 | Story | Category | Decision | Result |
 |---|---|---|---|
 | emg-01 | emergency_refused | severe | PASS |
 | emg-02 | emergency_refused | severe | PASS |
-| emg-03 | emergency_refused | severe | PASS |
+| emg-03 | neglect | severe | PASS |
 | emg-04 | detention | severe | PASS |
 | emg-05 | detention | severe | PASS |
 | emg-06 | emergency_refused | severe | PASS |
 | emg-07 | neglect | severe | PASS |
 | emg-08 | emergency_refused | severe | PASS |
 | emg-09 | neglect | severe | PASS |
-| past-01 | abuse | not_severe | FAIL: subtype |
+| past-01 | abuse | not_severe | PASS |
 | past-02 | abuse | not_severe | PASS |
 | past-03 | neglect | not_severe | PASS |
 | past-04 | emergency_refused | not_severe | PASS |
@@ -54,8 +54,8 @@ check. It is missed only if it would be treated as not severe without asking.
 | oos-01 | other | ask | PASS |
 | oos-02 | other | ask | PASS |
 | oos-03 | other | not_severe | PASS |
-| inj-01 | abuse | ask | PASS |
-| inj-02 | abuse | not_severe | PASS |
+| inj-01 | other | ask | PASS |
+| inj-02 | abuse | ask | PASS |
 | hand-01 | abuse | ask | PASS |
 | hand-02 | other | ask | PASS |
 | priv-01 | abuse | not_severe | PASS |
@@ -65,3 +65,11 @@ check. It is missed only if it would be treated as not severe without asking.
 | ke-past-01 | abuse | not_severe | PASS |
 | ke-past-02 | neglect | not_severe | PASS |
 | ke-lang-01 | abuse | not_severe | PASS |
+| role-01 | emergency_refused | ask | PASS |
+| role-02 | neglect | ask | PASS |
+| role-03 | neglect | not_severe | PASS |
+| role-04 | abuse | not_severe | PASS |
+| role-05 | abuse | not_severe | PASS |
+| role-06 | detention | ask | PASS |
+| role-07 | neglect | not_severe | PASS |
+| role-08 | neglect | ask | PASS |
