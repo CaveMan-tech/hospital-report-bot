@@ -42,6 +42,7 @@ Film this on a **real phone held in a hand**, not a desktop browser. Type in Pid
 | Bot asks one missing detail, then shows the right, the steps, the code. | "It asks at most three questions, only for what is missing. Then the person gets something useful immediately: the right that was violated and where it comes from, what they can do now, and a code. The code is the only link to their report. We never store it, only a scrambled version." |
 | **New chat.** Type the emergency story: relative bleeding, hospital demanding a deposit. | "Now the case that matters most." |
 | Escalation message appears instantly, with no danger question. Hold on it for 3 seconds. | "No questions. It goes straight to what to do, and what the law says. And it is honest: it says it cannot send help." |
+| Optional, 8 seconds: a nurse's message on screen, then the staff reply ("You do not have to confront anyone… do not use a work phone"). | "A patient can say they were asked for money. Only an insider can say it is policy. Staff can report safely too, and the bot adapts to who is writing." |
 
 _Recording note: the emergency message only shows its real text once you have verified it against
 the National Health Act and flipped its `verified` flag. Do that before filming. Do not film with
@@ -63,9 +64,9 @@ Fast cuts, one line each. Show code or a test name on screen for each claim.
 | Picture | Voice |
 |---|---|
 | `extract.py` prompt header. | "The AI has one job: read the story and fill in a structured record." |
-| `packs/ng-lagos/messages.json` showing a `verified` flag. | "It never writes a legal claim or a phone number. Those are pre-written, and the bot refuses to send any of them until a human has verified it." |
+| `packs/ng-lagos/messages.json` showing a `verified` flag. | "It writes nothing the person reads. Every message is pre-written, and the bot refuses to send a legal claim or a phone number until a human has verified it." |
 | `severity.py`. | "It never decides alone whether someone is in danger. Rules do, and when in doubt, it asks." |
-| Terminal: `pytest` going green, then `evals/RESULTS.llm.md` with the headline line. | "The privacy promises are tests, not promises. And I measured it: thirty hand-written stories, English and Pidgin. Missed emergencies: `[N]`." |
+| Terminal: `pytest` going green, then `evals/RESULTS.llm.md` with the headline line. | "The privacy promises are tests, not promises. And I measured it: forty-four hand-written stories, English and Pidgin, two countries. Missed emergencies: zero, three runs in a row." |
 
 ## 3:05 to 3:30 · Scale (scalability)
 
@@ -91,8 +92,9 @@ fake it._
 ## Before you record
 
 - [ ] Verify pack content and flip the `verified` flags, so the real messages show.
-- [ ] Run the evaluation with the real model and fill in `[N]`. If it is not zero, say the real
-      number and what you did about it. An honest number beats a suspicious one.
+- [ ] Re-run the evaluation the day you record (`uv run python -m evals.run`) and quote that
+      day's result. If it is not zero, say the real number and what you did about it. An honest
+      number beats a suspicious one.
 - [ ] Deploy, then film against the deployed link, so the URL on screen is the one judges will open.
 - [ ] Correct the Pidgin. Judges from the region will notice.
 - [ ] Reset the demo data so the count you watch go up is easy to spot.
