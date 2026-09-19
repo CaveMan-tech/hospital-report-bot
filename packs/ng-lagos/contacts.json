@@ -1,36 +1,85 @@
 [
   {
+    "id": "emergency",
+    "label": "Lagos emergency lines",
+    "text": "767 or 112 (Lagos State emergency lines, ambulance included)",
+    "applies_to": [
+      "A1"
+    ],
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Lagos State Ministry of Health contact page: 'Emergency Line: 767 / 112'. Then test-call both.",
+        "url": "https://lagosministryofhealth.org/contact/"
+      }
+    ],
+    "note": "Whether both are free on every network is reported but not confirmed, so the text does not say 'free'."
+  },
+  {
     "id": "legal_aid",
     "label": "Free legal help",
-    "text": "[contact pending verification]",
+    "text": "For free legal advice, call the Lagos State Public Defender, toll-free 0800-006-7352 or 0800-002-7352.",
     "applies_to": [
       "detention"
     ],
     "verified": false,
-    "verified_on": null,
-    "note": "VERIFY: Lagos Office of the Public Defender, Legal Aid Council, NHRC with numbers",
     "check_against": [
       {
-        "label": "Lagos Office of the Public Defender, Legal Aid Council, NHRC: official sites, then test-call",
-        "url": ""
+        "label": "Lagos State Public Defender contact page. Then test-call.",
+        "url": "https://opdlagosstate.org/contact.html"
+      },
+      {
+        "label": "Backup: Legal Aid Council of Nigeria, Lagos",
+        "url": "https://legalaidcouncil.gov.ng/contact-us/"
       }
-    ]
+    ],
+    "note": "The office now calls itself the Bureau of the Public Defender; 'OPD' is still widely used."
   },
   {
     "id": "dsva",
     "label": "Domestic and sexual violence support",
-    "text": "[contact pending verification]",
+    "text": "Lagos State Domestic and Sexual Violence Agency: call 0800 033 3333, free, any time, for anyone of any age or gender. You can report without giving your name.",
     "applies_to": [
       "handoff"
     ],
     "verified": false,
-    "verified_on": null,
-    "note": "VERIFY: Lagos DSVA line",
     "check_against": [
       {
-        "label": "Lagos State Domestic and Sexual Violence Agency: official site, then test-call",
-        "url": ""
+        "label": "Lagos DSVA FAQ and contact pages. Then test-call.",
+        "url": "https://lagosdsva.org/frequently-asked-questionsfaqs/"
+      }
+    ],
+    "note": "The old *6820# code no longer appears on the agency's site."
+  },
+  {
+    "id": "sarc",
+    "label": "Medical care after sexual assault",
+    "text": "Mirabel Centre at LASUTH, Ikeja gives free medical care and counselling after sexual assault: 0818 724 3468 or 0815 577 0000.",
+    "applies_to": [
+      "handoff"
+    ],
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Mirabel Centre contact page. Then test-call.",
+        "url": "https://mirabelcentre.org/contact-us/"
       }
     ]
+  },
+  {
+    "id": "crisis",
+    "label": "Suicide and crisis line",
+    "text": "SURPIN helpline: 0800 078 7746 (toll-free), or 0908 021 7555.",
+    "applies_to": [
+      "handoff"
+    ],
+    "verified": false,
+    "check_against": [
+      {
+        "label": "SURPIN site footer. Hours unconfirmed: MUST be test-called.",
+        "url": "https://www.surpinng.com/"
+      }
+    ],
+    "note": "24-hour claim unconfirmed. MUST be test-called before sign-off."
   }
 ]

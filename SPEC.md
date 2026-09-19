@@ -422,7 +422,7 @@ Cut from the build, shown on one deck slide as the partner's job: open letter, p
 
 ## 13. Deck must answer
 
-1. Why official channels fail (UCH Ibadan study figures `[VERIFY and cite]`) and why lone X call-outs depend on luck.
+1. Why official channels fail and why lone X call-outs depend on luck. Use only sourced figures: `docs/research/nigeria-pack.md` section G lists what is citable. The "54 complaints / a quarter aware / 83.7%" figures from early brainstorming have no source and must not be used.
 2. Prior art and the difference: I Paid A Bribe, Ushahidi, Care Opinion, Tracka, SERVICOM. Ours: health-specific, reporter gets immediate value, built for people with no audience, and designed as infrastructure for an organisation that already campaigns. Lesson taken from prior platforms: reporting decays when nobody on the other end acts, hence the deployment model. `[VERIFY claims about each before citing]`
 3. Anonymity vs credibility: what we do now (section 6 controls, "unverified" labelling, partner's editorial checks before anything is public) and what comes next.
 4. Why nothing is public, analysts see only redacted summaries, and the threshold is 5.

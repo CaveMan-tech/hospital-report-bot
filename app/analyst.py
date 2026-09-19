@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 import textwrap
 from collections import Counter
 from datetime import UTC, datetime, timedelta
@@ -269,8 +270,28 @@ def thread(pattern: dict, rs: list[Report], pack: Pack) -> list[str]:
         f"warrant investigation, not rates, and not a ranking. Groups under {THRESHOLD} are never shown. "
         f"{pack.meta.get('method_url', '')}".strip(),
     ]
+    posts = [part for p in posts for part in _split_post(p)]
     total = len(posts)
     return [f"{i}/{total} {p}" for i, p in enumerate(posts, 1)]
+
+
+POST_LIMIT = 280 - len("10/10 ")
+
+
+def _split_post(text: str) -> list[str]:
+    """Pack content changes; a thread must never silently overflow. Split on sentence ends,
+    then on words as a last resort."""
+    if len(text) <= POST_LIMIT:
+        return [text]
+    parts, current = [], ""
+    for sentence in re.split(r"(?<=[.;:?!])\s+", text):
+        for chunk in textwrap.wrap(sentence, POST_LIMIT) or [""]:
+            if current and len(current) + 1 + len(chunk) > POST_LIMIT:
+                parts.append(current)
+                current = chunk
+            else:
+                current = f"{current} {chunk}".strip()
+    return parts + ([current] if current else [])
 
 
 def intent_url(text: str) -> str:

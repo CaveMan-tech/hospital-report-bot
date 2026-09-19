@@ -1,49 +1,70 @@
 [
   {
     "category": "emergency_refused",
-    "ask_text": "Publish your emergency admission policy and confirm in writing that no patient is turned away or delayed for a deposit.",
-    "law_line": "Section 20 of the National Health Act 2014 forbids any provider from refusing emergency medical treatment for any reason.",
+    "ask_text": "Instruct Casualty and paypoint staff in writing that emergency patients are assessed and stabilised before any deposit, card or police report is requested, and display that instruction at the entrance.",
+    "law_line": "National Health Act 2014, section 20: a health care provider, health worker or health establishment shall not refuse a person emergency medical treatment for any reason.",
     "verified": false,
     "check_against": [
       {
-        "label": "National Health Act 2014, section 20(1) and (2): find the official gazette or NASS text",
-        "url": ""
+        "label": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156",
+        "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
+      },
+      {
+        "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
+        "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
       }
     ]
   },
   {
     "category": "detention",
-    "ask_text": "Publish your policy on unpaid bills and confirm in writing that no patient or body is held over a debt.",
-    "law_line": "Holding a person over a debt engages the constitutional right to personal liberty.",
+    "ask_text": "Stop holding discharged patients, mothers and babies over unpaid bills; refer every such case to the Social Welfare Unit within 24 hours and recover fees by legal means.",
+    "law_line": "The Patients' Bill of Rights says providers should use legal means to recover fees owed. Holding a person over a debt engages the right to personal liberty, Constitution 1999, section 35(1).",
     "verified": false,
     "check_against": [
       {
-        "label": "Constitution of Nigeria 1999, section 35 (personal liberty): get a lawyer's view on this line",
-        "url": ""
+        "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
+        "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
+      },
+      {
+        "label": "Constitution of Nigeria 1999, ss.34 and 35",
+        "url": "https://nigeriarights.gov.ng/files/constitution.pdf"
       }
-    ]
+    ],
+    "note": "'Engages' is defensible. Do not upgrade to 'is illegal': there is no statute or appellate case."
   },
   {
     "category": "abuse",
-    "ask_text": "Publish how patients can report staff conduct safely, and how many conduct complaints were received and acted on this year.",
-    "law_line": "The Patients' Bill of Rights guarantees treatment with respect and dignity.",
+    "ask_text": "Investigate reported verbal and physical abuse, including on the labour ward, tell complainants the outcome, and display the complaints procedure where every patient can see it.",
+    "law_line": "Constitution 1999, section 34(1)(a) (dignity); National Health Act 2014, section 30 (complaints must be investigated).",
     "verified": false,
     "check_against": [
       {
-        "label": "Patients' Bill of Rights (FCCPC / Federal Ministry of Health, 2018): official PDF",
-        "url": ""
+        "label": "Constitution of Nigeria 1999, ss.34 and 35",
+        "url": "https://nigeriarights.gov.ng/files/constitution.pdf"
+      },
+      {
+        "label": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156",
+        "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
+      },
+      {
+        "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
+        "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
       }
     ]
   },
   {
     "category": "neglect",
-    "ask_text": "Publish staffing levels per shift for the affected departments and the plan to cover nights and weekends.",
-    "law_line": "The Patients' Bill of Rights guarantees quality care and urgent attention when needed.",
+    "ask_text": "Publish and keep to duty rosters for nights and weekends, make sure staff wear visible name tags, and give every ward a working way to call for help.",
+    "law_line": "The Patients' Bill of Rights expects displayed rosters and visible identity tags; National Health Act 2014, section 19(1) (quality requirements and standards).",
     "verified": false,
     "check_against": [
       {
-        "label": "Patients' Bill of Rights (FCCPC / Federal Ministry of Health, 2018): official PDF",
-        "url": ""
+        "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
+        "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
+      },
+      {
+        "label": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156",
+        "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
       }
     ]
   }

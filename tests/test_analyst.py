@@ -117,9 +117,10 @@ def _all_patterns():
 def test_every_thread_post_fits_and_uses_only_numbers_from_the_pattern():
     for pack, pat, rs in _all_patterns():
         posts = A.thread(pat, rs, pack)
-        assert len(posts) == 5 and all(len(p) <= 280 for p in posts), [len(p) for p in posts]
+        assert 5 <= len(posts) <= 8 and all(len(p) <= 280 for p in posts), [len(p) for p in posts]
+        assert [p.split(" ")[0] for p in posts] == [f"{i}/{len(posts)}" for i in range(1, len(posts) + 1)]
         assert "unverified" in posts[0] and "SAMPLE DATA" in posts[0] and pack.meta["target"]["x_handle"] in posts[0]
-        assert "not rates" in posts[4] and pack.org_name in posts[4]
+        assert "not rates" in posts[-1] and pack.org_name in posts[-1]
         allowed = {str(v) for v in pat.values() if isinstance(v, int) and not isinstance(v, bool)}
         body = " ".join(posts[:2]).replace(pat["hospital"], "")   # "Level 5 Hospital" is a name, not a statistic
         numbers = set(re.findall(r"(?<![/\d])\b\d+\b(?!/)", body)) - {str(A.WINDOW_DAYS)}
@@ -228,3 +229,11 @@ def test_kenyan_held_reports_do_not_show_in_the_lagos_queue():
                                   "text": "A nurse insulted my wife last week at Some Unknown Kenyan Hospital maternity"})
         assert "Some Unknown Kenyan" not in c.get("/analyst/review", auth=AUTH).text
         assert "Some Unknown Kenyan" in c.get("/analyst/review?pack=ke-nairobi", auth=AUTH).text
+
+
+def test_long_posts_are_split_on_sentences_and_never_overflow():
+    long = "We ask for this. " + "A very long requirement that goes on and on " * 12 + "and ends. Then a short one."
+    parts = A._split_post(long)
+    assert len(parts) > 1 and all(len(p) <= A.POST_LIMIT for p in parts)
+    assert " ".join(parts).split() == long.split()                    # nothing lost, nothing added
+    assert A._split_post("Short.") == ["Short."]

@@ -20,9 +20,14 @@ Tracks: Safety, Reporting & Protection + Transparency & Accountability. Your nam
 Then: "Back to the same hospital."
 **Say:** official desks sit inside the institution being complained about; poor patients expect to
 be ignored, and mostly do not complain at all.
-**Evidence:** one hard number. `[VERIFY and cite before using: the UCH Ibadan study figures on
-recorded complaints and awareness of the Patients' Bill of Rights]`. If you cannot verify it, use a
-story you know first-hand instead. One true story beats one shaky statistic.
+**Evidence:** one hard number, with its source on the slide. A checked option: "In a 2020 survey at
+a teaching hospital in Ondo State, fewer than half of respondents (46.8%) knew the Patients' Bill of
+Rights existed, and only about one in five patients had good knowledge of it" (Adejumo et al., West
+Afr J Med 2020, PMID 33185254). Read the abstract yourself before using it.
+**Do not use** the figures from the early brainstorm ("54 complaints in three years", "a quarter
+aware", "83.7% never asserted their rights"): a literature search found no source for any of them,
+and the one real study at that hospital says nearly the opposite. A first-hand story is also fine
+here. One true story beats one shaky statistic.
 
 ## 3. What actually works · uniqueness
 **On the slide:** "What works is X. If you have followers. Or if someone has already died."
@@ -105,6 +110,11 @@ organisation in one hospital catchment, on WhatsApp with voice notes, (3) a thir
 
 ## Appendix slides (for questions, not for presenting)
 
+- **A0. Why aggregated counts, never a single viral story.** Two Nigerian cases where a viral
+  hospital allegation was disputed or a panel cleared the hospital (see
+  `docs/research/nigeria-pack.md`, section H3) show how one account can be wrong. It is the
+  strongest argument for this design: patterns, unverified-signal wording, and an organisation
+  that checks before it publishes. `[VERIFY the two cases before citing]`
 - **A. Prior art and the difference.** I Paid A Bribe, Ushahidi, Care Opinion, Tracka, SERVICOM.
   `[VERIFY each claim before citing]`. Difference: health-specific, help for the reporter first,
   built for people with no audience, designed as infrastructure for an organisation that already

@@ -44,6 +44,10 @@ writing tests and the evaluation runner; first drafts of message copy for the au
   to a list that did not exist. Both were fixed the same day.
 - **Following a feature to its dead end.** Reports with an unrecognised hospital were "held for
   review" but no screen showed them. The review found it; the queue and a decision log fixed it.
+- **Research that corrected us.** The sourced Nigeria research found that three statistics from
+  early brainstorming had no source at all (the one real study says nearly the opposite), that
+  two rights lines overstated the official text, and that a crisis line, not the sexual-violence
+  agency, is the right handoff for someone who wants to end their life. All corrected.
 - **Evaluation, not vibes.** A 30-story set with a single headline metric: missed emergencies.
 - **AI output that was rejected or corrected:** _[Ikechi to fill in: e.g. the first stack choice
   and the first database choice were both changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table

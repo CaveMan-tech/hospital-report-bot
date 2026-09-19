@@ -80,10 +80,18 @@ def test_a_bare_verified_flag_does_not_unlock_gated_content(tmp_path, monkeypatc
     path.write_text(json.dumps(data))
     assert "Section 20" not in P.Pack("ng-lagos").message("A1.emergency_refused")
 
-    data["A1.emergency_refused"].update(verified_by="A. Lawyer", verified_on="2026-09-20",
-                                        verified_source="National Health Act 2014 s.20, official gazette")
+    sign_off = {"verified": True, "verified_by": "A. Lawyer", "verified_on": "2026-09-20"}
+    data["A1.emergency_refused"].update(sign_off, verified_source="National Health Act 2014 s.20, official gazette")
     path.write_text(json.dumps(data))
-    assert "Section 20" in P.Pack("ng-lagos").message("A1.emergency_refused")
+    # Still blocked: the message embeds the emergency numbers, and those need their own sign-off.
+    assert "Section 20" not in P.Pack("ng-lagos").message("A1.emergency_refused")
+
+    cpath = tmp_path / "ng-lagos" / "contacts.json"
+    contacts = json.loads(cpath.read_text())
+    next(c for c in contacts if c["id"] == "emergency").update(sign_off, verified_source="Ministry page; test-called both")
+    cpath.write_text(json.dumps(contacts))
+    msg = P.Pack("ng-lagos").message("A1.emergency_refused")
+    assert "Section 20" in msg and "767 or 112" in msg
     assert "safe place" in P.Pack("ng-lagos").message("S0.greeting")      # plain copy needs no provenance
 
 

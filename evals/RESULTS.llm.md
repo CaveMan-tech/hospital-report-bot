@@ -1,6 +1,6 @@
 # Evaluation results
 
-- Run: 2026-09-19 11:31 UTC
+- Run: 2026-09-19 13:21 UTC
 - Extractor: `openai:gpt-5-mini`, extraction version `2026-09-19.1`, reasoning effort `minimal`
 - Stories: 44 hand-written (English and Pidgin; Nigeria and Kenya packs)
 
@@ -23,7 +23,7 @@ check. It is missed only if it would be treated as not severe without asking.
 | nonsense | 3 | 3 |
 | not_nonsense | 39 | 39 |
 | patient_group | 12 | 12 |
-| reporter_role | 9 | 9 |
+| reporter_role | 8 | 9 |
 | subtype | 13 | 13 |
 | summary_redacted | 1 | 1 |
 
@@ -55,7 +55,7 @@ check. It is missed only if it would be treated as not severe without asking.
 | oos-02 | other | ask | PASS |
 | oos-03 | other | not_severe | PASS |
 | inj-01 | other | ask | PASS |
-| inj-02 | abuse | ask | PASS |
+| inj-02 | abuse | not_severe | PASS |
 | hand-01 | abuse | ask | PASS |
 | hand-02 | other | ask | PASS |
 | priv-01 | abuse | not_severe | PASS |
@@ -67,8 +67,8 @@ check. It is missed only if it would be treated as not severe without asking.
 | ke-lang-01 | abuse | not_severe | PASS |
 | role-01 | emergency_refused | ask | PASS |
 | role-02 | neglect | ask | PASS |
-| role-03 | neglect | not_severe | PASS |
-| role-04 | abuse | not_severe | PASS |
+| role-03 | abuse | not_severe | PASS |
+| role-04 | abuse | not_severe | FAIL: reporter_role |
 | role-05 | abuse | not_severe | PASS |
 | role-06 | detention | ask | PASS |
 | role-07 | neglect | not_severe | PASS |

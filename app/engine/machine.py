@@ -174,7 +174,10 @@ class Engine:
         if ex.safety_handoff != "none":
             # Out of scope for patterns. Hand off, store nothing. Checked before "nonsense"
             # so that a short message like "I wan die" is never met with a retry prompt.
-            return self._end(s, ["E.handoff"])
+            # Someone who wants to end their life needs a crisis line, not the sexual-violence
+            # service, and the other way round. Packs may provide a message per kind.
+            specific = f"E.handoff.{ex.safety_handoff}"
+            return self._end(s, [specific if specific in pack.messages else "E.handoff"])
 
         if ex.is_nonsense:
             if ctx.get("retried"):
@@ -216,15 +219,17 @@ class Engine:
     async def _severe(self, s: Session, ex: Extraction, ack: str = ""):
         s.context["severity"] = "severe"
         s.context["escalation_shown"] = True
-        replies = [ack, self._escalation(s, ex.category)]
+        replies = [ack, self._escalation(s, ex.category, ex.subtype)]
         if not ex.hospital_name_raw:
             s.state = "A2"
             return replies + [self._msg("Q.hospital", s)], None
         more, code = await self._finalise(s, ex)
         return replies + more, code
 
-    def _escalation(self, s: Session, category: str) -> str:
+    def _escalation(self, s: Session, category: str, subtype: str = "") -> str:
         key = f"A1.{category}" if category in ("emergency_refused", "detention") else "A1.generic"
+        if category == "detention" and subtype == "body_held":
+            key = "A1.detention_body"  # a bereaved family needs different words, and no talk of "discharge"
         return self._msg(key, s)
 
     async def _on_severe_hospital(self, s: Session, text: str):
@@ -441,7 +446,7 @@ class Engine:
             report.escalation_shown = True
             await self.store.save_report(report)
         s.state = "DONE"
-        return [self._escalation(s, category)], None
+        return [self._escalation(s, category, report.subtype if report else "")], None
 
     async def lookup(self, ref_code: str, lang: str = "en") -> str:
         report = await self._report_for(ref_code)

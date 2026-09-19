@@ -58,23 +58,6 @@
     ]
   },
   {
-    "id": "safety",
-    "label": "Urgent support",
-    "text": "the national gender-based violence helpline 1195 (free, 24 hours), the child helpline 116 (free), or Kenya Red Cross counselling on 1199 (free).",
-    "applies_to": [
-      "handoff"
-    ],
-    "verified": false,
-    "verified_on": null,
-    "note": "Medium confidence. Test-call each.",
-    "check_against": [
-      {
-        "label": "Research notes with confidence labels",
-        "url": "docs/research/kenya-pack.md"
-      }
-    ]
-  },
-  {
     "id": "oversight",
     "label": "If a complaint is not resolved",
     "text": "Kenya Health Professions Oversight Authority, 0742 157 424, info@khpoa.go.ke",
@@ -89,5 +72,39 @@
         "url": "https://khpoa.go.ke/contact-us/"
       }
     ]
+  },
+  {
+    "id": "gbv",
+    "label": "Gender-based and sexual violence support",
+    "text": "the national gender-based violence helpline 1195 (free, 24 hours). For a child, the child helpline 116 (free).",
+    "applies_to": [
+      "handoff"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ],
+    "note": "Medium confidence. Test-call both."
+  },
+  {
+    "id": "crisis",
+    "label": "Someone to talk to now",
+    "text": "Kenya Red Cross counselling on 1199 (free), or Befrienders Kenya on 0722 178 177 (daytime).",
+    "applies_to": [
+      "handoff"
+    ],
+    "verified": false,
+    "verified_on": null,
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ],
+    "note": "Befrienders hours low confidence. Test-call."
   }
 ]

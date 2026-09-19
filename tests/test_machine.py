@@ -384,3 +384,45 @@ async def test_every_held_report_says_why(engine, store):
     reasons = sorted(r.extra.get("review_reason", "") for r in store.reports.values())
     assert reasons == ["", "possible_duplicate", "unknown_hospital"]
     assert all((r.credibility == "review") == bool(r.extra.get("review_reason")) for r in store.reports.values())
+
+
+# ---------------------------------------------------------------- the right help for the situation
+
+async def test_each_kind_of_handoff_gets_the_right_service(store):
+    from app.engine.models import Extraction
+
+    def saying(kind):
+        async def fn(transcript, context=""):
+            return Extraction(category="other", safety_handoff=kind)
+        return fn
+
+    pack = Pack("ng-lagos", allow_unverified=True)
+    out = {}
+    for kind in ("self_harm", "sexual_violence", "other_violence"):
+        r = await Engine(store, saying(kind), pack, "s").handle_message(None, "web", "something long enough to be a story")
+        out[kind] = r.replies[0]
+        assert r.done and "trained to help" in r.replies[0] and "not shared anything" in r.replies[0]
+    assert "SURPIN" in out["self_harm"] and "Sexual Violence Agency" not in out["self_harm"]
+    assert "Sexual Violence Agency" in out["sexual_violence"] and "Mirabel" in out["sexual_violence"]
+    assert "SURPIN" not in out["sexual_violence"]
+    assert store.reports == {}
+
+
+async def test_a_bereaved_family_gets_different_words(store):
+    from app.engine.models import Extraction
+
+    async def body(transcript, context=""):
+        return Extraction(category="detention", subtype="body_held", is_ongoing=True, category_confidence=0.9,
+                          hospital_name_raw="Palm Grove Teaching Hospital", harm_outcome="death")
+
+    r = await Engine(store, body, Pack("ng-lagos", allow_unverified=True), "s").handle_message(
+        None, "web", "My father died and they will not release his body until we pay")
+    text = "\n".join(r.replies)
+    assert "sorry for your loss" in text and "mortuary charges" in text and "discharge" not in text
+
+
+def test_emergency_message_no_longer_asserts_a_legal_conclusion_or_free_care():
+    msg = Pack("ng-lagos", allow_unverified=True).message("A1.emergency_refused")
+    assert "against the law" not in msg and "does not say the treatment is free" in msg
+    assert "must not refuse a person emergency medical treatment for any reason" in msg
+    assert "767 or 112" in msg and "N100,000" not in msg and "imprison" not in msg

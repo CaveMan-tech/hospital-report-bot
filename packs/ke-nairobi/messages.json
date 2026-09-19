@@ -165,9 +165,8 @@
   },
   "E.handoff": {
     "verified": false,
-    "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. Please contact: {contact:safety}",
-    "note": "VERIFY: helpline numbers by test call.",
     "gated": true,
+    "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. I have not shared anything you told me.\n\nPlease contact {contact:gbv}\n\nIf anyone is in immediate danger, call {contact:emergency}.",
     "check_against": [
       {
         "label": "Research notes with confidence labels",
@@ -210,5 +209,40 @@
   "E.unavailable": {
     "verified": true,
     "en": "Something went wrong on our side and I could not record that. Please try again in a moment. If anyone is in danger, do not wait for me: get to the nearest other hospital or emergency service now."
+  },
+  "A1.detention_body": {
+    "verified": false,
+    "gated": true,
+    "en": "We are sorry for your loss. Kenyan High Court judges have ruled that a hospital has no legal right to hold a body to force payment of a bill. The bill is still a debt.\n\nWhat you can do:\n1. Ask to see the hospital's medical social worker about a waiver or a payment plan, and offer a written undertaking to pay in instalments.\n2. Ask for the itemised bill in writing, including mortuary charges, and note the date the body was first held.\n3. For free help: {contact:ombudsman}. For free legal advice: {contact:legal_aid}\n\nI cannot send anyone to you. I will record this so it is counted.",
+    "check_against": [
+      {
+        "label": "High Court decisions on detention of bodies: see research section B",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ],
+    "note": "Courts often order release on payment of mortuary charges or on an undertaking. Needs a Kenyan lawyer."
+  },
+  "E.handoff.sexual_violence": {
+    "verified": false,
+    "gated": true,
+    "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. I have not shared anything you told me.\n\nPlease contact {contact:gbv}",
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
+  },
+  "E.handoff.self_harm": {
+    "verified": false,
+    "gated": true,
+    "en": "I am so sorry you are carrying this. You deserve a person to talk to, and people who are trained to help right away. I have not shared anything you told me.\n\nPlease contact {contact:crisis}\n\nIf you are in immediate danger, call {contact:emergency}.",
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ],
+    "note": "Befrienders Kenya hours are low confidence. Test-call."
   }
 }
