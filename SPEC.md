@@ -28,7 +28,7 @@ Judging criteria (25% each): uniqueness, scalability across geographies, AI codi
 5. **No clinical judgement.** Rights and conduct only.
 6. **No identity collected.** No name, phone, or login. A reference code is the only link.
 7. **Honest about limits.** The bot cannot send help, reports are unverified, and the story is processed by a third-party AI provider. It says all three.
-8. **Reply in the user's language** (English, Pidgin in PoC; Yoruba, Hausa, Igbo, voice notes on roadmap).
+8. **Reply in the user's language** (English, Pidgin in PoC; Yoruba, Hausa, Igbo on roadmap). **Voice notes** (`VOICE_ENABLED`, off by default): a microphone button records up to a minute, the audio is transcribed and discarded (never written to disk, database or log), and the text lands in the message box for the person to check and edit. It is never sent automatically. The first use shows a plain notice that the recording goes to an AI service. The recorder script loads only when voice is on, so the base page stays small.
 9. **The tool publishes nothing itself.** No public counts, no public page. Patterns go to the partner organisation's analysts, and a human there decides what is used.
 10. **Patterns are signals, not rates.** Wording in every brief is always "N unverified reports, warrants investigation". No percentages, no hospital rankings, no staff names.
 11. **Frame patterns as system failure, not staff villainy.** Deposit demands often reflect unfunded emergency care. The ask targets policy and management.

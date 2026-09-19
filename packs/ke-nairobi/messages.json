@@ -244,5 +244,9 @@
       }
     ],
     "note": "Befrienders Kenya hours are low confidence. Test-call."
+  },
+  "S0.voice": {
+    "verified": true,
+    "en": "Your recording is sent to an AI service to be turned into text, then deleted. We never keep your voice. Check the words in the box, fix anything that is wrong, then press Send."
   }
 }

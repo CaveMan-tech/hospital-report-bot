@@ -23,5 +23,6 @@
     "name": "Harbour State Health Service Commission (fictional)",
     "x_handle": "@HarbourStateHSC_demo"
   },
-  "method_url": "https://example.org/method"
+  "method_url": "https://example.org/method",
+  "transcription_hint": "Nigerian English and Nigerian Pidgin. A person describing what happened at a government hospital in Lagos. Words that may occur: dey, dem, wetin, abeg, una, pikin, wahala, no gree, sharp sharp, comot, oga, nurse, matron, doctor, casualty, emergency, maternity, ward, deposit, card, folder, general hospital, LASUTH, LUTH."
 }

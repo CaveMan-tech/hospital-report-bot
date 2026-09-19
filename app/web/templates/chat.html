@@ -14,6 +14,7 @@
 </header>
 <main id="log" aria-live="polite"></main>
 <form id="form" autocomplete="off">
+  {% if voice %}<button type="button" id="mic" aria-label="Record a voice note" aria-pressed="false">🎤</button>{% endif %}
   <textarea id="text" rows="2" placeholder="Tell me what happened…" aria-label="Your message" required></textarea>
   <button type="submit">Send</button>
 </form>
@@ -25,5 +26,7 @@
 </footer>
 <script>window.PACK = {{ pack.id|tojson }}; window.OFFLINE = {{ pack.message("E.unavailable")|tojson }};</script>
 <script src="/static/chat.js?v={{ asset_v }}" defer></script>
+{% if voice %}<script>window.VOICE_NOTE = {{ pack.message("S0.voice")|tojson }};</script>
+<script src="/static/voice.js?v={{ asset_v }}" defer></script>{% endif %}
 </body>
 </html>

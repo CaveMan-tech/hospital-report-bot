@@ -20,5 +20,6 @@
     "name": "Acacia County Department of Health (fictional)",
     "x_handle": "@AcaciaCountyHealth_demo"
   },
-  "method_url": "https://example.org/method"
+  "method_url": "https://example.org/method",
+  "transcription_hint": "Kenyan English. A person describing what happened at a public hospital in Nairobi. Words that may occur: casualty, maternity, ward, cash deposit, waiver, mortuary, county referral hospital, sub-county hospital, Level 5, SHA, boda boda, matatu, shillings, bob."
 }

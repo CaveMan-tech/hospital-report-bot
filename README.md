@@ -55,6 +55,9 @@ With `EXTRACT_MODE=mock` and `STORE=memory` (the defaults) it runs with no API k
 Set `EXTRACT_MODE=llm` and `OPENAI_API_KEY` for real extraction, and `STORE=postgres` with a
 `DATABASE_URL` for persistence. The schema in `db/schema.sql` is applied automatically at startup.
 
+`VOICE_ENABLED=true` adds a microphone button: speech is transcribed, shown in the message box to
+check, and the audio is discarded. Browsers only allow the microphone on HTTPS or `localhost`.
+
 `ALLOW_UNVERIFIED=true` is for local development only: it lets you see messages that have not yet
 been checked against primary sources. Leave it off anywhere real people could reach.
 

@@ -330,5 +330,10 @@
       }
     ],
     "note": "SURPIN's hours are unconfirmed. Do not sign this off without a test call."
+  },
+  "S0.voice": {
+    "verified": true,
+    "en": "Your recording is sent to an AI service to be turned into text, then deleted. We never keep your voice. Check the words in the box, fix anything that is wrong, then press Send.",
+    "pcm": "We go send your recording give AI make e turn am to words, then we delete am. We no dey keep your voice. Check the words for the box, correct anything wey no correct, then press Send."
   }
 }

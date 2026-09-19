@@ -25,6 +25,7 @@ from app.engine.packs import get_pack
 from app.ratelimit import DailyDedupe, RateLimiter
 from app.seed import seed
 from app.store.memory import MemoryStore
+from app.voice import MAX_BYTES, make_openai_transcriber
 
 logging.basicConfig(level=logging.INFO)
 WEB = Path(__file__).parent / "web"
@@ -73,6 +74,8 @@ async def lifespan(app: FastAPI):
     if fatal:
         raise RuntimeError("Refusing to start: " + "; ".join(fatal))
     app.state.engine = await build_engine()
+    app.state.transcriber = (make_openai_transcriber(cfg.openai_api_key, cfg.openai_transcribe_model)
+                             if cfg.voice_enabled and cfg.openai_api_key else None)
     if get_settings().demo_mode:
         n = await seed(app.state.engine.store, list(app.state.engine.packs.values()))
         logging.getLogger(__name__).info("Seeded %s sample reports", n)
@@ -144,7 +147,8 @@ class CodeIn(BaseModel):
 async def chat_page(request: Request, pack: str | None = None, engine: Engine = Depends(engine_of)):
     current = engine.pack_for(pack)
     return templates.TemplateResponse(request, "chat.html", {
-        "pack": current, "packs": list(engine.packs.values()), "demo_mode": get_settings().demo_mode})
+        "pack": current, "packs": list(engine.packs.values()), "demo_mode": get_settings().demo_mode,
+        "voice": getattr(request.app.state, "transcriber", None) is not None})
 
 
 @app.post("/api/chat", response_model=EngineReply)
@@ -160,6 +164,42 @@ async def chat(body: ChatIn, request: Request, engine: Engine = Depends(engine_o
         # in danger, in words from the pack, never a bare "Internal Server Error".
         logging.getLogger(__name__).exception("chat failed")
         raise HTTPException(503, engine.pack_for(body.pack).message("E.unavailable")) from None
+
+
+voice_limiter = RateLimiter(limit=12, window_seconds=600)
+
+
+@app.post("/api/transcribe")
+async def transcribe(request: Request, pack: str | None = None, engine: Engine = Depends(engine_of)):
+    """Speech to text for people who would rather talk than type. Returns the words to the
+    reporter's own screen; nothing is sent to the bot until they press Send."""
+    transcriber = getattr(request.app.state, "transcriber", None)
+    if transcriber is None:
+        raise HTTPException(404, "Voice notes are not switched on.")
+    if not voice_limiter.allow(client_ip(request)):
+        raise HTTPException(429, "Too many recordings. Please wait a few minutes, or type instead.")
+    mime = request.headers.get("content-type", "audio/webm")
+    if not mime.startswith("audio/"):
+        raise HTTPException(415, "Send the recording as audio.")
+    audio = await request.body()
+    if not audio:
+        raise HTTPException(400, "The recording was empty. Please try again.")
+    if len(audio) > MAX_BYTES:
+        raise HTTPException(413, "That recording is too long. Please keep it under a minute, or type instead.")
+    current = engine.pack_for(pack)
+    try:
+        # The hint is vocabulary only: local words plus this pack's hospital names, so that
+        # "Harmattan General" does not come back as "Harmadan General".
+        hint = current.meta.get("transcription_hint", "") + " Hospitals: " + ", ".join(h.name for h in current.hospitals) + "."
+        text = await transcriber(audio, mime, hint)
+    except Exception as e:  # noqa: BLE001 - never leave the reporter with a stack trace
+        logging.getLogger(__name__).error("Transcription failed (%s)", type(e).__name__)
+        raise HTTPException(503, "I could not turn that into text. Please try again, or type instead.") from None
+    finally:
+        del audio  # held in memory for this request only; never written anywhere
+    if not text:
+        raise HTTPException(422, "I could not hear any words. Please try again, or type instead.")
+    return {"text": text[:4000]}
 
 
 class ForgetIn(BaseModel):

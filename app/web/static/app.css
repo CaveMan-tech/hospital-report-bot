@@ -21,6 +21,9 @@ form{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line)}
 textarea{flex:1;resize:none;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bot);color:var(--fg);font:inherit}
 button{font:inherit;border:0;border-radius:10px;padding:0 16px;background:var(--me);color:var(--me-fg);min-height:44px}
 button:disabled{opacity:.5}
+#mic{padding:0;min-width:48px;font-size:1.3rem;background:var(--bot);border:2px solid var(--me)}
+#mic[aria-pressed=true]{background:var(--warn);border-color:var(--warn);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55}}
 footer{display:flex;flex-wrap:wrap;gap:4px 16px;padding:0 16px 12px}
 a.link{display:inline-flex;align-items:center}
 .link{background:none;color:var(--mut);padding:0;min-height:32px;text-decoration:underline;font-size:.85rem}
