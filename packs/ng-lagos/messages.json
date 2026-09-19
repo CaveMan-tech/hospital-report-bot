@@ -178,5 +178,15 @@
     "verified": true,
     "en": "Your report about {category_plain} at {hospital} is on record. Status: {status}.",
     "pcm": "Your report about {category_plain} for {hospital} dey our record. Status: {status}."
+  },
+  "S1.ack": {
+    "verified": true,
+    "en": "I am sorry this happened. Thank you for telling me.",
+    "pcm": "Sorry say this happen. Thank you say you tell me."
+  },
+  "B3.staff": {
+    "verified": true,
+    "en": "Thank you. It takes courage to speak up from the inside.\n\nTo keep yourself safe:\n1. You do not have to confront anyone or report this inside the hospital. Reporting here already counts.\n2. If you keep notes, keep dates, shifts and what staff were told to do. Do not copy patient records or take photos of patients.\n3. Do not use a work phone, work computer or hospital Wi-Fi to contact us.",
+    "pcm": null
   }
 }

@@ -223,3 +223,30 @@ def test_pidgin_detected_by_markers_only_where_the_pack_supports_it():
     assert apply_safety_net(Extraction(language="en"), text, ["en"]).language == "en"
     english = "They have held my brother at the hospital for three days and will not let him leave."
     assert apply_safety_net(Extraction(language="en"), english, ["en", "pcm"]).language == "en"
+
+
+async def test_staff_whistleblower_flow(store):
+    from app.engine.models import Extraction
+
+    async def staff(transcript, context=""):
+        return Extraction(category="emergency_refused", category_confidence=0.9, subtype="deposit_demanded",
+                          reporter_role="staff", is_ongoing=True, critical_condition=True, severity="severe",
+                          hospital_name_raw="Iroko District Hospital", department="emergency",
+                          incident_timing="ongoing", time_bucket="night", summary_redacted="Staff report.",
+                          ack="MODEL TEXT THAT MUST NEVER BE SHOWN")
+
+    engine = Engine(store, staff, Pack("ng-lagos", allow_unverified=True), "s")
+    r = await engine.handle_message(None, "web", "I am a nurse, management tells us to collect deposits every night")
+    assert r.state == "S2" and "danger right now" in r.replies[0]
+    assert "MODEL TEXT" not in " ".join(r.replies) and r.replies[0].startswith("I am sorry this happened")
+    r = await engine.handle_message(r.session_id, "web", "no, I am at home")
+    text = "\n".join(r.replies)
+    assert "Section 20" not in text and "112" not in text            # no emergency steps for someone at home
+    assert "courage to speak up" in text and "work phone" in text    # staff wording
+    assert "What happened to you" not in text and "receipts" not in text
+    report = next(iter(store.reports.values()))
+    assert report.reporter_role == "staff" and report.severity == "not_severe" and report.rights_shown == []
+
+    r = await engine.handle_message(None, "web", "I am a nurse, a patient is dying in casualty now and they want deposit")
+    r = await engine.handle_message(r.session_id, "web", "yes")
+    assert "Section 20" in "\n".join(r.replies)                     # staff who say YES get the escalation

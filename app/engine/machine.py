@@ -139,12 +139,14 @@ class Engine:
 
         ctx["extraction"] = ex.model_dump()
         decision = decide(ex)
+        # The acknowledgement is pre-written, like everything else a reporter reads.
+        ack = self._msg("S1.ack", s)
         if decision == "severe":
-            return await self._severe(s, ex, ack=ex.ack)
+            return await self._severe(s, ex, ack=ack)
         if decision == "ask":
             s.state = "S2"
-            return [self._msg("S2.danger_check", s, ack=ex.ack)], None
-        return await self._non_severe(s, ex, lead=[ex.ack])
+            return [self._msg("S2.danger_check", s, ack=ack)], None
+        return await self._non_severe(s, ex, lead=[ack])
 
     # ----------------------------------------------------- S2: danger check
 
@@ -197,10 +199,15 @@ class Engine:
             s.state = "B1"
             return replies + [question], None
 
-        rights = self.pack_for(s.pack).rights_for(ex.category, s.context["lang"])
-        s.context["rights_shown"] = [rid for rid, _ in rights]
-        replies += [text for _, text in rights]
-        help_key = f"B3.{ex.category}" if ex.category in ("abuse", "neglect") else "B3.other"
+        if ex.reporter_role == "staff":
+            # Rights and self-help text is written for patients. A member of staff reporting
+            # a practice gets wording for them, and nothing that nudges them to expose themselves.
+            help_key = "B3.staff"
+        else:
+            rights = self.pack_for(s.pack).rights_for(ex.category, s.context["lang"])
+            s.context["rights_shown"] = [rid for rid, _ in rights]
+            replies += [text for _, text in rights]
+            help_key = f"B3.{ex.category}" if ex.category in ("abuse", "neglect") else "B3.other"
         replies.append(self._msg(help_key, s))
         more, code = await self._finalise(s, ex)
         return replies + more, code

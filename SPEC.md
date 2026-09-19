@@ -24,7 +24,7 @@ Judging criteria (25% each): uniqueness, scalability across geographies, AI codi
 1. **Assume the user is angry, tired, stressed, or all three.** Acknowledge first. One free-text story. Never a form.
 2. **Maximum three follow-up questions.** The AI extracts the rest.
 3. **Safety check before anything else.**
-4. **The AI never writes legal claims, phone numbers, or statistics.** It classifies and extracts; the system sends pre-written verified text and template-filled numbers.
+4. **The AI writes nothing a reporter reads.** It classifies and extracts. Every message, including the acknowledgement, is pre-written in the pack; legal claims and phone numbers additionally need a human `verified` flag; numbers in briefs are template-filled. Deterministic nets run on top of the model for handoff phrases, Pidgin detection and scrubbing identifiers from summaries.
 5. **No clinical judgement.** Rights and conduct only.
 6. **No identity collected.** No name, phone, or login. A reference code is the only link.
 7. **Honest about limits.** The bot cannot send help, reports are unverified, and the story is processed by a third-party AI provider. It says all three.
@@ -97,7 +97,7 @@ F  FOLLOW-UP (next day, opt-in only)
 
 ## 4. Bot messages
 
-`{braces}` are system-filled. The only AI-written text is `{ack}`: max 20 words, no advice, no legal content, no promises.
+`{braces}` are system-filled. `{ack}` is the pre-written `S1.ack` message. No AI-written text is shown to a reporter.
 
 ### S0 Greeting
 
@@ -238,7 +238,7 @@ Follow-up data is only ever reported as "of the N people who answered a follow-u
 | Sexual assault, violence, user in crisis | Out of scope for patterns. Hand off immediately `[VERIFY: Lagos DSVA line etc.]`. Skip normal flow. |
 | User names a staff member | Accept, strip from stored summary, tell user names are never published. |
 | Private hospital | Store with `facility_type`. Excluded from patterns in PoC. |
-| Reporter is hospital staff | Store `reporter_role = staff`. Whistleblower features on roadmap. |
+| Reporter is hospital staff | Store `reporter_role = staff`. Always ask the danger question rather than assume (a staff member describing a practice is not necessarily beside a patient in danger). If not in danger, skip the patient-oriented rights and self-help text and send `B3.staff`: no need to confront anyone, note dates and instructions but never copy patient records, do not use work devices or hospital Wi-Fi. Counts as one report like any other. Dedicated whistleblower channel on roadmap. |
 | Nonsense or abusive input | One polite retry, then end session. Nothing stored. |
 | Prompt injection in story ("ignore your instructions...") | Extraction prompt treats the story as data only. Output is schema-validated; invalid JSON or out-of-enum values fall back to `other` + danger check. |
 
@@ -271,7 +271,6 @@ One LLM call after the story, and again after each answer with running context. 
   "safety_handoff": "none | sexual_violence | self_harm | other_violence",
   "implausible": false,
   "summary_redacted": "One or two neutral sentences. No names, ages, phone numbers, bed numbers, or exact dates.",
-  "ack": "Max 20 words, no advice, no legal content, no promises.",
   "missing_fields": ["hospital", "department", "when"]
 }
 ```

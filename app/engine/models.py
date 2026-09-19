@@ -74,7 +74,7 @@ class Extraction(BaseModel):
     implausible: bool = False
     is_nonsense: bool = False
     summary_redacted: str = ""
-    ack: str = ""
+    ack: str = ""  # unused: acknowledgements are pre-written in the pack. Kept so old payloads validate.
     missing_fields: list[MissingField] = Field(default_factory=list)
 
 

@@ -47,5 +47,6 @@ def test_staff_whistleblower_is_asked_not_assumed():
     assert decide(e) == "ask"
     assert decide(e, danger_answer=True) == "severe"
     assert decide(e, danger_answer=False) == "not_severe"   # they said nobody is in danger: believe them
+    # "people have died waiting" trips the critical flag; staff are still asked, not assumed
     assert decide(ex(category="emergency_refused", is_ongoing=True, reporter_role="staff",
-                     critical_condition=True)) == "severe"
+                     critical_condition=True)) == "ask"
