@@ -1,10 +1,14 @@
 (() => {
   const log = document.getElementById('log'), form = document.getElementById('form');
   const box = document.getElementById('text'), btn = form.querySelector('button');
-  let sid = null;
-  try { sid = sessionStorage.getItem('sid'); } catch (e) {}
+  // sessionStorage only: it never leaves this device and is wiped when the tab closes.
+  const S = {
+    get(k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } },
+    set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+  let sid = S.get('sid'), hist = S.get('hist') || [];
 
-  function add(text, cls) {
+  function draw(text, cls) {
     const d = document.createElement('div');
     d.className = 'm ' + cls;
     d.textContent = text;
@@ -13,7 +17,28 @@
     log.appendChild(d);
     d.scrollIntoView({ block: 'end' });
   }
-  function setSid(v) { sid = v; try { v ? sessionStorage.setItem('sid', v) : sessionStorage.removeItem('sid'); } catch (e) {} }
+  function add(text, cls) { draw(text, cls); hist.push([text, cls]); S.set('hist', hist); }
+  function setSid(v) { sid = v; S.set('sid', v); }
+  function drop(id) { const e = document.getElementById(id); if (e) e.remove(); }
+
+  function buttons(id, options, onPick) {
+    drop(id);
+    if (!options || !options.length) return;
+    const row = document.createElement('div');
+    row.id = id; row.className = 'quick';
+    options.forEach(o => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = o.label;
+      b.onclick = () => onPick(o);
+      row.appendChild(b);
+    });
+    log.appendChild(row);
+    row.scrollIntoView({ block: 'end' });
+  }
+  function quick(options) {
+    S.set('quick', options && options.length ? options : null);
+    buttons('quick', options, o => { add(o.label, 'me'); send(o.value); });
+  }
 
   async function post(url, body) {
     let r;
@@ -23,31 +48,27 @@
     if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : window.OFFLINE);
     return data;
   }
-  function clearQuick() { const q = document.getElementById('quick'); if (q) q.remove(); }
-  function quick(options) {
-    if (!options || !options.length) return;
-    const row = document.createElement('div');
-    row.id = 'quick'; row.className = 'quick';
-    options.forEach(o => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.textContent = o.label;
-      b.onclick = () => { add(o.label, 'me'); send(o.value); };
-      row.appendChild(b);
-    });
-    log.appendChild(row);
-    row.scrollIntoView({ block: 'end' });
-  }
   function show(data) {
     setSid(data.done ? null : data.session_id);
     data.replies.forEach((t, i) => setTimeout(() => add(t, 'bot'), i * 250));
     setTimeout(() => quick(data.quick_replies), data.replies.length * 250);
   }
   async function send(text) {
-    clearQuick();
+    quick(null); drop('retry'); drop('err');
     btn.disabled = true;
     try { show(await post('/api/chat', { session_id: sid, channel: 'web', pack: window.PACK, text })); }
-    catch (e) { add(e.message, 'sys err'); }
+    catch (e) {
+      // The message is not lost: one tap sends it again when the network is back.
+      const d = document.createElement('div'); d.id = 'err'; d.className = 'm sys err'; d.textContent = e.message;
+      log.appendChild(d);
+      buttons('retry', [{ label: 'Try again' }], () => send(text));
+    }
     finally { btn.disabled = false; box.focus(); }
+  }
+  function forget() {
+    if (sid && navigator.sendBeacon) navigator.sendBeacon('/api/chat/forget',
+      new Blob([JSON.stringify({ session_id: sid })], { type: 'application/json' }));
+    hist = []; setSid(null); S.set('hist', null); S.set('quick', null);
   }
 
   form.addEventListener('submit', e => {
@@ -58,17 +79,24 @@
   });
   box.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
 
-  document.getElementById('new').onclick = () => { setSid(null); log.innerHTML = ''; send(''); };
+  document.getElementById('new').onclick = () => { forget(); log.innerHTML = ''; send(''); };
+  // Quick exit: wipe this device, delete the unfinished story on the server, and leave without
+  // a trace in the back button. For when someone walks up behind you.
+  document.getElementById('exit').onclick = () => { forget(); log.innerHTML = ''; location.replace('https://www.google.com'); };
   document.getElementById('check').onclick = async () => {
     const code = prompt('Enter your code'); if (!code) return;
-    try { add((await post('/api/report/lookup', { ref_code: code })).message, 'bot'); } catch (e) { add(e.message, 'sys err'); }
+    try { draw((await post('/api/report/lookup', { ref_code: code })).message, 'bot'); } catch (e) { draw(e.message, 'sys err'); }
   };
   const nd = document.getElementById('nextday');
   if (nd) nd.onclick = async () => {
     const code = prompt('Demo: enter a report code to simulate the next-day check-in'); if (!code) return;
-    add('— one day later —', 'sys');
-    try { show(await post('/api/demo/next-day', { ref_code: code })); } catch (e) { add(e.message, 'sys err'); }
+    draw('— one day later —', 'sys');
+    try { show(await post('/api/demo/next-day', { ref_code: code })); } catch (e) { draw(e.message, 'sys err'); }
   };
 
-  setSid(null); send('');
+  if (sid && hist.length) {   // the page was reloaded mid-report: carry on where they were
+    hist.forEach(([t, c]) => draw(t, c));
+    draw('— continuing your report —', 'sys');
+    quick(S.get('quick'));
+  } else { forget(); send(''); }
 })();

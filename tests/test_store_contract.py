@@ -11,7 +11,7 @@ import pytest
 
 from app.engine.extract import mock_extract
 from app.engine.machine import Engine
-from app.engine.models import Followup, Report, Session
+from app.engine.models import AuditEntry, Followup, Report, Session
 from app.engine.packs import Pack
 from app.store.memory import MemoryStore
 
@@ -27,7 +27,7 @@ async def store(request):
     from app.store.postgres import PostgresStore
 
     s = await PostgresStore.connect(PG)
-    await s.pool.execute("truncate followups, sessions, reports cascade")
+    await s.pool.execute("truncate analyst_actions, followups, sessions, reports cascade")
     yield s
     await s.close()
 
@@ -115,3 +115,21 @@ async def test_full_conversation_runs_on_this_store(store):
     f = await engine.start_followup(r.ref_code)
     await engine.handle_message(f.session_id, "web", "2")
     assert (await store.list_reports())[0].status == "unchanged"
+
+
+async def test_delete_session_and_audit_log(store):
+    s = Session(context={"transcript": [{"role": "user", "text": "secret story"}]})
+    await store.create_session(s)
+    await store.delete_session(s.id)
+    await store.delete_session(s.id)                       # idempotent
+    await store.delete_session("not-a-uuid")               # junk never raises
+    assert await store.get_session(s.id) is None
+
+    r = a_report()
+    await store.create_report(r)
+    await store.add_audit(AuditEntry(actor="Ngozi", action="exclude", report_id=r.id, before="ok", after="excluded"))
+    await store.add_audit(AuditEntry(actor="Tunde", action="accept", report_id=r.id, before="review", after="ok",
+                                     detail="hospital set to X"))
+    log = await store.list_audit()
+    assert [e.actor for e in log] == ["Tunde", "Ngozi"] and log[0].detail == "hospital set to X"
+    assert len(await store.list_audit(limit=1)) == 1

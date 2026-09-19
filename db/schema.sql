@@ -63,3 +63,16 @@ create table if not exists sessions (
   expires_at timestamptz not null
 );
 create index if not exists sessions_expiry_idx on sessions (expires_at);
+
+-- Every change an analyst makes to a report's standing. Append-only by convention.
+create table if not exists analyst_actions (
+  id         uuid primary key,
+  at         timestamptz not null default now(),
+  actor      text not null default 'unknown',
+  action     text not null,
+  report_id  uuid references reports(id) on delete set null,
+  before     text not null default '',
+  after      text not null default '',
+  detail     text not null default ''
+);
+create index if not exists analyst_actions_at_idx on analyst_actions (at desc);

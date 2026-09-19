@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review queue · {{ pack.title }}</title>
+<link rel="stylesheet" href="/static/analyst.css?v={{ asset_v }}">
+</head>
+<body>
+<header><p><a href="/analyst?pack={{ pack.id }}">← Patterns</a>
+{% for p in packs %}{% if p.id != pack.id %} · <a href="/analyst/review?pack={{ p.id }}">switch to {{ p.title }}</a>{% endif %}{% endfor %}</p>
+<h1>Review queue · {{ pack.title }}</h1><p>{{ rows|length }} report{{ "" if rows|length == 1 else "s" }} held back and not counted</p></header>
+<p class="note">A report lands here when the system is not sure it should count: the hospital name was not recognised,
+it may be a duplicate, the story looked inconsistent, or the AI was unreachable and only keywords were used.
+Nothing here is in any pattern until someone counts it. Every decision is logged below.</p>
+{% if rows %}
+<div class="scroll"><table>
+<thead><tr><th>Week</th><th>Why it is held</th><th>Report</th><th>Hospital</th><th>Decision</th></tr></thead>
+<tbody>
+{% for row in rows %}{% set r = row.report %}
+<tr><td>{{ r.created_at.strftime("%G-W%V") }}{% if r.is_sample %}<br><small>sample</small>{% endif %}</td>
+<td>{{ row.reason }}</td>
+<td>{{ r.summary_redacted }}<br><small>{{ r.category.replace("_"," ") }} · {{ r.subtype.replace("_"," ") }} · {{ r.department }} · {{ r.patient_group }}{% if r.severity == "severe" %} · <strong>in danger</strong>{% endif %}</small></td>
+<td>{% if row.hospital %}{{ row.hospital }}{% else %}<small>Reporter wrote:</small><br>{{ r.hospital_name_raw or "nothing" }}{% endif %}</td>
+<td class="row-actions">
+<form method="post" action="/analyst/reports/{{ r.id }}/accept">
+{% if not row.hospital %}<select name="hospital_id" required aria-label="Which hospital is this?"><option value="">Which hospital?</option>
+{% for h in hospitals %}<option value="{{ h.id }}">{{ h.name }}</option>{% endfor %}</select>{% endif %}
+<button>Count it</button></form>
+<form method="post" action="/analyst/reports/{{ r.id }}/exclude"><button>Exclude</button></form></td></tr>
+{% endfor %}
+</tbody></table></div>
+{% else %}<p>Nothing is waiting for review.</p>{% endif %}
+
+<section><h2>Decision log</h2>
+<p class="note">Most recent 50 analyst decisions. A tool for accountability has to be accountable: excluding reports
+until a pattern disappears leaves a trace here. The password is shared in this proof of concept, so the name is whatever
+was typed at the sign-in prompt; individual accounts are the next step.</p>
+{% if audit %}<div class="scroll"><table><thead><tr><th>When (UTC)</th><th>Who</th><th>Decision</th><th>Change</th><th>Detail</th></tr></thead><tbody>
+{% for a in audit %}<tr><td>{{ a.at.strftime("%Y-%m-%d %H:%M") }}</td><td>{{ a.actor }}</td><td>{{ a.action }}</td>
+<td>{{ a.before }} → {{ a.after }}</td><td>{{ a.detail }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<p>No decisions yet.</p>{% endif %}</section>
+</body></html>

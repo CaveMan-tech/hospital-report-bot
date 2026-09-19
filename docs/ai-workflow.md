@@ -42,6 +42,8 @@ writing tests and the evaluation runner; first drafts of message copy for the au
 - **Critical self-review.** Asked to find the weakest parts of its own build, the AI found that
   the bot failed outright when the model was unreachable, and that one of its own tests pointed
   to a list that did not exist. Both were fixed the same day.
+- **Following a feature to its dead end.** Reports with an unrecognised hospital were "held for
+  review" but no screen showed them. The review found it; the queue and a decision log fixed it.
 - **Evaluation, not vibes.** A 30-story set with a single headline metric: missed emergencies.
 - **AI output that was rejected or corrected:** _[Ikechi to fill in: e.g. the first stack choice
   and the first database choice were both changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table

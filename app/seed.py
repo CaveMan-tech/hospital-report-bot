@@ -78,6 +78,7 @@ def build(pack: Pack | None = None, now: datetime | None = None) -> tuple[list[R
                 status=status,  # type: ignore[arg-type]
                 # One held-back report per larger pattern, so the analyst sees the review queue working.
                 credibility="review" if (i == 0 and count >= 8) else "ok",
+                extra={"review_reason": "possible_duplicate"} if (i == 0 and count >= 8) else {},
                 is_sample=True,
             )
             reports.append(r)

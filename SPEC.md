@@ -239,6 +239,8 @@ Follow-up data is only ever reported as "of the N people who answered a follow-u
 | User names a staff member | Accept, strip from stored summary, tell user names are never published. |
 | Private hospital | Store with `facility_type`. Excluded from patterns in PoC. |
 | Reporter is hospital staff | Store `reporter_role = staff`. Always ask the danger question rather than assume (a staff member describing a practice is not necessarily beside a patient in danger). If not in danger, skip the patient-oriented rights and self-help text and send `B3.staff`: no need to confront anyone, note dates and instructions but never copy patient records, do not use work devices or hospital Wi-Fi. Counts as one report like any other. Dedicated whistleblower channel on roadmap. |
+| Page reloads or the network drops mid-report | The visible chat is kept in the tab's `sessionStorage` only (never `localStorage`, never the server), so a reload resumes where they were, with the tap options restored. A message that failed to send is not lost: "Try again" resends it. If the server session has expired, the bot says so and starts again. |
+| Someone walks up behind the reporter | **Hide this chat**: wipes the chat from the device, deletes the unfinished conversation on the server immediately (`POST /api/chat/forget`) rather than at expiry, and leaves with `location.replace`, so the Back button does not return to it. A finished report is never affected. |
 | Nonsense or abusive input | One polite retry, then end session. Nothing stored. |
 | Prompt injection in story ("ignore your instructions...") | Extraction prompt treats the story as data only. Output is schema-validated; invalid JSON or out-of-enum values fall back to `other` + danger check. |
 
@@ -326,6 +328,8 @@ The bot's job ends at clean data. This thin slice proves the data is usable for 
   - Method and caveats: anonymous, unverified, self-selected, signals that warrant investigation, not rates
 - **Trend:** reports per week for the last 13 weeks as a small chart, with a rising / steady / falling label. Weekly numbers are small, so they stay on the analyst's screen and never go into a brief, a thread or a card.
 - **Ready to post:** a five-post X thread (each within 280 characters) and a 1200x675 share card, filled from the same pattern numbers as the brief, addressed to the pack's target body. Template fill only, nothing written by AI. Plain-words facts such as "mostly at night" appear only when the top value covers at least half of the credible reports and at least 5 of them. Copy buttons, an "Open in X" link and PNG download; no X API integration. The organisation reviews and publishes under its own name.
+- **Review queue (`/analyst/review`):** every report held back and not counted, with the reason (hospital name not recognised, possible duplicate, flagged as implausible, AI unreachable). An analyst can count it, exclude it, or for an unrecognised name choose which hospital it is; a report cannot be counted without a hospital, or with a hospital from another pack. Without this screen a held report would be in no pattern and nobody would ever see it.
+- **Decision log:** every count / exclude / hold is recorded (who, when, from, to, detail) in `analyst_actions` and shown under the queue. A tool for accountability has to be accountable: excluding reports until a pattern disappears leaves a trace. The password is shared in the proof of concept, so the name is whatever was typed at sign-in; individual accounts are next.
 - **CSV export** of the patterns table and of report-level facets (no summaries) for patterns above threshold. Cheap, and it is what a real data team would ask for first.
 
 **Asks (`asks.json`, per category):** e.g. `emergency_refused`: "Publish your emergency admission policy and confirm in writing that no patient is turned away for a deposit, as section 20 of the National Health Act requires." `[TBD Ikechi to sharpen]`
@@ -370,7 +374,9 @@ Deck framing: any advocacy organisation in any country deploys this with a count
 | `GET /analyst/pattern/{hospital}/{category}` | Analyst. Breakdowns, brief, redacted summaries, exclude / count-it actions. |
 | `GET /analyst/brief/{hospital}/{category}.md` | Analyst. Template-filled markdown brief. |
 | `GET /analyst/patterns.csv`, `GET /analyst/facets.csv` | Analyst. Exports. Facets are week-level, no summaries. |
-| `POST /analyst/reports/{id}/{exclude,accept,hold}` | Analyst. Sets credibility. |
+| `POST /analyst/reports/{id}/{exclude,accept,hold}` | Analyst. Sets credibility; `accept` can also assign a hospital. Always logged. |
+| `GET /analyst/review`, `GET /analyst/content` | Analyst. Review queue with decision log; content sign-off status. |
+| `POST /api/chat/forget` | Deletes an unfinished conversation now. Used by quick exit and "start again". |
 | `POST /api/demo/next-day` | Demo only. Triggers F1. |
 
 Stack: Python, FastAPI + Pydantic AI, deployed as one always-on service on Railway. Railway Postgres (asyncpg). OpenAI `gpt-5-mini` behind a small `extract()` wrapper. Pages are server-rendered plain HTML with a few lines of vanilla JS.

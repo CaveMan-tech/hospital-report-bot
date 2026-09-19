@@ -30,5 +30,6 @@ code{font:12px ui-monospace,Menlo,monospace}
 .thread li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
 .thread p{margin:4px 0}.btn.small{padding:4px 10px;font-size:.85rem}
 #card{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#f6f4ef}
+select{font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);max-width:22ch}
 .row-actions{white-space:nowrap}.row-actions form{display:inline}
 .row-actions button{background:none;color:var(--fg);border:1px solid var(--line);padding:3px 8px;font-size:.85rem}

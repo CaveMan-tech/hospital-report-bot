@@ -20,7 +20,7 @@ from app import analyst as A
 from app.config import get_settings
 from app.engine.extract import get_extractor
 from app.engine.machine import Engine
-from app.engine.models import Channel, EngineReply
+from app.engine.models import AuditEntry, Channel, EngineReply
 from app.engine.packs import get_pack
 from app.ratelimit import DailyDedupe, RateLimiter
 from app.seed import seed
@@ -162,6 +162,17 @@ async def chat(body: ChatIn, request: Request, engine: Engine = Depends(engine_o
         raise HTTPException(503, engine.pack_for(body.pack).message("E.unavailable")) from None
 
 
+class ForgetIn(BaseModel):
+    session_id: str = Field(max_length=64)
+
+
+@app.post("/api/chat/forget", status_code=204)
+async def forget(body: ForgetIn, engine: Engine = Depends(engine_of)):
+    """Quick exit and "start again": delete the unfinished conversation now, not at expiry.
+    A finished report is untouched; it holds no story and the session no longer links to it."""
+    await engine.store.delete_session(body.session_id)
+
+
 @app.post("/api/report/lookup")
 async def lookup(body: CodeIn, request: Request, engine: Engine = Depends(engine_of)):
     if not lookup_limiter.allow(client_ip(request)):
@@ -188,10 +199,13 @@ async def demo_next_day(body: CodeIn, request: Request, engine: Engine = Depends
 basic = HTTPBasic(realm="Analyst")
 
 
-def analyst_auth(creds: HTTPBasicCredentials = Depends(basic)) -> None:
+def analyst_auth(creds: HTTPBasicCredentials = Depends(basic)) -> str:
+    """Returns the username typed at the prompt. The password is shared in this proof of concept,
+    so the name is a courtesy, not proof; it still makes the audit log readable."""
     expected = get_settings().analyst_password.encode()
     if not secrets.compare_digest(creds.password.encode(), expected):
         raise HTTPException(401, "Wrong password", headers={"WWW-Authenticate": 'Basic realm="Analyst"'})
+    return creds.username[:60] or "unknown"
 
 
 def _pack_of_hospital(engine: Engine, hospital_id: str):
@@ -222,7 +236,7 @@ async def analyst_home(request: Request, pack: str | None = None, engine: Engine
         "pack": current, "packs": list(engine.packs.values()),
         "org_name": current.org_name, "patterns": rows, "threshold": A.THRESHOLD,
         "window": A.WINDOW_DAYS, "sample": any(p["includes_sample_data"] for p in rows),
-        "held_back": sum(r.credibility == "review" for r in reports)})
+        "held_back": len(A.review_queue(reports, current))})
 
 
 @app.get("/analyst/content", response_class=HTMLResponse, dependencies=[Depends(analyst_auth)])
@@ -285,15 +299,43 @@ async def analyst_facets_csv(pack: str | None = None, engine: Engine = Depends(e
                              headers={"Content-Disposition": 'attachment; filename="facets.csv"'})
 
 
-@app.post("/analyst/reports/{report_id}/{action}", dependencies=[Depends(analyst_auth)])
+@app.get("/analyst/review", response_class=HTMLResponse)
+async def analyst_review(request: Request, pack: str | None = None, engine: Engine = Depends(engine_of),
+                         _: str = Depends(analyst_auth)):
+    current = engine.pack_for(pack)
+    rows = A.review_queue(await engine.store.list_reports(), current)
+    return templates.TemplateResponse(request, "review.html", {
+        "pack": current, "packs": list(engine.packs.values()), "rows": rows,
+        "hospitals": [h for h in current.hospitals if h.facility_type != "private"],
+        "audit": await engine.store.list_audit(50)})
+
+
+@app.post("/analyst/reports/{report_id}/{action}")
 async def analyst_set_credibility(report_id: str, action: str, request: Request,
-                                  engine: Engine = Depends(engine_of)):
+                                  engine: Engine = Depends(engine_of), actor: str = Depends(analyst_auth)):
     new = {"exclude": "excluded", "accept": "ok", "hold": "review"}.get(action)
     report = await engine.store.get_report(report_id)
     if new is None or report is None:
         raise HTTPException(404)
+    before, detail = report.credibility, ""
+
+    # "accept" from the review queue can also resolve an unrecognised hospital name.
+    form = await request.form()
+    hospital_id = str(form.get("hospital_id") or "")
+    if action == "accept" and hospital_id:
+        pack = engine.pack_for(report.pack)
+        match = next((h for h in pack.hospitals if h.id == hospital_id), None)
+        if match is None:
+            raise HTTPException(400, "Unknown hospital for this pack")
+        detail = f"hospital set to {match.name}"
+        report.hospital_id, report.hospital_name_raw = match.id, None
+    if action == "accept" and report.hospital_id is None:
+        raise HTTPException(400, "Choose a hospital before counting this report")
+
     report.credibility = new  # type: ignore[assignment]
     await engine.store.save_report(report)
+    await engine.store.add_audit(AuditEntry(actor=actor, action=action, report_id=report.id,
+                                            before=before, after=new, detail=detail))
     back = request.headers.get("referer") or "/analyst"
     return RedirectResponse(back, status_code=303)
 

@@ -338,18 +338,23 @@ class Engine:
         hospital = pack.match_hospital(ex.hospital_name_raw)
         code = refcode.generate()
 
-        credibility = "ok"
+        # Anything we are not sure about is held for a human, with the reason, never silently counted.
         dedupe_key = ctx.get("dedupe_key")
+        reason = ""
         if ctx.get("degraded"):
-            credibility = "review"  # classified by keywords only: help the person, do not count it blind
+            reason = "ai_unavailable"      # classified by keywords only: help the person, do not count it blind
         elif ex.implausible:
-            credibility = "review"
+            reason = "implausible"
         elif ex.hospital_name_raw and hospital is None:
-            credibility = "review"  # unknown hospital name: a human should look
+            reason = "unknown_hospital"
         elif dedupe_key and await self.store.find_recent_duplicate(
             dedupe_key, hospital.id if hospital else None, ex.category
         ):
-            credibility = "review"
+            reason = "possible_duplicate"
+        credibility = "review" if reason else "ok"
+        extra = {"review_reason": reason} if reason else {}
+        if ctx.get("degraded"):
+            extra["degraded_extraction"] = True
 
         report = Report(
             ref_code_hmac=refcode.digest(code, self.ref_secret),
@@ -372,7 +377,7 @@ class Engine:
             money_demanded=ex.money_demanded,
             amount_bucket=ex.amount_bucket,
             summary_redacted=ex.summary_redacted,
-            extra={"degraded_extraction": True} if ctx.get("degraded") else {},
+            extra=extra,
             rights_shown=ctx.get("rights_shown", []),
             escalation_shown=ctx.get("escalation_shown", False),
             credibility=credibility,

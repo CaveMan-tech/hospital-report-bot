@@ -9,6 +9,7 @@ dependencies = [
     "pydantic>=2.13.5",
     "pydantic-ai-slim[openai]>=2.45.0",
     "pydantic-settings>=2.15.0",
+    "python-multipart>=0.0.32",
     "uvicorn[standard]>=0.53.0",
 ]
 

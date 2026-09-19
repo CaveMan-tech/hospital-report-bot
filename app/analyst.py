@@ -147,6 +147,29 @@ def brief(pattern: dict, pack: Pack, now: datetime | None = None) -> str:
     return "\n".join(lines)
 
 
+REVIEW_REASONS = {
+    "unknown_hospital": "Hospital name not recognised",
+    "possible_duplicate": "Possible duplicate (same source, hospital and problem within 24 hours)",
+    "implausible": "Story flagged as inconsistent or spam-like",
+    "ai_unavailable": "AI was unreachable; classified by keywords only",
+    "": "Held by an analyst",
+}
+
+
+def review_queue(reports: list[Report], pack: Pack) -> list[dict]:
+    """Everything held back for this pack, newest first, with why. Without this screen a held
+    report would simply vanish: it is in no pattern, so nobody would ever see it."""
+    names = {h.id: h.name for h in pack.hospitals}
+    rows = []
+    for r in sorted(reports, key=lambda r: r.created_at, reverse=True):
+        if r.pack != pack.id or r.credibility != "review":
+            continue
+        reason = str(r.extra.get("review_reason", ""))
+        rows.append({"report": r, "hospital": names.get(r.hospital_id or ""), "reason_code": reason,
+                     "reason": REVIEW_REASONS.get(reason, reason)})
+    return rows
+
+
 def weekly_counts(rs: list[Report], weeks: int = 13, now: datetime | None = None) -> list[int]:
     """Credible reports per week, oldest first. For the analyst's eyes only: weekly numbers are
     small, so they never go into a brief, a thread or a card."""

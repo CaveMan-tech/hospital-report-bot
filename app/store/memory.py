@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from app.engine.models import Followup, Report, Session
+from app.engine.models import AuditEntry, Followup, Report, Session
 
 
 class MemoryStore:
@@ -12,6 +12,7 @@ class MemoryStore:
         self.sessions: dict[str, Session] = {}
         self.reports: dict[str, Report] = {}
         self.followups: list[Followup] = []
+        self.audit: list[AuditEntry] = []
 
     async def create_session(self, session: Session) -> None:
         self.sessions[session.id] = session.model_copy(deep=True)
@@ -22,6 +23,9 @@ class MemoryStore:
 
     async def save_session(self, session: Session) -> None:
         self.sessions[session.id] = session.model_copy(deep=True)
+
+    async def delete_session(self, session_id: str) -> None:
+        self.sessions.pop(session_id, None)
 
     async def purge_expired_sessions(self) -> int:
         dead = [sid for sid, s in self.sessions.items() if s.expired]
@@ -62,3 +66,9 @@ class MemoryStore:
 
     async def add_followup(self, followup: Followup) -> None:
         self.followups.append(followup.model_copy(deep=True))
+
+    async def add_audit(self, entry: AuditEntry) -> None:
+        self.audit.append(entry.model_copy(deep=True))
+
+    async def list_audit(self, limit: int = 50) -> list[AuditEntry]:
+        return [e.model_copy(deep=True) for e in sorted(self.audit, key=lambda e: e.at, reverse=True)[:limit]]

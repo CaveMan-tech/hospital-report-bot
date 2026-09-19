@@ -270,7 +270,8 @@ async def test_emergency_still_gets_escalation_when_the_ai_is_down(store):
     text = "\n".join(r.replies)
     assert "Section 20" in text and "112" in text and r.ref_code
     report = next(iter(store.reports.values()))
-    assert report.credibility == "review" and report.extra == {"degraded_extraction": True}
+    assert report.credibility == "review"
+    assert report.extra == {"review_reason": "ai_unavailable", "degraded_extraction": True}
     assert "AI service could not be reached" in report.summary_redacted
 
 
@@ -374,3 +375,12 @@ async def test_typed_answers_still_work_and_junk_taps_are_ignored(engine, store)
     assert r.ref_code
     report = next(iter(store.reports.values()))
     assert report.department == "unknown" and report.incident_timing == "this_week"
+
+
+async def test_every_held_report_says_why(engine, store):
+    await say(engine, None, "A nurse slapped me last week at Zebra Crossing Hospital maternity ward")
+    for _ in range(2):
+        await say(engine, None, "A nurse slapped me last week at Harmattan General Hospital maternity ward", dedupe_key="k")
+    reasons = sorted(r.extra.get("review_reason", "") for r in store.reports.values())
+    assert reasons == ["", "possible_duplicate", "unknown_hospital"]
+    assert all((r.credibility == "review") == bool(r.extra.get("review_reason")) for r in store.reports.values())

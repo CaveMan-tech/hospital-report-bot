@@ -4,6 +4,8 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;max-width:640px;margin-inline:auto}
 header{padding:14px 16px 8px;border-bottom:1px solid var(--line)}
+#exit{float:right;margin-left:12px;min-height:36px;padding:0 12px;background:var(--warn);color:#fff;font-size:.85rem;font-weight:600}
+@media (prefers-color-scheme:dark){#exit{color:#151412}}
 h1{font-size:1.05rem;margin:0}
 header p{margin:2px 0 0;color:var(--mut);font-size:.85rem}
 main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}

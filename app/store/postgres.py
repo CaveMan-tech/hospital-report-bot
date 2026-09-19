@@ -13,7 +13,7 @@ from typing import Any
 import asyncpg
 from pydantic import BaseModel
 
-from app.engine.models import Followup, Report, Session
+from app.engine.models import AuditEntry, Followup, Report, Session
 
 SCHEMA = Path(__file__).resolve().parents[2] / "db" / "schema.sql"
 
@@ -85,6 +85,12 @@ class PostgresStore:
     async def save_session(self, session: Session) -> None:
         await self._write("sessions", session, upsert=True)
 
+    async def delete_session(self, session_id: str) -> None:
+        try:
+            await self.pool.execute("delete from sessions where id = $1", session_id)
+        except asyncpg.DataError:
+            pass
+
     async def purge_expired_sessions(self) -> int:
         result = await self.pool.execute("delete from sessions where expires_at < now()")
         return int(result.split()[-1])
@@ -126,3 +132,10 @@ class PostgresStore:
 
     async def add_followup(self, followup: Followup) -> None:
         await self._write("followups", followup, upsert=False)
+
+    async def add_audit(self, entry: AuditEntry) -> None:
+        await self._write("analyst_actions", entry, upsert=False)
+
+    async def list_audit(self, limit: int = 50) -> list[AuditEntry]:
+        rows = await self.pool.fetch("select * from analyst_actions order by at desc limit $1", limit)
+        return [_model(AuditEntry, r) for r in rows]

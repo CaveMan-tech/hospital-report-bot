@@ -133,6 +133,20 @@ class Followup(BaseModel):
     status: Literal["resolved", "unchanged", "worse", "left"]
 
 
+class AuditEntry(BaseModel):
+    """Who changed what on the analyst side. A tool for accountability has to be accountable:
+    an analyst who excludes reports until a pattern disappears must leave a trace."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    at: datetime = Field(default_factory=_now)
+    actor: str = "unknown"
+    action: str
+    report_id: str | None = None
+    before: str = ""
+    after: str = ""
+    detail: str = ""
+
+
 SESSION_TTL = timedelta(hours=2)
 
 

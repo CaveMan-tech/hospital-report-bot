@@ -8,11 +8,12 @@
 <body>
 <header><h1>Patterns · {{ pack.title }}</h1><p>{{ org_name }} · analyst view · last {{ window }} days
 {% for p in packs %}{% if p.id != pack.id %} · <a href="/analyst?pack={{ p.id }}">switch to {{ p.title }}</a>{% endif %}{% endfor %}
+ · <a href="/analyst/review?pack={{ pack.id }}">review queue{% if held_back %} ({{ held_back }}){% endif %}</a>
  · <a href="/analyst/content?pack={{ pack.id }}">content review</a></p></header>
 {% if sample %}<p class="banner">SAMPLE DATA. Fictional hospitals, generated reports.</p>{% endif %}
 <p class="note">Anonymous, unverified reports. A pattern appears here only once {{ threshold }} separate credible
 reports exist. These are signals that warrant investigation, not rates. Do not rank hospitals with them.
-{% if held_back %}<br>{{ held_back }} report{{ "" if held_back == 1 else "s" }} held back for review (possible duplicate, implausible, or unknown hospital).{% endif %}</p>
+{% if held_back %}<br><a href="/analyst/review?pack={{ pack.id }}">{{ held_back }} report{{ "" if held_back == 1 else "s" }} held back for review</a> and not counted.{% endif %}</p>
 {% if patterns %}
 <div class="scroll"><table>
 <thead><tr><th>Hospital</th><th>Problem</th><th class="n">Reports</th><th class="n">In danger at the time</th>

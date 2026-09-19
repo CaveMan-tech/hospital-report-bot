@@ -180,3 +180,51 @@ def test_ready_to_post_section_on_the_pattern_page():
         assert card.status_code == 200 and card.headers["content-type"].startswith("image/svg+xml")
         assert c.get("/analyst/card/h-harmattan/emergency_refused.svg").status_code == 401
         assert c.get("/analyst/card/h-palmgrove/abuse.svg", auth=AUTH).status_code == 404
+
+
+def test_review_queue_resolves_an_unknown_hospital_and_logs_the_decision():
+    with TestClient(app) as c:
+        assert c.get("/analyst/review").status_code == 401
+        def count():
+            rows = c.get("/analyst/patterns.csv", auth=AUTH).text.splitlines()
+            return int(next(r for r in rows if r.startswith("Lagoon View General Hospital,abuse")).split(",")[2])
+        before = count()
+        c.post("/api/chat", json={"text": "A nurse slapped me last week at Island Peoples Hospital maternity ward"})
+        assert count() == before                                          # held, not counted
+
+        page = c.get("/analyst/review", auth=AUTH).text
+        assert "Hospital name not recognised" in page and "Island Peoples Hospital" in page and "Decision log" in page
+        store = c.app.state.engine.store
+        held = next(r for r in store.reports.values() if r.hospital_name_raw and "Island Peoples" in r.hospital_name_raw)
+
+        # Cannot be counted without saying which hospital it is, or with a hospital from another country.
+        assert c.post(f"/analyst/reports/{held.id}/accept", auth=AUTH, follow_redirects=False).status_code == 400
+        assert c.post(f"/analyst/reports/{held.id}/accept", auth=AUTH, data={"hospital_id": "h-mugumo-ridge"},
+                      follow_redirects=False).status_code == 400
+        r = c.post(f"/analyst/reports/{held.id}/accept", auth=("Ngozi", "pw"), data={"hospital_id": "h-lagoonview"},
+                   follow_redirects=False)
+        assert r.status_code == 303 and count() == before + 1
+        fixed = store.reports[held.id]
+        assert fixed.hospital_id == "h-lagoonview" and fixed.hospital_name_raw is None and fixed.credibility == "ok"
+
+        log = store.audit[-1]
+        assert (log.actor, log.action, log.before, log.after) == ("Ngozi", "accept", "review", "ok")
+        assert "Lagoon View General Hospital" in log.detail
+        assert "Ngozi" in c.get("/analyst/review", auth=AUTH).text
+
+
+def test_excluding_a_report_is_always_logged():
+    with TestClient(app) as c:
+        store = c.app.state.engine.store
+        target = next(r for r in store.reports.values() if r.hospital_id == "h-iroko" and r.category == "detention")
+        n = len(store.audit)
+        c.post(f"/analyst/reports/{target.id}/exclude", auth=("Tunde", "pw"), follow_redirects=False)
+        assert len(store.audit) == n + 1 and store.audit[-1].actor == "Tunde" and store.audit[-1].after == "excluded"
+
+
+def test_kenyan_held_reports_do_not_show_in_the_lagos_queue():
+    with TestClient(app) as c:
+        c.post("/api/chat", json={"pack": "ke-nairobi",
+                                  "text": "A nurse insulted my wife last week at Some Unknown Kenyan Hospital maternity"})
+        assert "Some Unknown Kenyan" not in c.get("/analyst/review", auth=AUTH).text
+        assert "Some Unknown Kenyan" in c.get("/analyst/review?pack=ke-nairobi", auth=AUTH).text
