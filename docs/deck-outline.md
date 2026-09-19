@@ -20,14 +20,30 @@ Tracks: Safety, Reporting & Protection + Transparency & Accountability. Your nam
 Then: "Back to the same hospital."
 **Say:** official desks sit inside the institution being complained about; poor patients expect to
 be ignored, and mostly do not complain at all.
-**Evidence:** one hard number, with its source on the slide. A checked option: "In a 2020 survey at
-a teaching hospital in Ondo State, fewer than half of respondents (46.8%) knew the Patients' Bill of
-Rights existed, and only about one in five patients had good knowledge of it" (Adejumo et al., West
-Afr J Med 2020, PMID 33185254). Read the abstract yourself before using it.
+**Evidence:** one hard number, with its source on the slide. Checked against the abstract:
+"In a 2020 survey at a Nigerian teaching hospital, only about one in five patients (21.3%) had good
+knowledge of the Patients' Bill of Rights. Among their doctors it was three in five (60.6%)."
+(Adejumo et al., West Afr J Med 2020, PMID 33185254, https://pubmed.ncbi.nlm.nih.gov/33185254/)
+The contrast is the point: the people who hold the rights know far less about them than the people
+on the other side of the desk. The authors' own conclusion is quotable: knowledge "was
+unsatisfactory especially among the patients".
+**How to use it honestly:**
+- Use 21.3%, not 46.8% or 23.8%. Those two describe the whole sample of 453, and 199 of them (44%)
+  were physicians, so they overstate what patients know. 21.3% is the only patient-only figure in
+  the abstract.
+- Say "in a hospital-based survey". It was run inside the hospital by affiliated researchers, on
+  patients who got into a teaching hospital, and knowledge tracked education. All three push the
+  number up, so the real figure for poorer patients at general hospitals is plausibly lower. Say
+  that as a reasoned inference, not as a finding.
+- A pitch line that turns the weakness into the argument: "Most of what we know about patient
+  experience comes from surveys run inside hospitals, by the hospitals' own staff. This collects
+  what people say when the hospital is not the one asking."
 **Do not use** the figures from the early brainstorm ("54 complaints in three years", "a quarter
-aware", "83.7% never asserted their rights"): a literature search found no source for any of them,
-and the one real study at that hospital says nearly the opposite. A first-hand story is also fine
-here. One true story beats one shaky statistic.
+aware", "83.7% never asserted their rights"): a literature search found no source for any of them.
+Do not cite the 2013 Ibadan study either (PMID 24579387): it predates the Bill of Rights, surveys
+outpatients inside the hospital, and its "75% would seek redress" is a stated intention, not action.
+The structural point needs no statistic at all: the complaint desk sits inside the institution being
+complained about. A first-hand story also works. One true story beats one shaky statistic.
 
 ## 3. What actually works · uniqueness
 **On the slide:** "What works is X. If you have followers. Or if someone has already died."

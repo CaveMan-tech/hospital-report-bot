@@ -311,6 +311,8 @@ What actually exists:
 | "only about a quarter of patients knew the bill of rights existed" | **Unsupported as worded, and not UCH.** Nearest real figures: Ondo 2020, 23.8% of all respondents (doctors and patients together) "aware of its contents", 46.8% aware it exists, 21.3% of patients with good knowledge. The UCH 2013 study found 94.2% good knowledge of rights generally. |
 | "83.7% had never asserted their rights when violated" | **Unsupported.** No source found. The only "83.7%" hit was a Ugandan student survey. UCH 2013 reports 75% WOULD seek redress (stated intention). |
 
+> **Reviewer note (Ikechi, 19 Sept 2026, from the abstract):** 46.8% and 23.8% describe the whole sample of 453, of whom 199 (44%) were physicians, so they overstate patient awareness. The only patient-only figure is 21.3% with good-to-excellent knowledge, against 60.6% of physicians. The deck uses 21.3%. The survey was hospital-based and run by affiliated researchers, which if anything pushes the figure up.
+
 Recommendation: drop all three. A safe replacement sentence: "In a 2020 survey at a teaching hospital in Ondo State, fewer than half of respondents (46.8%) knew the Patients' Bill of Rights existed, and only about one in five patients had good knowledge of it (Adejumo et al., West Afr J Med 2020)." If the team has the original paper behind the 54 / 83.7% figures, check it against this.
 
 ### G3. SERVICOM effectiveness
