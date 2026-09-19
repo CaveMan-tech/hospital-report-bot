@@ -324,6 +324,8 @@ The bot's job ends at clean data. This thin slice proves the data is usable for 
   - The rule: {law_line}
   - Suggested ask: {ask}
   - Method and caveats: anonymous, unverified, self-selected, signals that warrant investigation, not rates
+- **Trend:** reports per week for the last 13 weeks as a small chart, with a rising / steady / falling label. Weekly numbers are small, so they stay on the analyst's screen and never go into a brief, a thread or a card.
+- **Ready to post:** a five-post X thread (each within 280 characters) and a 1200x675 share card, filled from the same pattern numbers as the brief, addressed to the pack's target body. Template fill only, nothing written by AI. Plain-words facts such as "mostly at night" appear only when the top value covers at least half of the credible reports and at least 5 of them. Copy buttons, an "Open in X" link and PNG download; no X API integration. The organisation reviews and publishes under its own name.
 - **CSV export** of the patterns table and of report-level facets (no summaries) for patterns above threshold. Cheap, and it is what a real data team would ask for first.
 
 **Asks (`asks.json`, per category):** e.g. `emergency_refused`: "Publish your emergency admission policy and confirm in writing that no patient is turned away for a deposit, as section 20 of the National Health Act requires." `[TBD Ikechi to sharpen]`
@@ -408,7 +410,7 @@ Unit tests (few, high value): severity rules, verified-only content gate, thresh
 | Mon AM | Record video (3 to 4 min: problem, Pidgin report on a phone, emergency branch, pattern appears on the organisation's analyst screen, brief exported, pack switch, eval table). | |
 | Mon PM | Deck (PDF), written summary, final verification pass on every `verified: true` entry. **Submit by 18:00 UTC.** | |
 
-Cut from the build, shown on one deck slide as the partner's job: X thread generator, open letter, public patterns page, response clock, share card. Cut entirely: Telegram. Roadmap only: voice notes, USSD follow-up, Yoruba/Hausa/Igbo, evidence upload, partner verification, whistleblower mode.
+Cut from the build, shown on one deck slide as the partner's job: open letter, public patterns page, response clock. Cut entirely: Telegram. Roadmap only: voice notes, USSD follow-up, Yoruba/Hausa/Igbo, evidence upload, partner verification, whistleblower mode.
 
 ---
 

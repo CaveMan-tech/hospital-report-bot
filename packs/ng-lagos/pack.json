@@ -18,5 +18,10 @@
     "large": "50,000 to 200,000 naira",
     "very_large": "over 200,000 naira"
   },
-  "local_terms": "'casualty' or 'emergency' = emergency department; 'pikin' = child; 'deposit' = upfront payment demanded before care"
+  "local_terms": "'casualty' or 'emergency' = emergency department; 'pikin' = child; 'deposit' = upfront payment demanded before care",
+  "target": {
+    "name": "Harbour State Health Service Commission (fictional)",
+    "x_handle": "@HarbourStateHSC_demo"
+  },
+  "method_url": "https://example.org/method"
 }

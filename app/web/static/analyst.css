@@ -21,5 +21,14 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--line);bor
 .btn,button{font:inherit;border:0;border-radius:8px;padding:8px 14px;background:var(--acc);color:var(--acc-fg);text-decoration:none;cursor:pointer}
 td.copy{white-space:pre-wrap;min-width:32ch;max-width:60ch}small{color:var(--mut)}
 code{font:12px ui-monospace,Menlo,monospace}
+.spark{vertical-align:middle;fill:var(--acc)}
+.trend{font-size:.8rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
+.trend.rising{color:var(--warn-fg);background:var(--warn-bg);border-color:transparent;font-weight:600}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.thread{margin:0;padding-left:0;list-style:none;display:grid;gap:10px}
+.thread li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.thread p{margin:4px 0}.btn.small{padding:4px 10px;font-size:.85rem}
+#card{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#f6f4ef}
 .row-actions{white-space:nowrap}.row-actions form{display:inline}
 .row-actions button{background:none;color:var(--fg);border:1px solid var(--line);padding:3px 8px;font-size:.85rem}

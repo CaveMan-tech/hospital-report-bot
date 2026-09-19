@@ -11,8 +11,11 @@ from __future__ import annotations
 
 import csv
 import io
+import textwrap
 from collections import Counter
 from datetime import UTC, datetime, timedelta
+from html import escape
+from urllib.parse import quote
 
 from app.engine.models import Report
 from app.engine.packs import Pack, UnverifiedContent
@@ -97,16 +100,7 @@ def slices(rs: list[Report]) -> dict[str, list[tuple[str, str]]]:
 def brief(pattern: dict, pack: Pack, now: datetime | None = None) -> str:
     now = now or datetime.now(UTC)
     start = now - timedelta(days=WINDOW_DAYS)
-    ask = pack.asks.get(pattern["category"])
-    law_line = "[legal reference pending verification]"
-    ask_text = "[ask to be agreed]"
-    if ask:
-        ask_text = ask["ask_text"]
-        try:
-            pack._check("ask", pattern["category"], ask, always_gated=True)
-            law_line = ask["law_line"]
-        except UnverifiedContent:
-            pass
+    law_line, ask_text = _law_and_ask(pattern, pack)
 
     n = pattern["reports_90d"]
     lines = [
@@ -151,6 +145,143 @@ def brief(pattern: dict, pack: Pack, now: datetime | None = None) -> str:
         "",
     ]
     return "\n".join(lines)
+
+
+def weekly_counts(rs: list[Report], weeks: int = 13, now: datetime | None = None) -> list[int]:
+    """Credible reports per week, oldest first. For the analyst's eyes only: weekly numbers are
+    small, so they never go into a brief, a thread or a card."""
+    now = now or datetime.now(UTC)
+    counts = [0] * weeks
+    for r in rs:
+        if r.credibility != "ok":
+            continue
+        age = (now - r.created_at).days // 7
+        if 0 <= age < weeks:
+            counts[weeks - 1 - age] += 1
+    return counts
+
+
+def trend(rs: list[Report], now: datetime | None = None) -> dict:
+    """Compare the last 45 days with the 45 before. Words and totals only when both halves are
+    big enough to show; otherwise just the word."""
+    now = now or datetime.now(UTC)
+    ok = [r for r in rs if r.credibility == "ok"]
+    recent = sum((now - r.created_at).days < 45 for r in ok)
+    earlier = sum(45 <= (now - r.created_at).days < 90 for r in ok)
+    if recent >= earlier * 1.5 and recent - earlier >= 2:
+        word = "rising"
+    elif earlier >= recent * 1.5 and earlier - recent >= 2:
+        word = "falling"
+    else:
+        word = "steady"
+    showable = recent >= THRESHOLD and earlier >= THRESHOLD
+    return {"word": word, "recent": recent if showable else None, "earlier": earlier if showable else None}
+
+
+def sparkline_svg(counts: list[int], width: int = 104, height: int = 24) -> str:
+    top = max(counts) or 1
+    bar = width / len(counts)
+    rects = "".join(
+        f'<rect x="{i * bar + 1:.1f}" y="{height - max(c / top * (height - 2), 1 if c else 0):.1f}" '
+        f'width="{bar - 2:.1f}" height="{max(c / top * (height - 2), 1 if c else 0):.1f}" rx="1"/>'
+        for i, c in enumerate(counts))
+    return (f'<svg class="spark" viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
+            f'role="img" aria-label="Reports per week, last {len(counts)} weeks">{rects}</svg>')
+
+
+def _dominant(rs: list[Report], field: str, labels: dict[str, str]) -> str | None:
+    """A plain-words fact like "mostly at night", only when it is both safe and true: the top
+    value covers at least half the credible reports and at least THRESHOLD of them."""
+    ok = [r for r in rs if r.credibility == "ok"]
+    if not ok:
+        return None
+    value, n = Counter(getattr(r, field) for r in ok).most_common(1)[0]
+    if value in labels and n >= THRESHOLD and n * 2 >= len(ok):
+        return labels[value]
+    return None
+
+
+_TIME_WORDS = {"night": "at night", "weekend": "at weekends", "day": "during the day"}
+_DEPT_WORDS = {"emergency": "the emergency department", "maternity": "maternity", "paediatrics": "the children's ward",
+               "ward": "the wards", "outpatient": "outpatients", "pharmacy": "the pharmacy", "records": "records"}
+
+
+def _law_and_ask(pattern: dict, pack: Pack) -> tuple[str, str]:
+    ask = pack.asks.get(pattern["category"])
+    law_line, ask_text = "[legal reference pending verification]", "[ask to be agreed]"
+    if ask:
+        ask_text = ask["ask_text"]
+        try:
+            pack._check("ask", pattern["category"], ask, always_gated=True)
+            law_line = ask["law_line"]
+        except UnverifiedContent:
+            pass
+    return law_line, ask_text
+
+
+def thread(pattern: dict, rs: list[Report], pack: Pack) -> list[str]:
+    """A ready-to-post X thread for the partner organisation. Template fill only: every number is
+    a number from the pattern, and the organisation, not this tool, is the publisher."""
+    law_line, ask_text = _law_and_ask(pattern, pack)
+    target = pack.meta.get("target", {})
+    handle = target.get("x_handle", "")
+    n = pattern["reports_90d"]
+    sample = "[SAMPLE DATA, fictional hospital] " if pattern["includes_sample_data"] else ""
+
+    what = [f"{pattern['severe']} of the {n} said someone was in danger at the moment they reported."]
+    where, when = _dominant(rs, "department", _DEPT_WORDS), _dominant(rs, "time_bucket", _TIME_WORDS)
+    if where or when:
+        what.append("Most reports were " + " ".join(x for x in (f"about {where}" if where else "", when or "") if x) + ".")
+    if pattern["followed_up"] >= THRESHOLD:
+        what.append(f"Of {pattern['followed_up']} people who answered a check-in the next day, "
+                    f"{pattern['unchanged_or_worse']} said nothing had changed or it was worse.")
+
+    posts = [
+        f"{sample}{n} people have privately reported {pattern['category_plain']} at {pattern['hospital']} "
+        f"in the last {WINDOW_DAYS} days. These reports are unverified. Here is why they still need an answer. {handle}".strip(),
+        " ".join(what),
+        f"The rule: {law_line}",
+        f"What we are asking {target.get('name', 'the hospital')} for: {ask_text} We will post the response here. Day 0.",
+        f"Method: anonymous, unverified, self-selected reports collected by {pack.org_name}. They are signals that "
+        f"warrant investigation, not rates, and not a ranking. Groups under {THRESHOLD} are never shown. "
+        f"{pack.meta.get('method_url', '')}".strip(),
+    ]
+    total = len(posts)
+    return [f"{i}/{total} {p}" for i, p in enumerate(posts, 1)]
+
+
+def intent_url(text: str) -> str:
+    return "https://x.com/intent/tweet?text=" + quote(text, safe="")
+
+
+def card_svg(pattern: dict, pack: Pack) -> str:
+    """1200x675 share card. Count, problem, hospital, the ask. No story, no slice, no small number."""
+    _, ask_text = _law_and_ask(pattern, pack)
+    esc = escape
+    ask_lines = textwrap.wrap("We are asking: " + ask_text, 62)[:4]
+    title_lines = textwrap.wrap(f"unverified reports of {pattern['category_plain']}", 34)[:2]
+    parts = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" '
+        'font-family="Helvetica, Arial, sans-serif">',
+        '<rect width="1200" height="675" fill="#f6f4ef"/><rect width="1200" height="14" fill="#1f4d3a"/>',
+        f'<text x="80" y="230" font-size="200" font-weight="700" fill="#1f4d3a">{pattern["reports_90d"]}</text>',
+    ]
+    for i, line in enumerate(title_lines):
+        parts.append(f'<text x="420" y="{150 + i * 62}" font-size="50" font-weight="700" fill="#1d1b18">{esc(line)}</text>')
+    parts.append(f'<text x="420" y="{150 + len(title_lines) * 62 + 4}" font-size="36" fill="#1d1b18">at {esc(pattern["hospital"])}</text>')
+    parts.append(f'<text x="80" y="338" font-size="28" fill="#6b655c">in the last {WINDOW_DAYS} days · anonymous, unverified · '
+                 'signals that warrant investigation, not rates</text>')
+    parts.append('<line x1="80" y1="372" x2="1120" y2="372" stroke="#ddd6c9" stroke-width="2"/>')
+    for i, line in enumerate(ask_lines):
+        parts.append(f'<text x="80" y="{430 + i * 46}" font-size="34" fill="#1d1b18">{esc(line)}</text>')
+    parts.append(f'<text x="80" y="630" font-size="26" fill="#6b655c">{esc(pack.org_name)}</text>')
+    if pattern["includes_sample_data"]:
+        parts.append('<g transform="rotate(-18 600 340)"><text x="600" y="360" text-anchor="middle" font-size="120" '
+                     'font-weight="700" fill="#8a2d1c" fill-opacity="0.16">SAMPLE DATA</text></g>'
+                     '<text x="1120" y="630" text-anchor="end" font-size="26" font-weight="700" fill="#8a2d1c">'
+                     'SAMPLE DATA · fictional hospital</text>')
+    parts.append("</svg>")
+    return "".join(parts)
 
 
 def patterns_csv(rows: list[dict]) -> str:

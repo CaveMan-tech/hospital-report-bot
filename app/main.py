@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -210,6 +210,10 @@ async def analyst_home(request: Request, pack: str | None = None, engine: Engine
     current = engine.pack_for(pack)
     reports = [r for r in await engine.store.list_reports() if r.pack == current.id]
     rows = A.patterns(reports, current)
+    for p in rows:
+        rs = A.pattern_reports(reports, p["hospital_id"], p["category"])
+        p["trend"] = A.trend(rs)["word"]
+        p["spark"] = A.sparkline_svg(A.weekly_counts(rs))
     return templates.TemplateResponse(request, "analyst.html", {
         "pack": current, "packs": list(engine.packs.values()),
         "org_name": current.org_name, "patterns": rows, "threshold": A.THRESHOLD,
@@ -238,7 +242,18 @@ async def analyst_pattern(hospital_id: str, category: str, request: Request,
     rs = A.pattern_reports(reports, hospital_id, category)
     return templates.TemplateResponse(request, "pattern.html", {
         "pack": pack, "org_name": pack.org_name, "p": pattern, "reports": rs, "slices": A.slices(rs),
-        "brief": A.brief(pattern, pack)})
+        "brief": A.brief(pattern, pack), "trend": A.trend(rs),
+        "spark": A.sparkline_svg(A.weekly_counts(rs), width=260, height=48),
+        "posts": [{"text": t, "url": A.intent_url(t), "chars": len(t)} for t in A.thread(pattern, rs, pack)],
+        "target": pack.meta.get("target", {})})
+
+
+@app.get("/analyst/card/{hospital_id}/{category}.svg", dependencies=[Depends(analyst_auth)])
+async def analyst_card(hospital_id: str, category: str, engine: Engine = Depends(engine_of)):
+    pack = _pack_of_hospital(engine, hospital_id)
+    rows = A.patterns(await engine.store.list_reports(), pack)
+    svg = A.card_svg(_pattern_or_404(rows, hospital_id, category), pack)
+    return Response(svg, media_type="image/svg+xml")
 
 
 @app.get("/analyst/brief/{hospital_id}/{category}.md", response_class=PlainTextResponse,

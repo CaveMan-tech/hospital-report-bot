@@ -15,5 +15,10 @@
     "very_large": "over KSh 500,000"
   },
   "local_terms": "'casualty' = emergency department; 'county referral hospital', 'sub-county hospital', 'Level 4/5/6' = public hospital tiers; 'cash deposit' = upfront payment demanded before care; 'waiver' = bill reduction arranged by the medical social worker; 'SHA' = Social Health Authority; 'mortuary' = where bodies are held",
-  "note": "English only. Kiswahili is the next step and needs a fluent reviewer; nothing here was machine-translated."
+  "note": "English only. Kiswahili is the next step and needs a fluent reviewer; nothing here was machine-translated.",
+  "target": {
+    "name": "Acacia County Department of Health (fictional)",
+    "x_handle": "@AcaciaCountyHealth_demo"
+  },
+  "method_url": "https://example.org/method"
 }

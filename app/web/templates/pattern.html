@@ -10,6 +10,11 @@
 <h1>{{ p.reports_90d }} unverified reports of {{ p.category_plain }}</h1><p>{{ p.hospital }} · {{ org_name }}</p></header>
 {% if p.includes_sample_data %}<p class="banner">SAMPLE DATA. Fictional hospital, generated reports.</p>{% endif %}
 
+<section><h2>Trend</h2>
+<p>{{ spark|safe }} <span class="trend {{ trend.word }}">{{ trend.word }}</span>
+{% if trend.recent is not none %} · {{ trend.recent }} reports in the last 45 days, {{ trend.earlier }} in the 45 days before{% endif %}</p>
+<p class="note">Weekly numbers are small, so they stay on this screen: they never go into a brief, a thread or a card.</p></section>
+
 <section><h2>Breakdown</h2>
 <p class="note">Any group with fewer than 5 reports is masked. Enough detail combined can identify a family.</p>
 <div class="grid">
@@ -25,6 +30,20 @@
 <p class="actions"><button class="btn" id="copy" type="button">Copy brief</button>
 <a class="btn" href="/analyst/brief/{{ p.hospital_id }}/{{ p.category }}.md">Download .md</a></p></section>
 
+<section><h2>Ready to post</h2>
+<p class="note">For {{ org_name }} to review and publish under its own name. Every number below comes from the pattern
+above; nothing here is written by AI. Addressed to {{ target.name }} ({{ target.x_handle }}).</p>
+<div class="two">
+<ol class="thread">
+{% for post in posts %}<li><p>{{ post.text }}</p>
+<p class="actions"><button class="btn small copy" type="button" data-text="{{ post.text }}">Copy</button>
+{% if loop.first %}<a class="btn small" href="{{ post.url }}" target="_blank" rel="noopener noreferrer">Open in X</a>{% endif %}
+<small>{{ post.chars }} / 280</small></p></li>{% endfor %}
+</ol>
+<div><img id="card" src="/analyst/card/{{ p.hospital_id }}/{{ p.category }}.svg" alt="Share card for this pattern" width="600" height="338">
+<p class="actions"><button class="btn small" id="png" type="button">Download card as PNG</button></p></div>
+</div></section>
+
 <section><h2>Reports behind this pattern</h2>
 <p class="note">Redacted summaries only. Original messages are never kept.</p>
 <div class="scroll"><table><thead><tr><th>Week</th><th>Summary</th><th>Details</th><th>Follow-up</th><th>Credibility</th><th></th></tr></thead><tbody>
@@ -38,9 +57,18 @@
 {% endfor %}
 </tbody></table></div></section>
 <script>
-document.getElementById('copy').onclick = async e => {
-  try { await navigator.clipboard.writeText(document.getElementById('brief').textContent); e.target.textContent = 'Copied'; }
-  catch (_) { e.target.textContent = 'Select and copy manually'; }
+async function copy(text, btn) {
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+  catch (_) { btn.textContent = 'Select and copy manually'; }
+}
+document.getElementById('copy').onclick = e => copy(document.getElementById('brief').textContent, e.target);
+document.querySelectorAll('.thread .copy').forEach(b => b.onclick = () => copy(b.dataset.text, b));
+document.getElementById('png').onclick = () => {
+  const img = document.getElementById('card'), c = document.createElement('canvas');
+  c.width = 1200; c.height = 675;
+  c.getContext('2d').drawImage(img, 0, 0, 1200, 675);
+  c.toBlob(blob => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'pattern-card.png'; a.click(); URL.revokeObjectURL(a.href); }, 'image/png');
 };
 </script>
 </body></html>

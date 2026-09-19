@@ -104,3 +104,79 @@ def test_content_review_page_lists_everything_to_verify():
         assert "0 of" in page and "Article 43(2)" in page and "new.kenyalaw.org" in page
         assert "app.verify mark ke-nairobi" in page and "ALLOW_UNVERIFIED is ON" in page
         assert "A1.emergency_refused" in c.get("/analyst/content", auth=AUTH).text
+
+
+def _all_patterns():
+    for pid in ("ng-lagos", "ke-nairobi"):
+        pack = Pack(pid, allow_unverified=True)
+        reports, _ = build(pack)
+        for pat in A.patterns(reports, pack):
+            yield pack, pat, A.pattern_reports(reports, pat["hospital_id"], pat["category"])
+
+
+def test_every_thread_post_fits_and_uses_only_numbers_from_the_pattern():
+    for pack, pat, rs in _all_patterns():
+        posts = A.thread(pat, rs, pack)
+        assert len(posts) == 5 and all(len(p) <= 280 for p in posts), [len(p) for p in posts]
+        assert "unverified" in posts[0] and "SAMPLE DATA" in posts[0] and pack.meta["target"]["x_handle"] in posts[0]
+        assert "not rates" in posts[4] and pack.org_name in posts[4]
+        allowed = {str(v) for v in pat.values() if isinstance(v, int) and not isinstance(v, bool)}
+        body = " ".join(posts[:2]).replace(pat["hospital"], "")   # "Level 5 Hospital" is a name, not a statistic
+        numbers = set(re.findall(r"(?<![/\d])\b\d+\b(?!/)", body)) - {str(A.WINDOW_DAYS)}
+        assert numbers <= allowed, (numbers, allowed)
+
+
+def test_thread_withholds_unverified_law_in_production_mode():
+    pack = Pack("ke-nairobi", allow_unverified=False)
+    reports, _ = build(pack)
+    pat = A.patterns(reports, pack)[0]
+    text = " ".join(A.thread(pat, A.pattern_reports(reports, pat["hospital_id"], pat["category"]), pack))
+    assert "Article 43" not in text and "pending verification" in text
+
+
+def test_dominant_facts_are_only_stated_when_safe_and_true():
+    from app.engine.models import Report
+    def r(dept, time):
+        return Report(ref_code_hmac="x", category="neglect", severity="not_severe", department=dept, time_bucket=time)
+    many = [r("ward", "night")] * 6 + [r("emergency", "day")] * 2
+    assert A._dominant(many, "time_bucket", A._TIME_WORDS) == "at night"
+    few = [r("ward", "night")] * 4 + [r("emergency", "day")] * 1          # majority, but under the threshold
+    assert A._dominant(few, "time_bucket", A._TIME_WORDS) is None
+    split = [r("ward", "night")] * 5 + [r("ward", "day")] * 6               # over threshold, but not most
+    assert A._dominant(split, "time_bucket", A._TIME_WORDS) == "during the day"
+    assert A._dominant([r("unknown", "unknown")] * 9, "department", A._DEPT_WORDS) is None
+
+
+def test_card_is_safe_svg_with_the_count_and_the_sample_mark():
+    for pack, pat, _ in _all_patterns():
+        svg = A.card_svg(pat, pack)
+        assert svg.startswith("<svg") and f">{pat['reports_90d']}</text>" in svg
+        assert "SAMPLE DATA" in svg and "unverified" in svg and "<script" not in svg
+    evil = dict(pat, hospital='<script>alert(1)</script> & Sons')
+    assert "<script>" not in A.card_svg(evil, pack) and "&lt;script&gt;" in A.card_svg(evil, pack)
+
+
+def test_trend_words_and_small_halves_stay_hidden():
+    from datetime import UTC, datetime, timedelta
+
+    from app.engine.models import Report
+    now = datetime.now(UTC)
+    def at(days):
+        return Report(ref_code_hmac="x", category="abuse", severity="not_severe", created_at=now - timedelta(days=days))
+    rising = [at(5)] * 8 + [at(60)] * 2
+    assert A.trend(rising)["word"] == "rising" and A.trend(rising)["recent"] is None     # earlier half is under 5
+    both = [at(5)] * 9 + [at(60)] * 5
+    assert A.trend(both) == {"word": "rising", "recent": 9, "earlier": 5}
+    assert A.trend([at(5)] * 5 + [at(60)] * 5)["word"] == "steady"
+    assert sum(A.weekly_counts(both)) == 14 and len(A.weekly_counts(both)) == 13
+
+
+def test_ready_to_post_section_on_the_pattern_page():
+    with TestClient(app) as c:
+        page = c.get("/analyst/pattern/h-harmattan/emergency_refused", auth=AUTH).text
+        assert "Ready to post" in page and "x.com/intent/tweet" in page and "nothing here is written by AI" in page
+        assert "Last 13 weeks" in c.get("/analyst", auth=AUTH).text
+        card = c.get("/analyst/card/h-harmattan/emergency_refused.svg", auth=AUTH)
+        assert card.status_code == 200 and card.headers["content-type"].startswith("image/svg+xml")
+        assert c.get("/analyst/card/h-harmattan/emergency_refused.svg").status_code == 401
+        assert c.get("/analyst/card/h-palmgrove/abuse.svg", auth=AUTH).status_code == 404

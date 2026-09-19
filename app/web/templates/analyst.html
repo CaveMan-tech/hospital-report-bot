@@ -16,12 +16,13 @@ reports exist. These are signals that warrant investigation, not rates. Do not r
 {% if patterns %}
 <div class="scroll"><table>
 <thead><tr><th>Hospital</th><th>Problem</th><th class="n">Reports</th><th class="n">In danger at the time</th>
-<th class="n">Answered follow-up</th><th class="n">Unchanged or worse</th><th class="n">Held for review</th><th></th></tr></thead>
+<th class="n">Answered follow-up</th><th class="n">Unchanged or worse</th><th class="n">Held for review</th><th>Last 13 weeks</th><th></th></tr></thead>
 <tbody>
 {% for p in patterns %}
 <tr><td>{{ p.hospital }}</td><td>{{ p.category_plain }}</td><td class="n strong">{{ p.reports_90d }}</td>
 <td class="n">{{ p.severe }}</td><td class="n">{{ p.followed_up }}</td><td class="n">{{ p.unchanged_or_worse }}</td>
 <td class="n">{{ p.flagged or "" }}</td>
+<td>{{ p.spark|safe }} <span class="trend {{ p.trend }}">{{ p.trend }}</span></td>
 <td><a href="/analyst/pattern/{{ p.hospital_id }}/{{ p.category }}">Open</a></td></tr>
 {% endfor %}
 </tbody></table></div>
