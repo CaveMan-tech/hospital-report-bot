@@ -70,8 +70,8 @@ class Pack:
             f"Local terms: {self.meta.get('local_terms', 'none')}."
         )
 
-    def _check(self, kind: str, key: str, verified: bool) -> None:
-        if verified:
+    def _check(self, kind: str, key: str, entry: dict, always_gated: bool = False) -> None:
+        if is_verified(entry, always_gated):
             return
         if self.allow_unverified:
             log.warning("Sending UNVERIFIED %s %r (ALLOW_UNVERIFIED is on)", kind, key)
@@ -88,12 +88,12 @@ class Pack:
 
     def _message(self, key: str, lang: str, **fields: str) -> str:
         entry = self.messages[key]
-        self._check("message", key, entry["verified"])
+        self._check("message", key, entry)
         text = entry.get(lang) or entry["en"]
 
         def contact(match: re.Match) -> str:
             c = self.contacts[match.group(1)]
-            self._check("contact", c["id"], c["verified"])
+            self._check("contact", c["id"], c, always_gated=True)
             return c["text"]
 
         text = _CONTACT_RE.sub(contact, text)
@@ -101,6 +101,30 @@ class Pack:
         for name, value in fields.items():
             text = text.replace("{" + name + "}", value)
         return text.strip()
+
+    def gated_entries(self) -> list[dict]:
+        """Everything a human must verify, for the content review page and the verify command."""
+        out = []
+
+        def row(file: str, key: str, text: str, entry: dict) -> None:
+            out.append({
+                "file": file, "id": key, "text": text, "citation": entry.get("source", ""),
+                "check_against": entry.get("check_against", []), "note": entry.get("note", ""),
+                "verified": is_verified(entry, always_gated=True),
+                "claimed_without_provenance": bool(entry.get("verified")) and not is_verified(entry, True),
+                **{f: entry.get(f, "") for f in PROVENANCE},
+            })
+
+        for key, e in self.messages.items():
+            if e.get("gated"):
+                row("messages", key, e["en"], e)
+        for e in self.rights:
+            row("rights", e["id"], e["text_en"], e)
+        for e in self.contacts.values():
+            row("contacts", e["id"], f"{e['label']}: {e['text']}", e)
+        for e in self.asks.values():
+            row("asks", e["category"], f"{e['ask_text']}  |  {e['law_line']}", e)
+        return out
 
     def label(self, group: str, key: str, lang: str = "en") -> str:
         entry = self.labels[group][key] if group != "unknown_hospital" else self.labels[group]
@@ -117,7 +141,7 @@ class Pack:
             if category not in r["category"]:
                 continue
             try:
-                self._check("right", r["id"], r["verified"])
+                self._check("right", r["id"], r, always_gated=True)
             except UnverifiedContent:
                 continue
             right_text = (r.get(f"text_{lang}") or r["text_en"])
@@ -140,6 +164,19 @@ class Pack:
                 if score > best_score:
                     best, best_score = h, score
         return best if best_score >= 0.82 else None
+
+
+PROVENANCE = ("verified_by", "verified_on", "verified_source")
+
+
+def is_verified(entry: dict, always_gated: bool = False) -> bool:
+    """A gated entry (law, phone number, contact, organisation) only counts as verified when it
+    says WHO checked it, WHEN, and AGAINST WHAT. `"verified": true` on its own is not enough."""
+    if not entry.get("verified"):
+        return False
+    if always_gated or entry.get("gated"):
+        return all(str(entry.get(f) or "").strip() for f in PROVENANCE)
+    return True
 
 
 def _norm(s: str) -> str:

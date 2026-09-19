@@ -95,3 +95,12 @@ def test_full_loop_report_in_pattern_moves():
         before = count()
         c.post("/api/chat", json={"text": "A nurse slapped me last week at Lagoon View General Hospital maternity ward"})
         assert count() == before + 1
+
+
+def test_content_review_page_lists_everything_to_verify():
+    with TestClient(app) as c:
+        assert c.get("/analyst/content").status_code == 401
+        page = c.get("/analyst/content?pack=ke-nairobi", auth=AUTH).text
+        assert "0 of" in page and "Article 43(2)" in page and "new.kenyalaw.org" in page
+        assert "app.verify mark ke-nairobi" in page and "ALLOW_UNVERIFIED is ON" in page
+        assert "A1.emergency_refused" in c.get("/analyst/content", auth=AUTH).text

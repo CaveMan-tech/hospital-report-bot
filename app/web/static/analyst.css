@@ -19,5 +19,7 @@ tr.held{background:var(--held)}
 pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;font:13px/1.5 ui-monospace,Menlo,monospace;max-height:420px;overflow:auto}
 .actions{display:flex;flex-wrap:wrap;gap:8px}
 .btn,button{font:inherit;border:0;border-radius:8px;padding:8px 14px;background:var(--acc);color:var(--acc-fg);text-decoration:none;cursor:pointer}
+td.copy{white-space:pre-wrap;min-width:32ch;max-width:60ch}small{color:var(--mut)}
+code{font:12px ui-monospace,Menlo,monospace}
 .row-actions{white-space:nowrap}.row-actions form{display:inline}
 .row-actions button{background:none;color:var(--fg);border:1px solid var(--line);padding:3px 8px;font-size:.85rem}

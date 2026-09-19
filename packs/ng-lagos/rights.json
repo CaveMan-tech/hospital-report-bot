@@ -8,7 +8,13 @@
     "text_pcm": "You get right make dem treat you with respect.",
     "source": "Patients' Bill of Rights (2018)",
     "verified": false,
-    "note": "VERIFY exact wording"
+    "note": "VERIFY exact wording",
+    "check_against": [
+      {
+        "label": "Patients' Bill of Rights (FCCPC / Federal Ministry of Health, 2018): official PDF",
+        "url": ""
+      }
+    ]
   },
   {
     "id": "quality_care",
@@ -19,7 +25,13 @@
     "text_pcm": "You get right to better care, and make dem attend to you quick when you need am.",
     "source": "Patients' Bill of Rights (2018)",
     "verified": false,
-    "note": "VERIFY exact wording"
+    "note": "VERIFY exact wording",
+    "check_against": [
+      {
+        "label": "Patients' Bill of Rights (FCCPC / Federal Ministry of Health, 2018): official PDF",
+        "url": ""
+      }
+    ]
   },
   {
     "id": "complain",
@@ -34,6 +46,12 @@
     "text_pcm": "You get right to complain, and make dem hear you.",
     "source": "Patients' Bill of Rights (2018)",
     "verified": false,
-    "note": "VERIFY exact wording"
+    "note": "VERIFY exact wording",
+    "check_against": [
+      {
+        "label": "Patients' Bill of Rights (FCCPC / Federal Ministry of Health, 2018): official PDF",
+        "url": ""
+      }
+    ]
   }
 ]

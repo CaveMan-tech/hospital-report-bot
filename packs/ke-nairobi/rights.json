@@ -7,7 +7,21 @@
     "text_en": "No one may be denied emergency medical treatment, and in an emergency you must be stabilised whether or not you can pay at that moment.",
     "source": "Constitution of Kenya 2010, Art 43(2); Health Act 2017, s.7; Patients' Rights Charter 2013",
     "verified": false,
-    "note": "'at that moment' is there so nobody reads it as 'free'"
+    "note": "'at that moment' is there so nobody reads it as 'free'",
+    "check_against": [
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      },
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      },
+      {
+        "label": "Kenya National Patients' Rights Charter 2013",
+        "url": "https://kmpdc.go.ke/resources/PATIENTS_CHARTER_2013.pdf"
+      }
+    ]
   },
   {
     "id": "liberty",
@@ -16,7 +30,17 @@
     ],
     "text_en": "You have the right to your freedom, your dignity and your freedom of movement. Kenyan courts have ruled that a hospital may not hold a patient or a body over an unpaid bill.",
     "source": "Constitution, Arts 28, 29 and 39; [2015] KEHC 8096 (KLR)",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      },
+      {
+        "label": "MAO & another v Attorney General [2015] KEHC 8096 (KLR)",
+        "url": "https://new.kenyalaw.org/akn/ke/judgment/kehc/2015/8096/eng@2015-09-17"
+      }
+    ]
   },
   {
     "id": "dignity",
@@ -25,7 +49,21 @@
     ],
     "text_en": "You have the right to be treated with dignity and respect.",
     "source": "Health Act 2017, s.5(2); Patients' Rights Charter 2013",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      },
+      {
+        "label": "Kenya National Patients' Rights Charter 2013",
+        "url": "https://kmpdc.go.ke/resources/PATIENTS_CHARTER_2013.pdf"
+      },
+      {
+        "label": "JOO v Attorney General [2018] KEHC 7540 (KLR)",
+        "url": "https://new.kenyalaw.org/akn/ke/judgment/kehc/2018/7540/eng@2018-03-22"
+      }
+    ]
   },
   {
     "id": "quality_care",
@@ -34,7 +72,17 @@
     ],
     "text_en": "You have the right to the highest attainable standard of health care, and health workers have a duty to care for every person entrusted to them.",
     "source": "Constitution, Art 43(1)(a); Health Act 2017, ss.5(1) and 12(2)(a)",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      },
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      }
+    ]
   },
   {
     "id": "complain",
@@ -47,6 +95,16 @@
     ],
     "text_en": "You have the right to complain about how you were treated at a health facility, to have it investigated, and to be told in writing within three months what was done.",
     "source": "Health Act 2017, s.14; Patients' Rights Charter 2013",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      },
+      {
+        "label": "Kenya National Patients' Rights Charter 2013",
+        "url": "https://kmpdc.go.ke/resources/PATIENTS_CHARTER_2013.pdf"
+      }
+    ]
   }
 ]

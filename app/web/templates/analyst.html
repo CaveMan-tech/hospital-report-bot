@@ -7,7 +7,8 @@
 </head>
 <body>
 <header><h1>Patterns · {{ pack.title }}</h1><p>{{ org_name }} · analyst view · last {{ window }} days
-{% for p in packs %}{% if p.id != pack.id %} · <a href="/analyst?pack={{ p.id }}">switch to {{ p.title }}</a>{% endif %}{% endfor %}</p></header>
+{% for p in packs %}{% if p.id != pack.id %} · <a href="/analyst?pack={{ p.id }}">switch to {{ p.title }}</a>{% endif %}{% endfor %}
+ · <a href="/analyst/content?pack={{ pack.id }}">content review</a></p></header>
 {% if sample %}<p class="banner">SAMPLE DATA. Fictional hospitals, generated reports.</p>{% endif %}
 <p class="note">Anonymous, unverified reports. A pattern appears here only once {{ threshold }} separate credible
 reports exist. These are signals that warrant investigation, not rates. Do not rank hospitals with them.

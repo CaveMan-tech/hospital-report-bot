@@ -103,7 +103,7 @@ def brief(pattern: dict, pack: Pack, now: datetime | None = None) -> str:
     if ask:
         ask_text = ask["ask_text"]
         try:
-            pack._check("ask", pattern["category"], ask["verified"])
+            pack._check("ask", pattern["category"], ask, always_gated=True)
             law_line = ask["law_line"]
         except UnverifiedContent:
             pass

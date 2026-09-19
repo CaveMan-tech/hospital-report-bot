@@ -91,7 +91,9 @@ fake it._
 
 ## Before you record
 
-- [ ] Verify pack content and flip the `verified` flags, so the real messages show.
+- [ ] Verify pack content so the real messages show: open `/analyst/content`, check each entry
+      against its source, and sign it off with `uv run python -m app.verify mark ...`. Do not
+      flip flags by hand; a bare flag is ignored on purpose.
 - [ ] Re-run the evaluation the day you record (`uv run python -m evals.run`) and quote that
       day's result. If it is not zero, say the real number and what you did about it. An honest
       number beats a suspicious one.

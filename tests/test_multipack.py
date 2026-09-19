@@ -1,5 +1,6 @@
 """Scaling across geographies: a new country is a new folder, not new code."""
 
+import json
 import os
 import re
 from pathlib import Path
@@ -40,17 +41,75 @@ def test_every_pack_has_the_same_message_keys_and_five_hospitals(pack_id):
     assert set(pack.meta["amount_buckets"]) == {"small", "medium", "large", "very_large"}
 
 
+RISKY = re.compile(r"[Ss]ection \d|Article \d|Constitution|\b\d{3,4}\b|\{contact:|Council|Act 20|High Court")
+
+
 @pytest.mark.parametrize("pack_id", PACK_IDS)
-def test_law_numbers_and_contacts_always_start_unverified(pack_id):
-    """No pack may ship a legal claim, phone number or contact that a human has not signed off."""
-    pack = Pack(pack_id)
-    risky = re.compile(r"Section \d|section \d|Article \d|Constitution|\b\d{3,4}\b|\{contact:|Council|Act 20")
-    for key, entry in pack.messages.items():
-        if risky.search(entry["en"]) and entry["verified"]:
-            pytest.fail(f"{pack_id}:{key} contains legal/contact content but is marked verified. "
-                        "If a human really verified it, add the key to VERIFIED_BY_HUMAN in this test.")
-    for c in pack.contacts.values():
-        assert "verified" in c
+def test_anything_with_law_numbers_or_contacts_is_gated(pack_id):
+    """A message that mentions a law, a phone number, a contact or a regulator must be gated,
+    so it can never be sent on a bare `"verified": true`."""
+    for key, entry in Pack(pack_id).messages.items():
+        texts = " ".join(str(v) for k, v in entry.items() if k in ("en", "pcm") and v)
+        if RISKY.search(texts):
+            assert entry.get("gated"), f"{pack_id}:{key} has legal/contact content but is not gated"
+
+
+@pytest.mark.parametrize("pack_id", PACK_IDS)
+def test_verified_gated_content_always_says_who_when_and_against_what(pack_id):
+    """To verify an entry use:  uv run python -m app.verify mark <pack> <file> <id> --by ... --source ...
+    Flipping the flag by hand without provenance does NOT count, and this test says so."""
+    for row in Pack(pack_id).gated_entries():
+        assert not row["claimed_without_provenance"], (
+            f"{pack_id}/{row['file']}/{row['id']} says verified but has no verified_by / verified_on / "
+            "verified_source. Use `python -m app.verify mark` so the sign-off is recorded.")
+        if row["verified"]:
+            assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", row["verified_on"])
+
+
+def test_a_bare_verified_flag_does_not_unlock_gated_content(tmp_path, monkeypatch):
+    import shutil
+
+    from app.engine import packs as P
+    shutil.copytree(P.PACKS_DIR / "ng-lagos", tmp_path / "ng-lagos")
+    monkeypatch.setattr(P, "PACKS_DIR", tmp_path)
+    path = tmp_path / "ng-lagos" / "messages.json"
+    data = json.loads(path.read_text())
+
+    data["A1.emergency_refused"]["verified"] = True                      # flag flipped by hand
+    path.write_text(json.dumps(data))
+    assert "Section 20" not in P.Pack("ng-lagos").message("A1.emergency_refused")
+
+    data["A1.emergency_refused"].update(verified_by="A. Lawyer", verified_on="2026-09-20",
+                                        verified_source="National Health Act 2014 s.20, official gazette")
+    path.write_text(json.dumps(data))
+    assert "Section 20" in P.Pack("ng-lagos").message("A1.emergency_refused")
+    assert "safe place" in P.Pack("ng-lagos").message("S0.greeting")      # plain copy needs no provenance
+
+
+def test_verify_command_records_provenance_and_can_be_undone(tmp_path, monkeypatch):
+    import shutil
+    import sys
+
+    from app import verify as V
+    from app.engine import packs as P
+    shutil.copytree(P.PACKS_DIR / "ke-nairobi", tmp_path / "ke-nairobi")
+    monkeypatch.setattr(P, "PACKS_DIR", tmp_path)
+    monkeypatch.setattr(V, "PACKS_DIR", tmp_path)
+
+    def run(*argv):
+        monkeypatch.setattr(sys, "argv", ["verify", *argv])
+        V.main()
+
+    run("mark", "ke-nairobi", "rights", "dignity", "--by", "W. Advocate", "--source", "Health Act 2017 s.5(2), kenyalaw.org")
+    row = next(r for r in P.Pack("ke-nairobi").gated_entries() if r["id"] == "dignity")
+    assert row["verified"] and row["verified_by"] == "W. Advocate" and row["verified_on"]
+    assert P.Pack("ke-nairobi").rights_for("abuse", "en")[0][0] == "dignity"
+    run("unmark", "ke-nairobi", "rights", "dignity")
+    assert P.Pack("ke-nairobi").rights_for("abuse", "en") == []
+    with pytest.raises(SystemExit):                                       # plain copy cannot be "verified"
+        run("mark", "ke-nairobi", "messages", "S0.greeting", "--by", "X", "--source", "anything at all")
+    with pytest.raises(SystemExit):                                       # a source is mandatory
+        run("mark", "ke-nairobi", "rights", "dignity", "--by", "X", "--source", "n/a")
 
 
 def test_no_country_specific_strings_in_code():

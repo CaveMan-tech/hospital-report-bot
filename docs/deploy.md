@@ -48,9 +48,10 @@ On Railway the app refuses to start if `REF_CODE_SECRET` or `ANALYST_PASSWORD` a
 `ALLOW_UNVERIFIED` is on. It logs a loud `DEPLOYMENT CHECK` warning, but still starts, if the
 extractor is the mock or the store is in-memory, so a throwaway demo deployment is possible.
 
-Because `ALLOW_UNVERIFIED` must be off, **any pack entry still marked `"verified": false` is replaced
-by the safe fallback message in production.** Before recording the demo video against the deployed
-app, verify each entry against its primary source and flip its flag in `packs/ng-lagos/`.
+Because `ALLOW_UNVERIFIED` must be off, **any gated pack entry without a recorded sign-off is
+replaced by the safe fallback message in production.** Before recording the demo video against the
+deployed app, open `/analyst/content`, check each entry against its primary source, and sign it off
+with `uv run python -m app.verify mark ...`, then commit and redeploy.
 
 ## 5. After deploying
 

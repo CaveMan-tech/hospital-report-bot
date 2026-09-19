@@ -23,19 +23,48 @@
     "verified": false,
     "en": "What you describe is against the law. Section 20 of the National Health Act says no hospital or health worker may refuse a person emergency treatment for any reason.\n\nDo this now:\n1. If the person is getting worse, getting care comes first. Call 112 or 767 (free in Lagos), or go to the nearest other hospital. Do not stay to argue.\n2. If you can, ask calmly for the most senior doctor or officer on duty and say: \"Section 20 of the National Health Act says you cannot refuse emergency treatment.\"\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
     "pcm": "Wetin you talk so, law no gree am. Section 20 of National Health Act talk say no hospital or health worker fit refuse to treat person wey get emergency, for any reason.\n\nDo this one now:\n1. If the person condition dey worse, make e get treatment first. Call 112 or 767 (e free for Lagos), or carry am go another hospital wey near. No stay dey argue.\n2. If you fit, ask gently for the most senior doctor or officer wey dey duty, tell am: \"Section 20 of National Health Act talk say una no fit refuse emergency treatment.\"\n3. Write the time, the department, and who you follow talk.\n\nI no fit send anybody come meet you. But I go record am make e count.",
-    "note": "VERIFY: NHA 2014 s.20(1),(2) wording and penalties; 112 and 767 for Lagos. TBD: keep or drop step 2."
+    "note": "VERIFY: NHA 2014 s.20(1),(2) wording and penalties; 112 and 767 for Lagos. TBD: keep or drop step 2.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "National Health Act 2014, section 20(1) and (2): find the official gazette or NASS text",
+        "url": ""
+      },
+      {
+        "label": "Lagos State emergency lines 112 and 767: Lagos State Government / LASEMA official page, then test-call",
+        "url": ""
+      }
+    ]
   },
   "A1.detention": {
     "verified": false,
     "en": "Many people in Nigeria have faced this, and you have options. A hospital bill is a debt, and there are proper ways to settle a debt.\n\nWhat you can do:\n1. Ask to speak to the hospital's medical social services (social welfare) unit about a payment plan or waiver.\n2. Ask for the itemised bill in writing.\n3. Free legal help: {contact:legal_aid}\n\nI cannot send anyone to you. I will record this so it is counted.",
     "pcm": "Plenty people for Nigeria don face this kind thing, and you get options. Hospital bill na debt, and correct way dey to settle debt.\n\nWetin you fit do:\n1. Ask make you see the hospital medical social services (social welfare) people, make una talk about how you go pay small small or whether dem fit waive am.\n2. Ask make dem give you the bill for paper, with everything wey dem charge written.\n3. Free lawyer help: {contact:legal_aid}\n\nI no fit send anybody come meet you. But I go record am make e count.",
-    "note": "VERIFY: social services unit name at Lagos general hospitals; legal_aid contact."
+    "note": "VERIFY: social services unit name at Lagos general hospitals; legal_aid contact.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "Name of the medical social services unit at Lagos general hospitals: ask a hospital or the Health Service Commission",
+        "url": ""
+      },
+      {
+        "label": "Legal aid contacts: see contacts.json",
+        "url": ""
+      }
+    ]
   },
   "A1.generic": {
     "verified": false,
     "en": "If someone is in danger, getting care comes first.\n\nDo this now:\n1. Call 112 or 767 (free in Lagos), or go to the nearest other hospital if you can.\n2. Ask for the most senior doctor or nurse on duty and tell them plainly that the patient needs help now.\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
     "pcm": "If person dey for danger, make e get treatment first.\n\nDo this one now:\n1. Call 112 or 767 (e free for Lagos), or carry the person go another hospital wey near if you fit.\n2. Ask for the most senior doctor or nurse wey dey duty, tell am straight say the patient need help now now.\n3. Write the time, the department, and who you follow talk.\n\nI no fit send anybody come meet you. But I go record am make e count.",
-    "note": "VERIFY: 112 and 767 for Lagos."
+    "note": "VERIFY: 112 and 767 for Lagos.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "Lagos State emergency lines 112 and 767: Lagos State Government / LASEMA official page, then test-call",
+        "url": ""
+      }
+    ]
   },
   "Q.hospital": {
     "verified": true,
@@ -141,13 +170,27 @@
     "verified": false,
     "en": "I cannot judge medical decisions, like whether a diagnosis or treatment was right. I can still record what happened. Complaints about a doctor's professional conduct are handled by the Medical and Dental Council of Nigeria.",
     "pcm": null,
-    "note": "VERIFY: MDCN complaint route."
+    "note": "VERIFY: MDCN complaint route.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "Medical and Dental Council of Nigeria: complaints remit, official site",
+        "url": ""
+      }
+    ]
   },
   "E.handoff": {
     "verified": false,
     "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. Please contact: {contact:dsva}",
     "pcm": null,
-    "note": "VERIFY: Lagos DSVA contact."
+    "note": "VERIFY: Lagos DSVA contact.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "Lagos DSVA contact: see contacts.json",
+        "url": ""
+      }
+    ]
   },
   "E.retry": {
     "verified": true,

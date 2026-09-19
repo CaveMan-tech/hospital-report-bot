@@ -39,6 +39,9 @@ writing tests and the evaluation runner; first drafts of message copy for the au
 - **Research with receipts.** The Kenya pack was built from a sourced research file
   (`docs/research/kenya-pack.md`) in which every claim carries a confidence label and a primary
   source, and everything still ships unverified until a human checks it.
+- **Critical self-review.** Asked to find the weakest parts of its own build, the AI found that
+  the bot failed outright when the model was unreachable, and that one of its own tests pointed
+  to a list that did not exist. Both were fixed the same day.
 - **Evaluation, not vibes.** A 30-story set with a single headline metric: missed emergencies.
 - **AI output that was rejected or corrected:** _[Ikechi to fill in: e.g. the first stack choice
   and the first database choice were both changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table

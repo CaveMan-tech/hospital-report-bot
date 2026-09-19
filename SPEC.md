@@ -346,7 +346,9 @@ packs/ng-lagos/
   hospitals.seed.json  (fictional in PoC)
 ```
 
-The bot refuses to send any entry where `verified` is false. Enforced in code and covered by a test.
+The bot refuses to send gated content (anything with a law, a number, a contact or a regulator; all rights, asks and contacts) unless it carries a recorded sign-off: `verified_by`, `verified_on`, `verified_source`. A bare `verified: true` does not count. Sign-off is made with `python -m app.verify mark`, shown at `/analyst/content`, and lives in the pack files so the repository history is the audit trail. Enforced in code and covered by tests.
+
+**Fail-safe.** If the AI call fails or exceeds its timeout, the engine degrades instead of failing: keyword fallback for facets, the danger question is always asked, the pre-written escalation still goes out, deterministic handoff checks still run, and the report is held for review rather than counted. If the whole request fails, the reply is pack-worded safety text, which is also baked into the page for when the network drops.
 
 **Second pack: `packs/ke-nairobi/`** (English only). Kenyan emergency-treatment law (Constitution Art 43(2), Health Act 2017 s.7), High Court case law on detention of patients and bodies, the Patients' Rights Charter, Kenyan contacts and terminology ("casualty", "county referral hospital", "cash deposit", "waiver"), fictional Nairobi hospitals and a fictional organisation. Sourced in `docs/research/kenya-pack.md` with a confidence label per claim; every legal line and contact ships `verified: false` `[VERIFY with a Kenyan lawyer; test-call every number]`. Kiswahili is the next step and needs a fluent reviewer; nothing is machine-translated.
 

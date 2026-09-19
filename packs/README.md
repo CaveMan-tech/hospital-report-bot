@@ -18,13 +18,26 @@ The engine contains no law, no phone number, no hospital and no organisation nam
    escalation messages, `E.clinical`, `E.handoff`. Add a field per extra language code.
 4. `rights.json`, `asks.json`, `contacts.json`: the local law, the asks to management, and contacts.
 5. `hospitals.seed.json`: at least five facilities (fictional for a demo).
-6. Set every entry that mentions a law, a number or an organisation to `"verified": false`.
-   A human who has read the primary source, and test-called the number, flips it to `true`.
-   Until then the bot sends a safe fallback instead. `tests/test_multipack.py` fails if legal or
-   contact content is marked verified without being on the human-verified list.
+6. Mark every message that mentions a law, a number or an organisation `"gated": true`, leave
+   it `"verified": false`, and list what it must be checked against in `check_against`. Rights,
+   asks and contacts are always gated. Until a human signs an entry off, the bot sends a safe
+   fallback instead. A bare `"verified": true` does not count: the sign-off must say who, when and
+   against what, and a test enforces it. See "Verifying content" below.
 7. Add the pack id to the `PACKS` environment variable and run `uv run pytest`. The parity tests
    check that the new pack has every message key, all four asks and the amount buckets.
 8. Add a few local stories to `evals/stories.jsonl` with `"pack": "<id>"` and run the evaluation.
+
+## Verifying content
+
+```bash
+uv run python -m app.verify list <pack>
+uv run python -m app.verify mark <pack> <messages|rights|contacts|asks> <id> --by "Your Name" --source "citation and URL"
+uv run python -m app.verify unmark <pack> <file> <id>
+```
+
+`/analyst/content?pack=<id>` shows every gated entry beside the source to check it against, and
+who has signed it off. Sign-off is stored in the pack files, so `git log -p packs/` is the audit
+trail. For phone numbers, "verified" means someone test-called it.
 
 Open `/?pack=<id>` for the chat and `/analyst?pack=<id>` for that country's patterns. Reports,
 patterns, briefs and follow-ups never mix packs.

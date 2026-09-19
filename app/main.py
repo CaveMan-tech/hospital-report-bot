@@ -217,6 +217,17 @@ async def analyst_home(request: Request, pack: str | None = None, engine: Engine
         "held_back": sum(r.credibility == "review" for r in reports)})
 
 
+@app.get("/analyst/content", response_class=HTMLResponse, dependencies=[Depends(analyst_auth)])
+async def analyst_content(request: Request, pack: str | None = None, engine: Engine = Depends(engine_of)):
+    """Every law, number and contact the bot could send, with what to check it against and who
+    has signed it off. Read-only: sign-off happens in the pack files so git is the audit trail."""
+    current = engine.pack_for(pack)
+    rows = current.gated_entries()
+    return templates.TemplateResponse(request, "content.html", {
+        "pack": current, "packs": list(engine.packs.values()), "rows": rows,
+        "done": sum(r["verified"] for r in rows), "allow_unverified": current.allow_unverified})
+
+
 @app.get("/analyst/pattern/{hospital_id}/{category}", response_class=HTMLResponse,
          dependencies=[Depends(analyst_auth)])
 async def analyst_pattern(hospital_id: str, category: str, request: Request,

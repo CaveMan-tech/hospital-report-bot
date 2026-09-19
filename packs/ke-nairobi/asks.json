@@ -3,24 +3,60 @@
     "category": "emergency_refused",
     "ask_text": "Publish your casualty admission policy and confirm in writing that no emergency patient is turned away, delayed or transferred for lack of a deposit.",
     "law_line": "Article 43(2) of the Constitution: \"A person shall not be denied emergency medical treatment\"; Health Act 2017, section 7.",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      },
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      }
+    ]
   },
   {
     "category": "detention",
     "ask_text": "Publish your policy on unpaid bills and your waiver procedure, and confirm in writing that no patient or body is held over a debt.",
     "law_line": "The High Court has repeatedly held that detaining patients or bodies over bills violates Articles 28, 29 and 39 of the Constitution, and in 2015 directed clear waiver guidelines for all public hospitals ([2015] KEHC 8096 (KLR)).",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "MAO & another v Attorney General [2015] KEHC 8096 (KLR)",
+        "url": "https://new.kenyalaw.org/akn/ke/judgment/kehc/2015/8096/eng@2015-09-17"
+      },
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      }
+    ]
   },
   {
     "category": "abuse",
     "ask_text": "Display how patients can report staff conduct safely, and publish how many conduct complaints were received and acted on this year.",
     "law_line": "Health Act 2017, section 5(2) (dignity and respect) and section 14 (complaints procedure).",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      }
+    ]
   },
   {
     "category": "neglect",
     "ask_text": "Publish staffing levels per shift for the affected departments and the plan to cover nights and weekends.",
     "law_line": "Health Act 2017, section 12(2)(a); Article 43(1)(a) of the Constitution.",
-    "verified": false
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      },
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      }
+    ]
   }
 ]

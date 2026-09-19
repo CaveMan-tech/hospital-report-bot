@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content review · {{ pack.title }}</title>
+<link rel="stylesheet" href="/static/analyst.css">
+</head>
+<body>
+<header><p><a href="/analyst?pack={{ pack.id }}">← Patterns</a>
+{% for p in packs %}{% if p.id != pack.id %} · <a href="/analyst/content?pack={{ p.id }}">switch to {{ p.title }}</a>{% endif %}{% endfor %}</p>
+<h1>Content review · {{ pack.title }}</h1>
+<p>{{ done }} of {{ rows|length }} legal lines, numbers and contacts verified by a human</p></header>
+<p class="note">The bot refuses to send any of these until someone has checked it against the primary source and,
+for phone numbers, test-called it. Until then reporters get a safe fallback message. Sign-off is recorded in the
+pack files (who, when, against what), so the repository history is the audit trail:<br>
+<code>uv run python -m app.verify mark {{ pack.id }} &lt;file&gt; &lt;id&gt; --by "Your name" --source "citation and URL"</code></p>
+{% if allow_unverified %}<p class="banner">ALLOW_UNVERIFIED is ON in this environment: unverified content is being shown. Development only.</p>{% endif %}
+<div class="scroll"><table>
+<thead><tr><th>Status</th><th>Where</th><th>What the bot would say</th><th>Check it against</th></tr></thead>
+<tbody>
+{% for r in rows %}
+<tr class="{{ '' if r.verified else 'held' }}">
+<td>{% if r.verified %}<strong>Verified</strong><br><small>{{ r.verified_by }}<br>{{ r.verified_on }}<br>{{ r.verified_source }}</small>
+{% elif r.claimed_without_provenance %}<strong>Not counted</strong><br><small>flag set by hand, no sign-off recorded</small>
+{% else %}To verify{% endif %}</td>
+<td><code>{{ r.file }}</code><br><code>{{ r.id }}</code></td>
+<td class="copy">{{ r.text }}{% if r.citation %}<br><small>Cited as: {{ r.citation }}</small>{% endif %}{% if r.note %}<br><small>Note: {{ r.note }}</small>{% endif %}</td>
+<td>{% for c in r.check_against %}{% if c.url and c.url.startswith("http") %}<a href="{{ c.url }}" target="_blank" rel="noopener noreferrer">{{ c.label }}</a>{% else %}{{ c.label }}{% if c.url %} <small>({{ c.url }})</small>{% endif %}{% endif %}<br>{% endfor %}</td>
+</tr>
+{% endfor %}
+</tbody></table></div>
+</body></html>

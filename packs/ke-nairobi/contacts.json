@@ -8,7 +8,13 @@
     ],
     "verified": false,
     "verified_on": null,
-    "note": "922 launched Aug 2026 and is known only from news reports; 999/112 reach police and are unreliable for ambulances. TEST-CALL before verifying."
+    "note": "922 launched Aug 2026 and is known only from news reports; 999/112 reach police and are unreliable for ambulances. TEST-CALL before verifying.",
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   {
     "id": "ombudsman",
@@ -22,7 +28,13 @@
     ],
     "verified": false,
     "verified_on": null,
-    "note": "Seen on official site. Test-call."
+    "note": "Seen on official site. Test-call.",
+    "check_against": [
+      {
+        "label": "Office of the Ombudsman: complaints portal",
+        "url": "https://cmis.ombudsman.go.ke"
+      }
+    ]
   },
   {
     "id": "legal_aid",
@@ -33,7 +45,17 @@
     ],
     "verified": false,
     "verified_on": null,
-    "note": "Seen on official sites. Confirm they take hospital-detention cases."
+    "note": "Seen on official sites. Confirm they take hospital-detention cases.",
+    "check_against": [
+      {
+        "label": "Kituo cha Sheria: contact page",
+        "url": "https://kituochasheria.or.ke/contact-us/"
+      },
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   {
     "id": "safety",
@@ -44,7 +66,13 @@
     ],
     "verified": false,
     "verified_on": null,
-    "note": "Medium confidence. Test-call each."
+    "note": "Medium confidence. Test-call each.",
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   {
     "id": "oversight",
@@ -54,6 +82,12 @@
       "all"
     ],
     "verified": false,
-    "verified_on": null
+    "verified_on": null,
+    "check_against": [
+      {
+        "label": "KHPOA: contact page",
+        "url": "https://khpoa.go.ke/contact-us/"
+      }
+    ]
   }
 ]

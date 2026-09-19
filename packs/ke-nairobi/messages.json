@@ -18,17 +18,54 @@
   "A1.emergency_refused": {
     "verified": false,
     "en": "What you describe is against the law in Kenya. Article 43(2) of the Constitution says: \"A person shall not be denied emergency medical treatment.\" Section 7 of the Health Act 2017 says every person has the right to emergency medical treatment, in public and private hospitals.\n\nDo this now:\n1. If the person is getting worse, getting care comes first. Go to the nearest other hospital if you can, or call {contact:emergency}. Do not stay to argue.\n2. If you can, ask calmly for the most senior doctor or officer on duty (the medical superintendent or the casualty in-charge) and say: \"Article 43(2) of the Constitution and section 7 of the Health Act say you cannot refuse emergency treatment.\"\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
-    "note": "VERIFY with a Kenyan lawyer: Constitution Art 43(2), Health Act 2017 s.7 wording. Deliberately does not say treatment is free and does not mention the fine. See docs/research/kenya-pack.md section A."
+    "note": "VERIFY with a Kenyan lawyer: Constitution Art 43(2), Health Act 2017 s.7 wording. Deliberately does not say treatment is free and does not mention the fine. See docs/research/kenya-pack.md section A.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      },
+      {
+        "label": "Health Act 2017 (ss.5, 7, 12, 14)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      },
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   "A1.detention": {
     "verified": false,
     "en": "Many families in Kenya have faced this, and you have options. Kenyan High Court judges have ruled many times that a hospital has no legal right to hold a patient, or a body, to force payment of a bill. The bill is still a debt, and there are proper ways to settle a debt.\n\nWhat you can do:\n1. Ask to see the hospital's medical social worker about a waiver or a payment plan. Offer to sign a written undertaking to pay in instalments.\n2. Ask for the itemised bill in writing, and note the date the patient was discharged or the date the body was first held.\n3. For free help: the Office of the Ombudsman takes complaints about public hospitals: {contact:ombudsman}. For free legal advice: {contact:legal_aid}\n\nI cannot send anyone to you. I will record this so it is counted.",
-    "note": "VERIFY with a Kenyan lawyer. Based on High Court decisions 2015 to 2026 (lead case [2015] KEHC 8096 (KLR)); courts keep the debt alive and some claims have failed. More conservative option: drop the second sentence. See research section B."
+    "note": "VERIFY with a Kenyan lawyer. Based on High Court decisions 2015 to 2026 (lead case [2015] KEHC 8096 (KLR)); courts keep the debt alive and some claims have failed. More conservative option: drop the second sentence. See research section B.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "MAO & another v Attorney General [2015] KEHC 8096 (KLR)",
+        "url": "https://new.kenyalaw.org/akn/ke/judgment/kehc/2015/8096/eng@2015-09-17"
+      },
+      {
+        "label": "Constitution of Kenya 2010 (Art 43, 28, 29, 39)",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      },
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   "A1.generic": {
     "verified": false,
     "en": "If someone is in danger, getting care comes first.\n\nDo this now:\n1. Go to the nearest other hospital if you can, or call {contact:emergency}.\n2. Ask for the most senior doctor or nurse on duty and tell them plainly that the patient needs help now.\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
-    "note": "VERIFY: emergency numbers need test calls."
+    "note": "VERIFY: emergency numbers need test calls.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   "Q.hospital": {
     "verified": true,
@@ -113,12 +150,30 @@
   "E.clinical": {
     "verified": false,
     "en": "I cannot judge medical decisions, like whether a diagnosis or treatment was right. I can still record what happened. Complaints about a doctor's professional conduct are handled by the Kenya Medical Practitioners and Dentists Council, and about a nurse by the Nursing Council of Kenya.",
-    "note": "VERIFY: regulator names and remits."
+    "note": "VERIFY: regulator names and remits.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "KMPDC: for the public",
+        "url": "https://kmpdc.go.ke/for-public/"
+      },
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   "E.handoff": {
     "verified": false,
     "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. Please contact: {contact:safety}",
-    "note": "VERIFY: helpline numbers by test call."
+    "note": "VERIFY: helpline numbers by test call.",
+    "gated": true,
+    "check_against": [
+      {
+        "label": "Research notes with confidence labels",
+        "url": "docs/research/kenya-pack.md"
+      }
+    ]
   },
   "E.retry": {
     "verified": true,

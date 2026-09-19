@@ -8,7 +8,13 @@
     ],
     "verified": false,
     "verified_on": null,
-    "note": "VERIFY: Lagos Office of the Public Defender, Legal Aid Council, NHRC with numbers"
+    "note": "VERIFY: Lagos Office of the Public Defender, Legal Aid Council, NHRC with numbers",
+    "check_against": [
+      {
+        "label": "Lagos Office of the Public Defender, Legal Aid Council, NHRC: official sites, then test-call",
+        "url": ""
+      }
+    ]
   },
   {
     "id": "dsva",
@@ -19,6 +25,12 @@
     ],
     "verified": false,
     "verified_on": null,
-    "note": "VERIFY: Lagos DSVA line"
+    "note": "VERIFY: Lagos DSVA line",
+    "check_against": [
+      {
+        "label": "Lagos State Domestic and Sexual Violence Agency: official site, then test-call",
+        "url": ""
+      }
+    ]
   }
 ]
