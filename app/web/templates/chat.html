@@ -22,7 +22,7 @@
   {% if demo_mode %}<button type="button" class="link" id="nextday">Demo: simulate next day</button>
   {% for p in packs %}{% if p.id != pack.id %}<a class="link" href="/?pack={{ p.id }}">Demo: switch to {{ p.title }}</a>{% endif %}{% endfor %}{% endif %}
 </footer>
-<script>window.PACK = {{ pack.id|tojson }};</script>
+<script>window.PACK = {{ pack.id|tojson }}; window.OFFLINE = {{ pack.message("E.unavailable")|tojson }};</script>
 <script src="/static/chat.js" defer></script>
 </body>
 </html>

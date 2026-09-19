@@ -53,6 +53,7 @@ async def build_engine() -> Engine:
                                 cfg.openai_reasoning_effort),
         pack=[get_pack(pid, cfg.allow_unverified) for pid in _pack_ids(cfg)],
         ref_secret=cfg.ref_code_secret,
+        extract_timeout=cfg.extract_timeout_seconds,
     )
 
 
@@ -147,8 +148,14 @@ async def chat(body: ChatIn, request: Request, engine: Engine = Depends(engine_o
     ip = client_ip(request)
     if not chat_limiter.allow(ip):
         raise HTTPException(429, "Too many messages. Please wait a few minutes.")
-    return await engine.handle_message(body.session_id, body.channel, body.text,
-                                       dedupe_key=dedupe.key(ip), pack_id=body.pack)
+    try:
+        return await engine.handle_message(body.session_id, body.channel, body.text,
+                                           dedupe_key=dedupe.key(ip), pack_id=body.pack)
+    except Exception:
+        # Database down, a bug, anything. The reporter must still see what to do if someone is
+        # in danger, in words from the pack, never a bare "Internal Server Error".
+        logging.getLogger(__name__).exception("chat failed")
+        raise HTTPException(503, engine.pack_for(body.pack).message("E.unavailable")) from None
 
 
 @app.post("/api/report/lookup")

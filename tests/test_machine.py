@@ -250,3 +250,63 @@ async def test_staff_whistleblower_flow(store):
     r = await engine.handle_message(None, "web", "I am a nurse, a patient is dying in casualty now and they want deposit")
     r = await engine.handle_message(r.session_id, "web", "yes")
     assert "Section 20" in "\n".join(r.replies)                     # staff who say YES get the escalation
+
+
+# ---------------------------------------------------------------- fail-safe: the AI is down
+
+async def _broken(transcript, context=""):
+    raise RuntimeError("openai is down")
+
+
+async def _hangs(transcript, context=""):
+    import asyncio
+    await asyncio.sleep(30)
+
+
+async def test_emergency_still_gets_escalation_when_the_ai_is_down(store):
+    engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
+    r = await engine.handle_message(None, "web",
+        "My mother is bleeding right now at Harmattan General Hospital, they refused to treat her, pay deposit")
+    text = "\n".join(r.replies)
+    assert "Section 20" in text and "112" in text and r.ref_code
+    report = next(iter(store.reports.values()))
+    assert report.credibility == "review" and report.extra == {"degraded_extraction": True}
+    assert "AI service could not be reached" in report.summary_redacted
+
+
+async def test_ai_down_never_skips_the_danger_question(store):
+    engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
+    # The keyword fallback reads this as clearly past. Normally that skips the question. Not when degraded.
+    r = await engine.handle_message(None, "web", "Last month a nurse insulted my wife at Harmattan General Hospital maternity")
+    assert r.state == "S2" and "danger right now" in r.replies[0]
+    r = await engine.handle_message(r.session_id, "web", "yes")
+    assert "112" in "\n".join(r.replies)
+
+
+async def test_ai_down_never_bounces_the_reporter_as_nonsense(store):
+    engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
+    g = await engine.handle_message(None, "web", "hi")
+    r = await engine.handle_message(g.session_id, "web", "help me abeg")
+    assert "did not quite understand" not in " ".join(r.replies) and r.state == "S2"
+
+
+async def test_slow_ai_times_out_into_the_same_fallback(store):
+    engine = Engine(store, _hangs, Pack("ng-lagos", allow_unverified=True), "s", extract_timeout=0.05)
+    r = await engine.handle_message(None, "web", "Nobody is attending to my father on the ward, no doctor anywhere at all")
+    assert r.state == "S2"
+
+
+async def test_self_harm_handoff_still_works_when_the_ai_is_down(store):
+    engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
+    r = await engine.handle_message(None, "web", "After wetin dem do my pikin I just wan end my life")
+    assert r.done and "trained to help" in r.replies[0] and store.reports == {}
+
+
+async def test_degraded_reports_are_not_counted_until_an_analyst_accepts_them(store):
+    from app import analyst as A
+    engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
+    for _ in range(6):
+        r = await engine.handle_message(None, "web", "A nurse slapped me last week at Harmattan General Hospital maternity ward")
+        await engine.handle_message(r.session_id, "web", "no")
+    assert len(store.reports) == 6
+    assert A.patterns(list(store.reports.values()), Pack("ng-lagos")) == []

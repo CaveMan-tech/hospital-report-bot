@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     # gpt-5-mini "thinks" before answering. Minimal keeps a reply near 4s instead of 15 to 20s,
     # with no loss on the evaluation set. A distressed person should not wait on a spinner.
+    extract_timeout_seconds: float = 15.0   # typical reply is ~4s; past this we degrade, not hang
     openai_reasoning_effort: Literal["minimal", "low", "medium", "high"] = "minimal"
     store: Literal["memory", "postgres"] = "memory"
     database_url: str = ""

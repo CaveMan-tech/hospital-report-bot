@@ -16,9 +16,11 @@
   function setSid(v) { sid = v; try { v ? sessionStorage.setItem('sid', v) : sessionStorage.removeItem('sid'); } catch (e) {} }
 
   async function post(url, body) {
-    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    let r;
+    try { r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+    catch (e) { throw new Error(window.OFFLINE); }  // no network: still say what to do in danger
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.detail || 'Something went wrong. Please try again.');
+    if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : window.OFFLINE);
     return data;
   }
   function show(data) {

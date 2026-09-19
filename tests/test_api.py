@@ -27,3 +27,21 @@ def test_page_is_tiny():
     with TestClient(app) as c:
         total = sum(len(c.get(p).content) for p in ("/", "/static/app.css", "/static/chat.js"))
         assert total < 10_000, total
+
+
+def test_total_failure_still_tells_the_reporter_what_to_do():
+    with TestClient(app) as c:
+        engine = c.app.state.engine
+        original = engine.handle_message
+
+        async def boom(*a, **k):
+            raise RuntimeError("database is down")
+
+        engine.handle_message = boom
+        try:
+            r = c.post("/api/chat", json={"text": "hello there my friend"})
+        finally:
+            engine.handle_message = original
+        assert r.status_code == 503
+        assert "nearest other hospital" in r.json()["detail"] and "Traceback" not in r.text
+        assert "nearest other hospital" in c.get("/").text          # offline text is baked into the page

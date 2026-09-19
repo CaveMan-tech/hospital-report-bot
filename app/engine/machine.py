@@ -7,6 +7,7 @@ Web chat, WhatsApp, Telegram and anything later are thin adapters around this.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from datetime import UTC, datetime, timedelta
@@ -14,7 +15,7 @@ from datetime import UTC, datetime, timedelta
 from app.store.base import Store
 
 from . import refcode
-from .extract import Extractor
+from .extract import Extractor, mock_extract
 from .models import Channel, EngineReply, Extraction, Followup, Report, Session
 from .packs import Pack
 from .severity import apply_safety_net, decide
@@ -49,12 +50,14 @@ def parse_yes_no(text: str) -> bool | None:
 
 
 class Engine:
-    def __init__(self, store: Store, extractor: Extractor, pack: Pack | list[Pack], ref_secret: str):
+    def __init__(self, store: Store, extractor: Extractor, pack: Pack | list[Pack], ref_secret: str,
+                 extract_timeout: float = 15.0):
         """`pack` may be one pack or several. The first is the default; each conversation
         picks its pack once, when it starts, and keeps it."""
         packs = pack if isinstance(pack, list) else [pack]
         self.store = store
         self.extract = extractor
+        self.extract_timeout = extract_timeout
         self.packs: dict[str, Pack] = {p.id: p for p in packs}
         self.pack = packs[0]
         self.ref_secret = ref_secret
@@ -113,13 +116,36 @@ class Engine:
             done=session.state == "DONE",
         )
 
+    # ------------------------------------------------- extraction, fail-safe
+
+    async def _extract(self, transcript: list[dict[str, str]], pack: Pack) -> tuple[Extraction, bool]:
+        """Run the extractor. If the AI is slow, down or returns rubbish, DEGRADE, never fail.
+
+        Returns (extraction, degraded). A person in an emergency ward must still get the danger
+        question and the pre-written escalation when the model is unreachable. The keyword
+        extractor stands in for the facets; the caller forces the danger question.
+        """
+        try:
+            ex = await asyncio.wait_for(self.extract(transcript, pack.extraction_context()),
+                                        timeout=self.extract_timeout)
+            return ex, False
+        except Exception as e:  # noqa: BLE001 - any failure here must degrade, not surface
+            log.error("Extractor failed (%s); using keyword fallback", type(e).__name__)
+            ex = await mock_extract(transcript, pack.extraction_context())
+            ex.is_nonsense = False          # never bounce someone because our AI is down
+            ex.category_confidence = 1.0    # no "is this mainly about…" question on a keyword guess
+            ex.summary_redacted = "[Automatic summary unavailable: the AI service could not be reached.]"
+            return ex, True
+
     # ------------------------------------------------------------ S1: story
 
     async def _on_story(self, s: Session, text: str):
         ctx = s.context
         ctx.setdefault("transcript", []).append({"role": "user", "text": text})
         pack = self.pack_for(s.pack)
-        ex = await self.extract(ctx["transcript"], pack.extraction_context())
+        ex, degraded = await self._extract(ctx["transcript"], pack)
+        if degraded:
+            ctx["degraded"] = True
         ex = apply_safety_net(ex, " ".join(t["text"] for t in ctx["transcript"] if t["role"] == "user"),
                               pack.languages)
         ex.language = pack.language_or_default(ex.language)
@@ -139,6 +165,8 @@ class Engine:
 
         ctx["extraction"] = ex.model_dump()
         decision = decide(ex)
+        if ctx.get("degraded") and decision == "not_severe":
+            decision = "ask"  # a keyword guess is never allowed to skip the danger question
         # The acknowledgement is pre-written, like everything else a reporter reads.
         ack = self._msg("S1.ack", s)
         if decision == "severe":
@@ -253,7 +281,9 @@ class Engine:
                 {"role": "user", "text": text},
             ]
             s.context["transcript"] = transcript
-            fresh = await self.extract(transcript, self.pack_for(s.pack).extraction_context())
+            fresh, degraded = await self._extract(transcript, self.pack_for(s.pack))
+            if degraded:
+                s.context["degraded"] = True
             # Only fill gaps. An answer to a follow-up never rewrites the category or severity.
             if ex.department == "unknown":
                 ex.department = fresh.department
@@ -281,7 +311,9 @@ class Engine:
 
         credibility = "ok"
         dedupe_key = ctx.get("dedupe_key")
-        if ex.implausible:
+        if ctx.get("degraded"):
+            credibility = "review"  # classified by keywords only: help the person, do not count it blind
+        elif ex.implausible:
             credibility = "review"
         elif ex.hospital_name_raw and hospital is None:
             credibility = "review"  # unknown hospital name: a human should look
@@ -311,6 +343,7 @@ class Engine:
             money_demanded=ex.money_demanded,
             amount_bucket=ex.amount_bucket,
             summary_redacted=ex.summary_redacted,
+            extra={"degraded_extraction": True} if ctx.get("degraded") else {},
             rights_shown=ctx.get("rights_shown", []),
             escalation_shown=ctx.get("escalation_shown", False),
             credibility=credibility,
