@@ -53,10 +53,10 @@ def test_hospital_matching():
 
 def test_message_or_none_skips_unverified_instead_of_sending_the_fallback():
     for pack_id in ("ng-lagos", "ke-nairobi"):
-        pack = Pack(pack_id, allow_unverified=False)
+        pack = unsigned(pack_id)
         for key in ("S0.privacy.telegram", "T.forgotten", "T.status_usage"):
-            assert pack.messages[key]["verified"] is False
             assert pack.message_or_none(key, "en") is None
+            assert pack.message(key, "en") == pack.message("E.unverified_fallback", "en")   # why it exists
 
 
 def test_message_or_none_returns_verified_text_and_honours_dev_mode():

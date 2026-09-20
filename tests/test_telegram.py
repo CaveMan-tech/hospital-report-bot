@@ -7,6 +7,7 @@ from app.engine.extract import mock_extract
 from app.engine.machine import Engine
 from app.engine.packs import Pack
 from app.store.memory import MemoryStore
+from tests.helpers import unsigned
 
 CHAT = 987654321
 STORY_ASK = "A nurse slapped me and insulted me in front of everybody"
@@ -43,7 +44,9 @@ class FakeAPI:
 
 def make(allow_unverified=True, demo_mode=True):
     store, api = MemoryStore(), FakeAPI()
-    packs = [Pack("ng-lagos", allow_unverified), Pack("ke-nairobi", allow_unverified)]
+    # Production mode is tested against the pack as it ships before review, whatever is signed off now.
+    load = Pack if allow_unverified else unsigned
+    packs = [load("ng-lagos", allow_unverified), load("ke-nairobi", allow_unverified)]
     engine = Engine(store, mock_extract, packs, ref_secret="test-secret")
     return TelegramAdapter(engine, api, demo_mode=demo_mode), api, store, engine
 
