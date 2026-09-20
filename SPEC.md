@@ -245,7 +245,10 @@ After each addition: "Thank you, I have added that. Anything else? ..." with the
 - **Emergencies are the one exception to "only when they say so".** Someone dealing with an emergency
   puts the phone down. If a report on the emergency branch waits here and the person adds nothing for
   two minutes, it is recorded as if they had tapped Done, and the flow carries on: reference code,
-  counted line, follow-up opt-in. Anything they add restarts the two minutes. The engine decides
+  counted line, follow-up opt-in. They are told this up front: on the emergency branch the prompt drops
+  "only recorded when you tell me" and says "If you need to go, go" and what will happen after two
+  minutes (`M1.more.severe`; the plain prompt is used until that wording is signed off). Anything they
+  add restarts the two minutes. The engine decides
   (`Engine.auto_record`); channels only keep time. Telegram holds the chat id in memory for the length
   of the wait and nowhere else; a restart drops the wait and the report is not recorded. The web page
   keeps time in the open tab. Every other report is recorded only when the person says they have finished.

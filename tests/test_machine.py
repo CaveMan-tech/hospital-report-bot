@@ -706,3 +706,20 @@ async def test_the_wait_starts_again_whenever_they_add_something(store):
     r = await tell(engine, None, EMERGENCY)
     assert await engine.auto_record(r.session_id) is None and store.reports == {}   # not quiet for long enough
     assert await engine.auto_record("no-such-session") is None
+
+
+async def test_someone_in_an_emergency_is_told_up_front_that_they_can_go(store):
+    engine = _quick_engine(store, after=120)
+    r = await tell(engine, None, EMERGENCY)
+    assert "If you need to go, go" in r.replies[-1] and "two minutes" in r.replies[-1]
+    assert "only recorded when you tell me" not in r.replies[-1]          # that would not be true for them
+    r = await tell(engine, None, FIRST)
+    assert "only recorded when you tell me" in r.replies[-1] and "two minutes" not in r.replies[-1]
+
+
+async def test_the_emergency_prompt_falls_back_to_the_plain_one_until_it_is_signed_off(store):
+    pack = Pack("ng-lagos", allow_unverified=False)
+    pack.messages["M1.more.severe"]["verified"] = False
+    engine = Engine(store, mock_extract, pack, "s")
+    r = await tell(engine, None, EMERGENCY)
+    assert r.state == "M1" and "only recorded when you tell me" in r.replies[-1]

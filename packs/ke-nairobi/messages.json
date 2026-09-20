@@ -309,5 +309,10 @@
     "verified": false,
     "en": "You have not added anything for a little while, so I have recorded your report now, so that it is not lost.",
     "pcm": null
+  },
+  "M1.more.severe": {
+    "verified": false,
+    "en": "Is there anything else you want to tell me about what happened? You can send it now. When you have finished, tap Done or reply DONE. If you need to go, go. If I do not hear from you for two minutes, I will record what you have told me so far, so that it is not lost.",
+    "pcm": null
   }
 }

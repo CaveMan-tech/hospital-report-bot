@@ -370,6 +370,9 @@ class Engine:
         if not ctx.get("finished"):
             pack, lang = self.pack_for(s.pack), ctx.get("lang", "en")
             prompt = pack.message_or_none("M1.more", lang)
+            if prompt and self.auto_record_after is not None and ctx.get("severity") == "severe":
+                # They will be recorded if they go quiet, so do not tell them otherwise. Say they can go.
+                prompt = pack.message_or_none("M1.more.severe", lang) or prompt
             again = pack.message_or_none("M1.more_again", lang) if ctx.get("more_asked") else None
             if prompt:
                 ctx["more_asked"] = True
