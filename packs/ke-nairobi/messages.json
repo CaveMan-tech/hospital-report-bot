@@ -264,5 +264,17 @@
   "B4.recorded": {
     "verified": true,
     "en": "A person will review your report before it is counted with other reports."
+  },
+  "S0.privacy.telegram": {
+    "verified": false,
+    "en": "On Telegram, we do not keep or record your Telegram name, username or phone number. Telegram itself can see that you messaged this bot. Send /forget to delete an unfinished report here. To clear this chat from your phone, delete it in Telegram."
+  },
+  "T.forgotten": {
+    "verified": false,
+    "en": "Done. I have deleted this unfinished conversation. Anything you already finished reporting holds no name and no story. To clear this chat from your phone, delete it in Telegram."
+  },
+  "T.status_usage": {
+    "verified": false,
+    "en": "Send /status followed by your code, like this: /status 7K3M-9QWX-2B4D"
   }
 }

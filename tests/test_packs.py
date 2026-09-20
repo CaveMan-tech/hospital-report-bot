@@ -48,3 +48,23 @@ def test_hospital_matching():
     assert pack.match_hospital("Lagoon Veiw General Hospital").id == "h-lagoonview"
     assert pack.match_hospital("Some Unknown Clinic") is None
     assert pack.match_hospital(None) is None
+
+
+def test_message_or_none_skips_unverified_instead_of_sending_the_fallback():
+    for pack_id in ("ng-lagos", "ke-nairobi"):
+        pack = Pack(pack_id, allow_unverified=False)
+        for key in ("S0.privacy.telegram", "T.forgotten", "T.status_usage"):
+            assert pack.messages[key]["verified"] is False
+            assert pack.message_or_none(key, "en") is None
+
+
+def test_message_or_none_returns_verified_text_and_honours_dev_mode():
+    assert "safe place" in Pack("ng-lagos").message_or_none("S0.greeting", "en")
+    assert "/forget" in Pack("ng-lagos", allow_unverified=True).message_or_none("S0.privacy.telegram", "en")
+
+
+def test_message_or_none_still_checks_nested_contacts():
+    pack = Pack("ng-lagos", allow_unverified=False)
+    pack.messages["X.test"] = {"verified": True, "en": "Call {contact:emergency}"}
+    pack.contacts["emergency"] = {**pack.contacts["emergency"], "verified": False}
+    assert pack.message_or_none("X.test", "en") is None

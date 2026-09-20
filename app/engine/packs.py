@@ -86,6 +86,15 @@ class Pack:
             log.warning("Blocked unverified message %r; sending fallback", key)
             return self._message("E.unverified_fallback", lang)
 
+    def message_or_none(self, key: str, lang: str = "en", **fields: str) -> str | None:
+        """For channel notices where the fallback would be untrue (it says "I have recorded what
+        you told me"). Same gate as `message`; unverified text is simply not sent."""
+        try:
+            return self._message(key, lang, **fields)
+        except UnverifiedContent:
+            log.warning("Skipped unverified message %r", key)
+            return None
+
     def _message(self, key: str, lang: str, **fields: str) -> str:
         entry = self.messages[key]
         self._check("message", key, entry)
