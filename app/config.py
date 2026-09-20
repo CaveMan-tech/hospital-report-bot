@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     analyst_password: str = "change-me"
     allow_unverified: bool = False
     demo_mode: bool = True
+    # Telegram channel. Empty token = channel off. The secret is checked on every webhook call.
+    telegram_bot_token: str = ""
+    telegram_webhook_secret: str = ""
 
 
     # Set automatically by Railway. Used only to decide whether the safety checks below apply.
@@ -44,6 +47,8 @@ class Settings(BaseSettings):
             problems.append("EXTRACT_MODE=mock is a keyword stub; set EXTRACT_MODE=llm and OPENAI_API_KEY")
         if self.store == "memory":
             problems.append("STORE=memory loses every report on restart; set STORE=postgres and DATABASE_URL")
+        if self.telegram_bot_token and len(self.telegram_webhook_secret) < 24:
+            problems.append("TELEGRAM_WEBHOOK_SECRET must be 24+ characters when TELEGRAM_BOT_TOKEN is set")
         return problems
 
 

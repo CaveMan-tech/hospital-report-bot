@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
     problems = cfg.production_problems() if cfg.railway_environment else []
     # Secrets and the verified gate are hard stops. The rest are loud warnings so a
     # demo deployment (mock extractor, in-memory store) is still possible on purpose.
-    fatal = [p for p in problems if p.startswith(("REF_CODE_SECRET", "ANALYST_PASSWORD", "ALLOW_UNVERIFIED"))]
+    fatal = [p for p in problems if p.startswith(("REF_CODE_SECRET", "ANALYST_PASSWORD", "ALLOW_UNVERIFIED", "TELEGRAM_"))]
     for p in problems:
         logging.getLogger(__name__).warning("DEPLOYMENT CHECK: %s", p)
     if fatal:

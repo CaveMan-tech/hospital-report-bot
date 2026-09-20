@@ -31,6 +31,14 @@ def test_each_unsafe_setting_is_caught():
         assert len(problems) == 1 and needle in problems[0]
 
 
+def test_telegram_token_needs_a_real_webhook_secret():
+    bad = Settings(**{**GOOD, "telegram_bot_token": "123:abc", "telegram_webhook_secret": "short"})
+    assert any(p.startswith("TELEGRAM_WEBHOOK_SECRET") for p in bad.production_problems())
+    ok = Settings(**{**GOOD, "telegram_bot_token": "123:abc", "telegram_webhook_secret": "s" * 24})
+    assert ok.production_problems() == []
+    assert Settings(**GOOD).production_problems() == []          # channel off: nothing to check
+
+
 def test_start_command_never_logs_ip_addresses_and_runs_one_worker():
     cmd = json.loads((ROOT / "railway.json").read_text())["deploy"]["startCommand"]
     assert "--no-access-log" in cmd            # access logs would record every reporter's IP
