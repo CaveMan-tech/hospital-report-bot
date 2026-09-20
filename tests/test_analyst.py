@@ -11,7 +11,7 @@ from app.config import get_settings
 from app.engine.packs import Pack
 from app.main import app
 from app.seed import build
-from tests.helpers import unsigned
+from tests.helpers import chat, unsigned
 
 get_settings.cache_clear()
 AUTH = ("analyst", "pw")
@@ -94,7 +94,7 @@ def test_full_loop_report_in_pattern_moves():
             rows = c.get("/analyst/patterns.csv", auth=AUTH).text.splitlines()
             return int(next(r for r in rows if r.startswith("Lagoon View General Hospital,abuse")).split(",")[2])
         before = count()
-        c.post("/api/chat", json={"text": "A nurse slapped me last week at Lagoon View General Hospital maternity ward"})
+        chat(c, {"text": "A nurse slapped me last week at Lagoon View General Hospital maternity ward"})
         assert count() == before + 1
 
 
@@ -196,7 +196,7 @@ def test_review_queue_resolves_an_unknown_hospital_and_logs_the_decision():
             rows = c.get("/analyst/patterns.csv", auth=AUTH).text.splitlines()
             return int(next(r for r in rows if r.startswith("Lagoon View General Hospital,abuse")).split(",")[2])
         before = count()
-        c.post("/api/chat", json={"text": "A nurse slapped me last week at Island Peoples Hospital maternity ward"})
+        chat(c, {"text": "A nurse slapped me last week at Island Peoples Hospital maternity ward"})
         assert count() == before                                          # held, not counted
 
         page = c.get("/analyst/review", auth=AUTH).text
@@ -231,7 +231,7 @@ def test_excluding_a_report_is_always_logged():
 
 def test_kenyan_held_reports_do_not_show_in_the_lagos_queue():
     with TestClient(app) as c:
-        c.post("/api/chat", json={"pack": "ke-nairobi",
+        chat(c, {"pack": "ke-nairobi",
                                   "text": "A nurse insulted my wife last week at Some Unknown Kenyan Hospital maternity"})
         assert "Some Unknown Kenyan" not in c.get("/analyst/review", auth=AUTH).text
         assert "Some Unknown Kenyan" in c.get("/analyst/review?pack=ke-nairobi", auth=AUTH).text

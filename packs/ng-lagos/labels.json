@@ -88,6 +88,10 @@
     "danger": {
       "en": "Someone is in danger right now",
       "pcm": "Person dey for danger now now"
+    },
+    "done": {
+      "en": "Done",
+      "pcm": "I don finish"
     }
   },
   "telegram_commands": {

@@ -5,6 +5,7 @@ os.environ.update(EXTRACT_MODE="mock", STORE="memory", ALLOW_UNVERIFIED="true", 
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.helpers import chat
 
 
 def test_full_conversation_over_http():
@@ -13,8 +14,8 @@ def test_full_conversation_over_http():
         r = c.post("/api/chat", json={"text": ""}).json()
         sid = r["session_id"]
         assert "safe place" in r["replies"][0]
-        r = c.post("/api/chat", json={"session_id": sid, "text":
-                   "A nurse slapped me last week at Harmattan General Hospital maternity ward"}).json()
+        r = chat(c, {"session_id": sid, "text":
+                     "A nurse slapped me last week at Harmattan General Hospital maternity ward"})
         code = r["ref_code"]
         assert code and r["state"] == "B5"
         assert "on record" in c.post("/api/report/lookup", json={"ref_code": code}).json()["message"]
@@ -64,7 +65,7 @@ def test_forget_deletes_an_unfinished_conversation_but_never_a_finished_report()
         assert sid not in store.sessions                                  # gone now, not in two hours
         assert c.post("/api/chat/forget", json={"session_id": "not-a-session"}).status_code == 204
 
-        done = c.post("/api/chat", json={"text": "A nurse slapped me last week at Harmattan General Hospital maternity ward"}).json()
+        done = chat(c, {"text": "A nurse slapped me last week at Harmattan General Hospital maternity ward"})
         n = len(store.reports)
         c.post("/api/chat/forget", json={"session_id": done["session_id"]})
         assert len(store.reports) == n and "on record" in c.post(

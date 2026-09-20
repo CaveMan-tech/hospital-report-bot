@@ -14,6 +14,7 @@ from app.engine.machine import Engine
 from app.engine.models import AuditEntry, Followup, Report, Session
 from app.engine.packs import Pack
 from app.store.memory import MemoryStore
+from tests.helpers import say
 
 PG = os.environ.get("TEST_DATABASE_URL")
 STORES = ["memory", pytest.param("postgres", marks=pytest.mark.skipif(not PG, reason="TEST_DATABASE_URL not set"))]
@@ -102,8 +103,8 @@ async def test_followups_and_cascade(store):
 
 async def test_full_conversation_runs_on_this_store(store):
     engine = Engine(store, mock_extract, Pack("ng-lagos", allow_unverified=True), "secret")
-    r = await engine.handle_message(None, "web", "A nurse slapped me last week at Harmattan General Hospital maternity ward",
-                                    dedupe_key="d1")
+    r = await say(engine, None, "A nurse slapped me last week at Harmattan General Hospital maternity ward",
+                  dedupe_key="d1")
     assert r.ref_code and r.state == "B5"
     r2 = await engine.handle_message(r.session_id, "web", "yes")
     assert r2.done

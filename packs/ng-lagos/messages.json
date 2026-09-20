@@ -417,5 +417,15 @@
     "verified_by": "Ikechi Okoro",
     "verified_source": "Official Gazette print of the National Health Act 2014: section 20 is on the 17th page of the file, numbered A153: https://faolex.fao.org/docs/pdf/nig162642.pdf",
     "verified_on": "2026-09-20"
+  },
+  "M1.more": {
+    "verified": false,
+    "en": "Is there anything else you want to tell me about what happened? You can send it now, in one message or several. When you have finished, tap Done or reply DONE. Your report is only recorded when you tell me you have finished.",
+    "pcm": "Anything else dey wey you wan tell me about wetin happen? You fit send am now, one message or plenty. When you don finish, tap Done or reply DONE. Na when you tell me say you don finish we go record your report."
+  },
+  "M1.more_again": {
+    "verified": false,
+    "en": "Thank you, I have added that. Anything else? When you have finished, tap Done or reply DONE.",
+    "pcm": "Thank you, I don add am. Anything else? When you don finish, tap Done or reply DONE."
   }
 }

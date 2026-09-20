@@ -70,6 +70,9 @@
     },
     "danger": {
       "en": "Someone is in danger right now"
+    },
+    "done": {
+      "en": "Done"
     }
   },
   "telegram_commands": {

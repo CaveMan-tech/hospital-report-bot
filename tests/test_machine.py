@@ -4,7 +4,7 @@ from app.engine.extract import mock_extract
 from app.engine.machine import Engine, parse_yes_no
 from app.engine.packs import Pack
 from app.store.memory import MemoryStore
-from tests.helpers import unsigned
+from tests.helpers import say, unsigned
 
 
 @pytest.fixture
@@ -17,8 +17,8 @@ def engine(store):
     return Engine(store, mock_extract, Pack("ng-lagos", allow_unverified=True), ref_secret="test-secret")
 
 
-async def say(engine, sid, text, **kw):
-    return await engine.handle_message(sid, "web", text, **kw)
+async def tell(engine, sid, text, **kw):
+    return await say(engine, sid, text, finish=False, **kw)
 
 
 def test_yes_no_parser():
@@ -187,10 +187,10 @@ async def test_self_harm_is_caught_even_if_the_model_misses_it(store):
 
     engine = Engine(store, oblivious, Pack("ng-lagos", allow_unverified=True), "s")
     for text in ("I don tire. After wetin dem do my pikin I just wan end my life.", "I wan die"):
-        r = await engine.handle_message(None, "web", text) if len(text.split()) > 3 else None
+        r = await say(engine, None, text) if len(text.split()) > 3 else None
         if r is None:   # short message: greet first, then the message
-            g = await engine.handle_message(None, "web", "hi")
-            r = await engine.handle_message(g.session_id, "web", text)
+            g = await say(engine, None, "hi")
+            r = await say(engine, g.session_id, text)
         assert r.done and "trained to help" in r.replies[0]
     assert store.reports == {}
 
@@ -237,10 +237,10 @@ async def test_staff_whistleblower_flow(store):
                           ack="MODEL TEXT THAT MUST NEVER BE SHOWN")
 
     engine = Engine(store, staff, Pack("ng-lagos", allow_unverified=True), "s")
-    r = await engine.handle_message(None, "web", "I am a nurse, management tells us to collect deposits every night")
+    r = await say(engine, None, "I am a nurse, management tells us to collect deposits every night")
     assert r.state == "S2" and "danger right now" in r.replies[0]
     assert "MODEL TEXT" not in " ".join(r.replies) and r.replies[0].startswith("I am sorry this happened")
-    r = await engine.handle_message(r.session_id, "web", "no, I am at home")
+    r = await say(engine, r.session_id, "no, I am at home")
     text = "\n".join(r.replies)
     assert "Section 20" not in text and "112" not in text            # no emergency steps for someone at home
     assert "courage to speak up" in text and "work phone" in text    # staff wording
@@ -248,8 +248,8 @@ async def test_staff_whistleblower_flow(store):
     report = next(iter(store.reports.values()))
     assert report.reporter_role == "staff" and report.severity == "not_severe" and report.rights_shown == []
 
-    r = await engine.handle_message(None, "web", "I am a nurse, a patient is dying in casualty now and they want deposit")
-    r = await engine.handle_message(r.session_id, "web", "yes")
+    r = await say(engine, None, "I am a nurse, a patient is dying in casualty now and they want deposit")
+    r = await say(engine, r.session_id, "yes")
     assert "Section 20" in "\n".join(r.replies)                     # staff who say YES get the escalation
 
 
@@ -266,8 +266,7 @@ async def _hangs(transcript, context=""):
 
 async def test_emergency_still_gets_escalation_when_the_ai_is_down(store):
     engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
-    r = await engine.handle_message(None, "web",
-        "My mother is bleeding right now at Harmattan General Hospital, they refused to treat her, pay deposit")
+    r = await say(engine, None, "My mother is bleeding right now at Harmattan General Hospital, they refused to treat her, pay deposit")
     text = "\n".join(r.replies)
     assert "Section 20" in text and "112" in text and r.ref_code
     report = next(iter(store.reports.values()))
@@ -279,28 +278,28 @@ async def test_emergency_still_gets_escalation_when_the_ai_is_down(store):
 async def test_ai_down_never_skips_the_danger_question(store):
     engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
     # The keyword fallback reads this as clearly past. Normally that skips the question. Not when degraded.
-    r = await engine.handle_message(None, "web", "Last month a nurse insulted my wife at Harmattan General Hospital maternity")
+    r = await say(engine, None, "Last month a nurse insulted my wife at Harmattan General Hospital maternity")
     assert r.state == "S2" and "danger right now" in r.replies[0]
-    r = await engine.handle_message(r.session_id, "web", "yes")
+    r = await say(engine, r.session_id, "yes")
     assert "112" in "\n".join(r.replies)
 
 
 async def test_ai_down_never_bounces_the_reporter_as_nonsense(store):
     engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
-    g = await engine.handle_message(None, "web", "hi")
-    r = await engine.handle_message(g.session_id, "web", "help me abeg")
+    g = await say(engine, None, "hi")
+    r = await say(engine, g.session_id, "help me abeg")
     assert "did not quite understand" not in " ".join(r.replies) and r.state == "S2"
 
 
 async def test_slow_ai_times_out_into_the_same_fallback(store):
     engine = Engine(store, _hangs, Pack("ng-lagos", allow_unverified=True), "s", extract_timeout=0.05)
-    r = await engine.handle_message(None, "web", "Nobody is attending to my father on the ward, no doctor anywhere at all")
+    r = await say(engine, None, "Nobody is attending to my father on the ward, no doctor anywhere at all")
     assert r.state == "S2"
 
 
 async def test_self_harm_handoff_still_works_when_the_ai_is_down(store):
     engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
-    r = await engine.handle_message(None, "web", "After wetin dem do my pikin I just wan end my life")
+    r = await say(engine, None, "After wetin dem do my pikin I just wan end my life")
     assert r.done and "trained to help" in r.replies[0] and store.reports == {}
 
 
@@ -308,8 +307,8 @@ async def test_degraded_reports_are_not_counted_until_an_analyst_accepts_them(st
     from app import analyst as A
     engine = Engine(store, _broken, Pack("ng-lagos", allow_unverified=True), "s")
     for _ in range(6):
-        r = await engine.handle_message(None, "web", "A nurse slapped me last week at Harmattan General Hospital maternity ward")
-        await engine.handle_message(r.session_id, "web", "no")
+        r = await say(engine, None, "A nurse slapped me last week at Harmattan General Hospital maternity ward")
+        await say(engine, r.session_id, "no")
     assert len(store.reports) == 6
     assert A.patterns(list(store.reports.values()), Pack("ng-lagos")) == []
 
@@ -354,14 +353,14 @@ async def test_tapped_when_and_department_need_no_ai_call(store):
         return await mock_extract(transcript, context)
 
     engine = Engine(store, counting, Pack("ng-lagos", allow_unverified=True), "s")
-    r = await engine.handle_message(None, "web", "A nurse slapped me and insulted me in front of everybody")
-    r = await engine.handle_message(r.session_id, "web", "no")
-    r = await engine.handle_message(r.session_id, "web", "Lagoon View General Hospital")
+    r = await say(engine, None, "A nurse slapped me and insulted me in front of everybody")
+    r = await say(engine, r.session_id, "no")
+    r = await say(engine, r.session_id, "Lagoon View General Hospital")
     assert [q.label for q in r.quick_replies][:3] == ["Emergency", "Maternity", "Children's ward"]
     before = calls
-    r = await engine.handle_message(r.session_id, "web", "tap:maternity")
+    r = await say(engine, r.session_id, "tap:maternity")
     assert [q.value for q in r.quick_replies] == ["tap:today", "tap:this_week", "tap:older"]
-    r = await engine.handle_message(r.session_id, "web", "tap:older")
+    r = await say(engine, r.session_id, "tap:older")
     assert calls == before and r.ref_code                                  # two answers, zero AI calls
     report = next(iter(store.reports.values()))
     assert report.department == "maternity" and report.incident_timing == "older"
@@ -596,3 +595,79 @@ async def test_a_short_unknown_hospital_name_is_still_kept_for_review(engine, st
             break
         r = await say(engine, r.session_id, "last week")
     assert next(iter(store.reports.values())).hospital_name_raw == "Saint Nowhere Clinic"
+
+
+# ---------------------------------------------------------------- "have you finished?"
+
+FIRST = "A nurse insulted me in front of everybody last week at Harmattan General Hospital maternity ward"
+
+
+async def test_nothing_is_recorded_until_the_person_says_they_have_finished(engine, store):
+    r = await tell(engine, None, FIRST)
+    assert r.state == "M1" and not r.ref_code and store.reports == {}
+    assert "anything else" in r.replies[-1].lower() and [q.value for q in r.quick_replies] == ["tap:done"]
+    assert "recorded" not in "\n".join(r.replies[:-1]).lower()            # no receipt, no rights yet
+    r = await tell(engine, r.session_id, "tap:done")
+    assert r.state == "B5" and r.ref_code and len(store.reports) == 1
+    text = "\n".join(r.replies)
+    assert "dignity" in text and "Your report is recorded" in text       # help and receipt come now
+
+
+async def test_they_can_add_as_many_messages_as_they_like_before_finishing(engine, store):
+    r = await tell(engine, None, FIRST)
+    r = await tell(engine, r.session_id, "She also slapped my sister")
+    assert r.state == "M1" and "added" in r.replies[-1] and store.reports == {}
+    r = await tell(engine, r.session_id, "And she pushed her against the wall")
+    assert r.state == "M1" and store.reports == {}
+    r = await tell(engine, r.session_id, "done")
+    assert r.ref_code and len(store.reports) == 1
+    report = next(iter(store.reports.values()))
+    assert report.hospital_id and report.department == "maternity"      # what they already told us is kept
+
+
+async def test_typed_ways_of_saying_finished(engine, store):
+    for word in ("DONE", "that is all", "No", "nothing else", "I don finish"):
+        r = await tell(engine, None, FIRST)
+        r = await tell(engine, r.session_id, word)
+        assert r.ref_code, word
+
+
+async def test_a_long_message_starting_with_no_is_more_story_not_finished(engine, store):
+    r = await tell(engine, None, FIRST)
+    r = await tell(engine, r.session_id, "No one came to help us and the matron just stood there watching it all")
+    assert r.state == "M1" and store.reports == {}
+
+
+async def test_an_emergency_revealed_while_adding_detail_gets_the_steps_at_once(engine, store):
+    r = await tell(engine, None, "A nurse insulted me in front of everybody at Harmattan General Hospital maternity")
+    r = await tell(engine, r.session_id, "no")
+    while r.state == "B1":
+        r = await tell(engine, r.session_id, "tap:today")
+    assert r.state == "M1"
+    r = await tell(engine, r.session_id, BURST)
+    text = "\n".join(r.replies)
+    assert "112" in text and "Section 20" in text and r.state == "M1" and store.reports == {}
+    r = await tell(engine, r.session_id, "tap:done")
+    report = next(iter(store.reports.values()))
+    assert report.category == "emergency_refused" and report.severity == "severe"
+    assert "Ngozi" not in _dump(store)
+
+
+async def test_the_emergency_branch_also_waits_for_finished_but_never_delays_the_steps(engine, store):
+    r = await tell(engine, None, "My mother is bleeding right now at Harmattan General Hospital emergency and "
+                                "they refused to treat her until we pay deposit")
+    assert "112" in "\n".join(r.replies) and r.state == "M1" and store.reports == {}
+    r = await tell(engine, r.session_id, "tap:done")
+    assert r.ref_code and next(iter(store.reports.values())).severity == "severe"
+
+
+async def test_a_crisis_disclosed_while_adding_detail_is_handed_off_and_nothing_is_stored(engine, store):
+    r = await tell(engine, None, FIRST)
+    r = await tell(engine, r.session_id, "I am so tired of everything, I want to die")
+    assert r.done and store.reports == {}
+
+
+async def test_until_the_wording_is_signed_off_the_step_is_skipped_not_replaced_by_the_fallback(store):
+    engine = Engine(store, mock_extract, unsigned("ng-lagos", False), ref_secret="test-secret")
+    r = await say(engine, None, FIRST, finish=False)
+    assert r.state == "B5" and r.ref_code and len(store.reports) == 1

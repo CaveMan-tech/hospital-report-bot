@@ -43,6 +43,41 @@ def _more_story(text: str) -> bool:
     return not text.startswith(TAP) and len(text.split()) > MORE_STORY_WORDS
 
 
+_DONE = {"done", "finish", "finished", "skip", "nothing", "end"}
+_DONE_PHRASES = ("that is all", "thats all", "that s all", "na all", "don finish", "nothing else")
+_DONE_MAX_WORDS = 6  # "No." means finished; "No one came to help us and the matron just stood there" does not
+
+
+def is_finished(text: str) -> bool:
+    """Has the person told us they have nothing more to add? Only a tap or a short reply counts."""
+    if text == f"{TAP}done":
+        return True
+    low = re.sub(r"[^a-z0-9 ]", " ", text.lower()).strip()
+    words = low.split()
+    if not words or len(words) > _DONE_MAX_WORDS:
+        return False
+    return words[0] in _DONE | _NO or any(p in low for p in _DONE_PHRASES)
+
+
+# Once the person has answered these, more story does not overwrite them.
+_ANSWERED = ("hospital_name_raw", "department", "incident_timing", "time_bucket")
+_EMPTY = (None, "", "unknown", "other", [], False)
+
+
+def merge_more(old: Extraction, fresh: Extraction) -> Extraction:
+    """Fold a re-reading of the longer story into what we already hold. New detail may change the
+    category; it never erases an answer already given, and never clears a danger signal."""
+    merged = fresh.model_copy()
+    for name in Extraction.model_fields:
+        was = getattr(old, name)
+        if was not in _EMPTY and (name in _ANSWERED or getattr(fresh, name) in _EMPTY):
+            setattr(merged, name, was)
+    if merged.category == old.category:
+        merged.category_confidence = max(old.category_confidence, fresh.category_confidence)
+    merged.language, merged.has_incident, merged.is_nonsense = old.language, True, False
+    return merged
+
+
 def parse_yes_no(text: str) -> bool | None:
     low = re.sub(r"[^a-z0-9 ]", " ", text.lower()).strip()
     if not low:
@@ -109,6 +144,7 @@ class Engine:
             "S2": self._on_danger_answer,
             "A2": self._on_severe_hospital,
             "B1": self._on_field_answer,
+            "M1": self._on_more,
             "B5": self._on_optin,
             "F1": self._on_followup_choice,
             "FS2": self._on_followup_danger,
@@ -138,6 +174,8 @@ class Engine:
                     QuickReply(label=pack.quick("no", lang), value="no")]
         if s.state == "S1" and s.context.get("asked_for_story") and not s.context.get("danger_answer"):
             return [QuickReply(label=pack.quick("danger", lang), value=f"{TAP}danger")]
+        if s.state == "M1":
+            return [QuickReply(label=pack.quick("done", lang), value=f"{TAP}done")]
         if s.state == "F1":
             return [QuickReply(label=pack.quick("followup", lang, n), value=n) for n in ("1", "2", "3", "4")]
         field = s.context.get("pending_field") if s.state == "B1" else None
@@ -264,8 +302,7 @@ class Engine:
         if not ex.hospital_name_raw:
             s.state = "A2"
             return replies + [self._msg("Q.hospital", s)], None
-        more, code = await self._finalise(s, ex)
-        return replies + more, code
+        return await self._wrap_up(s, ex, replies)
 
     @staticmethod
     def _escalation_key(category: str, subtype: str = "") -> str:
@@ -283,7 +320,7 @@ class Engine:
             s.context["danger_answer"] = True   # more detail never takes someone out of the emergency branch
             return await self._on_story(s, text)
         ex.hospital_name_raw = text[:120] or None
-        return await self._finalise(s, ex)
+        return await self._wrap_up(s, ex, [])
 
     # ---------------------------------------------------- non-severe branch
 
@@ -300,6 +337,32 @@ class Engine:
             s.state = "B1"
             return replies + [question], None
 
+        return await self._wrap_up(s, ex, replies)
+
+    # ------------------------------------------ M1: "have you finished?"
+
+    async def _wrap_up(self, s: Session, ex: Extraction, replies: list[str]):
+        """Nothing is recorded until the person tells us they have finished. Until then they can keep
+        adding to the story. Where a pack's wording for this step is not signed off, the step is
+        skipped: the fallback text would say "I have recorded what you told me", which would be untrue."""
+        ctx = s.context
+        if not ctx.get("finished"):
+            pack, lang = self.pack_for(s.pack), ctx.get("lang", "en")
+            prompt = pack.message_or_none("M1.more", lang)
+            again = pack.message_or_none("M1.more_again", lang) if ctx.get("more_asked") else None
+            if prompt:
+                ctx["more_asked"] = True
+                ctx["extraction"] = ex.model_dump()
+                s.state = "M1"
+                return replies + [again or prompt], None
+
+        if ctx.get("severity") != "severe":
+            replies = replies + self._help(s, ex)
+        more, code = await self._finalise(s, ex)
+        return replies + more, code
+
+    def _help(self, s: Session, ex: Extraction) -> list[str]:
+        replies: list[str] = []
         if ex.reporter_role == "staff":
             # Rights and self-help text is written for patients. A member of staff reporting
             # a practice gets wording for them, and nothing that nudges them to expose themselves.
@@ -311,9 +374,37 @@ class Engine:
             for rid, _ in rights:   # never on the emergency branch: that reply is what to do, not reading
                 replies += self.pack_for(s.pack).references_for(rid, s.context["lang"])
             help_key = f"B3.{ex.category}" if ex.category in ("abuse", "neglect") else "B3.other"
-        replies.append(self._msg(help_key, s))
-        more, code = await self._finalise(s, ex)
-        return replies + more, code
+        return replies + [self._msg(help_key, s)]
+
+    async def _on_more(self, s: Session, text: str):
+        ctx, ex, pack = s.context, self._ex(s), self.pack_for(s.pack)
+        if is_finished(text):
+            ctx["finished"] = True
+            return await self._wrap_up(s, ex, [])
+        if parse_yes_no(text) is True and len(text.split()) <= _DONE_MAX_WORDS:
+            return [self._msg("M1.more", s)], None      # "yes" to "anything else?": go on, we are listening
+
+        ctx.setdefault("transcript", []).append({"role": "user", "text": text})
+        fresh, degraded = await self._extract(ctx["transcript"], pack)
+        if degraded:
+            ctx["degraded"] = True
+        fresh = apply_safety_net(fresh, " ".join(t["text"] for t in ctx["transcript"] if t["role"] == "user"),
+                                 pack.languages)
+        if fresh.safety_handoff != "none":
+            specific = f"E.handoff.{fresh.safety_handoff}"
+            return self._end(s, [specific if specific in pack.messages else "E.handoff"])
+
+        if ctx.get("danger_answer") is False and (fresh.critical_condition or fresh.severity == "severe"):
+            ctx.pop("danger_answer")    # that NO was about a smaller story; never assume it still holds
+        ex = merge_more(ex, fresh)
+        ctx["extraction"] = ex.model_dump()
+        decision = decide(ex, ctx.get("danger_answer"))
+        if ctx.get("severity") == "severe" or decision == "severe":
+            return await self._severe(s, ex)
+        if decision == "ask" and ctx.get("danger_answer") is None:
+            s.state = "S2"
+            return [self._msg("S2.danger_check", s, ack="")], None
+        return await self._non_severe(s, ex)
 
     def _next_question(self, s: Session, ex: Extraction) -> str | None:
         asked: list[str] = s.context.setdefault("asked", [])

@@ -19,6 +19,7 @@ from app.engine.packs import PACKS_DIR, Pack
 from app.main import app
 from app.seed import build
 from app.store.memory import MemoryStore
+from tests.helpers import say
 
 PACK_IDS = sorted(p.name for p in PACKS_DIR.iterdir() if p.is_dir())
 AUTH = ("a", "pw")
@@ -39,7 +40,7 @@ def test_every_pack_has_the_same_message_keys_and_five_hospitals(pack_id):
     for lang in pack.languages:                    # default language must always have text
         assert all(m.get("en") for m in pack.messages.values()), lang
     assert set(pack.meta["amount_buckets"]) == {"small", "medium", "large", "very_large"}
-    assert set(pack.labels["quick"]) == {"yes", "no", "followup", "when", "department", "danger"} and set(pack.labels["quick"]["followup"]) == {"1", "2", "3", "4"}
+    assert set(pack.labels["quick"]) == {"yes", "no", "followup", "when", "department", "danger", "done"} and set(pack.labels["quick"]["followup"]) == {"1", "2", "3", "4"}
 
 
 RISKY = re.compile(r"[Ss]ection \d|Article \d|Constitution|\b\d{3,4}\b|\{contact:|Council|Act 20|High Court")
@@ -138,7 +139,7 @@ def engine(store, allow=True):
 
 async def test_kenya_conversation_gets_kenyan_law_and_never_nigerian():
     store = MemoryStore()
-    r = await engine(store).handle_message(None, "web", KE_STORY, pack_id="ke-nairobi")
+    r = await say(engine(store), None, KE_STORY, pack_id="ke-nairobi")
     text = "\n".join(r.replies)
     assert "Article 43(2)" in text and "Health Act 2017" in text and "922" in text
     assert "National Health Act" not in text and "767" not in text and "Section 20" not in text
@@ -151,7 +152,7 @@ async def test_default_pack_is_unchanged_and_unknown_pack_falls_back():
     store = MemoryStore()
     story = "My mother is bleeding right now at Harmattan General Hospital, refused to treat, pay deposit"
     for pid in (None, "zz-nowhere"):
-        r = await engine(store).handle_message(None, "web", story, pack_id=pid)
+        r = await say(engine(store), None, story, pack_id=pid)
         assert "Section 20" in "\n".join(r.replies)
     assert {x.pack for x in store.reports.values()} == {"ng-lagos"}
 
@@ -181,8 +182,8 @@ async def test_kenya_gate_blocks_unverified_law_in_production_mode():
 async def test_followup_and_lookup_use_the_reports_own_pack():
     store = MemoryStore()
     e = engine(store)
-    r = await e.handle_message(None, "web", "A nurse insulted my wife last week at Twiga Hill Sub-County Hospital maternity",
-                               pack_id="ke-nairobi")
+    r = await say(e, None, "A nurse insulted my wife last week at Twiga Hill Sub-County Hospital maternity",
+                  pack_id="ke-nairobi")
     assert "Twiga Hill Sub-County Hospital" in await e.lookup(r.ref_code)
     f = await e.start_followup(r.ref_code)
     assert "Twiga Hill" in f.replies[0] and (await store.get_session(f.session_id)).pack == "ke-nairobi"

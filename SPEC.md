@@ -71,11 +71,13 @@ S1 STORY (free text) --> AI extraction (section 5)
    |
 S2 DANGER CHECK (skipped only if story is clearly in the past)
    |
-   |-- severe --> A1 escalation message (by category)
+   |-- severe --> A1 escalation message (by category), at once
    |              A2 capture hospital if missing (1 question)
+   |              M1 "anything else?" until they say they have finished
    |              A3 reference code + follow-up opt-in
    |
    |-- not severe --> B1 fill missing fields (max 3 questions)
+                      M1 "anything else?" until they say they have finished
                       B2 rights check
                       B3 self-help steps
                       B4 reference code + counted line
@@ -212,6 +214,34 @@ From the country pack's `rights.json`, by category.
 We don count your report. When plenty report about the same wahala gather for one hospital, the pattern (na only numbers, no be story) go reach {org_name}, wey go use am push for change for that hospital for public.
 
 The receipt never shows a report number or count: that would leak counts below the pattern threshold to anyone who submits, and would tell the first reporter they are alone.
+
+### M1 Have you finished?
+
+**A report is recorded only when the person tells us they have finished.** Until then nothing is
+written, no code is issued, and "your report is recorded" is never said. Someone who walks away
+leaves nothing behind.
+
+**EN:** Is there anything else you want to tell me about what happened? You can send it now, in one message or several. When you have finished, tap Done or reply DONE. Your report is only recorded when you tell me you have finished.
+**PCM:** Anything else dey wey you wan tell me about wetin happen? You fit send am now, one message or plenty. When you don finish, tap Done or reply DONE. Na when you tell me say you don finish we go record your report.
+
+After each addition: "Thank you, I have added that. Anything else? ..." with the same Done option.
+
+- Finished means a tap on Done, or a short reply (six words or fewer) such as DONE, NO, "that is all",
+  "nothing else", "I don finish". A long message that starts with "No" is more story.
+- Every addition is read by the classifier together with everything said so far. New detail may change
+  the category. It never erases an answer already given (hospital, department, when) and never clears
+  a danger signal.
+- Severity is decided again after every addition. An emergency revealed here gets the A1 steps at
+  once, before anything else. If the classifier flags a critical condition, an earlier NO to the
+  danger check is set aside and the question is asked again. Nobody leaves the emergency branch by
+  adding detail.
+- Emergency steps never wait for this step. Only the recording of the report does.
+- A crisis disclosed here (self-harm, sexual violence) is handed off like anywhere else, and nothing is stored.
+- This step does not count towards the three questions.
+- Rights and self-help (B2, B3) come after it, so they match the whole story, not its first line.
+- The wording is reviewed by hand like the other notices. In a pack where it is not signed off the
+  step is skipped and the report is recorded after the last question: the unverified fallback says
+  "I have recorded what you told me", which would be untrue here.
 
 ### B5 / A3 Follow-up opt-in
 

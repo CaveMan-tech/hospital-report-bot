@@ -16,7 +16,9 @@
     "en": "Sorry, I did not get that. Is anyone in danger right now? Please reply YES or NO."
   },
   "A1.emergency_refused": {
-    "references": ["health_act_2017"],
+    "references": [
+      "health_act_2017"
+    ],
     "verified": false,
     "en": "What you describe is against the law in Kenya. Article 43(2) of the Constitution says: \"A person shall not be denied emergency medical treatment.\" Section 7 of the Health Act 2017 says every person has the right to emergency medical treatment, in public and private hospitals.\n\nDo this now:\n1. If the person is getting worse, getting care comes first. Go to the nearest other hospital if you can, or call {contact:emergency}. Do not stay to argue.\n2. If you can, ask calmly for the most senior doctor or officer on duty (the medical superintendent or the casualty in-charge) and say: \"Article 43(2) of the Constitution and section 7 of the Health Act say you cannot refuse emergency treatment.\"\n3. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
     "note": "VERIFY with a Kenyan lawyer: Constitution Art 43(2), Health Act 2017 s.7 wording. Deliberately does not say treatment is free and does not mention the fine. See docs/research/kenya-pack.md section A.",
@@ -292,5 +294,15 @@
         "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
       }
     ]
+  },
+  "M1.more": {
+    "verified": false,
+    "en": "Is there anything else you want to tell me about what happened? You can send it now, in one message or several. When you have finished, tap Done or reply DONE. Your report is only recorded when you tell me you have finished.",
+    "pcm": null
+  },
+  "M1.more_again": {
+    "verified": false,
+    "en": "Thank you, I have added that. Anything else? When you have finished, tap Done or reply DONE.",
+    "pcm": null
   }
 }

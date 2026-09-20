@@ -73,7 +73,7 @@ def mask(texts):
 def test_same_conversation_gives_the_same_replies_as_the_web_channel():
     """The proof: one script, through POST /api/chat and through Telegram, turn by turn."""
     import asyncio
-    script = ["hi", STORY_ASK, "no", "Lagoon View General Hospital", "maternity", "last week", "no"]
+    script = ["hi", STORY_ASK, "no", "Lagoon View General Hospital", "maternity", "last week", "done", "no"]
     with _client() as c:
         engine, api = c.app.state.engine, FakeAPI()
         adapter = TelegramAdapter(engine, api)
@@ -100,6 +100,7 @@ async def test_telegram_report_counts_in_the_analyst_patterns():
     adapter, _api, store, engine = make()
     for i in range(5):
         await adapter.handle_update(msg(STORY_FULL, chat=CHAT + i))
+        await adapter.handle_update(msg("done", chat=CHAT + i))
     assert len(store.reports) == 5 and {r.channel for r in store.reports.values()} == {"telegram"}
     rows = A.patterns(list(store.reports.values()), engine.pack)
     assert any(p["category"] == "abuse" for p in rows)
@@ -118,7 +119,8 @@ async def test_buttons_mirror_quick_replies_and_a_tap_sends_the_value():
 
 async def test_a_stale_button_never_answers_the_danger_check():
     adapter, api, store, _ = make()
-    await adapter.handle_update(msg(STORY_FULL))                 # ends at the opt-in question
+    await adapter.handle_update(msg(STORY_FULL))
+    await adapter.handle_update(msg("done"))                     # ends at the opt-in question
     old_no = api.last_buttons()[1][1]
     await adapter.handle_update(msg("/start"))
     await adapter.handle_update(msg(STORY_ASK))                  # now at the danger check
@@ -143,6 +145,7 @@ async def test_a_redelivered_update_is_handled_once():
     adapter, api, store, _ = make()
     update = msg(STORY_FULL)
     await adapter.handle_update(update)
+    await adapter.handle_update(msg("done"))
     sent, state = len(api.sent), next(iter(store.sessions.values())).state
     await adapter.handle_update(update)
     assert len(store.reports) == 1 and len(api.sent) == sent     # no second report, no second answer
@@ -196,6 +199,7 @@ async def test_unverified_notices_are_skipped_not_replaced_by_the_fallback():
 async def test_status_and_nextday():
     adapter, api, _store, _ = make()
     await adapter.handle_update(msg(STORY_FULL))
+    await adapter.handle_update(msg("done"))
     code = re.search(r"[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}", "\n".join(api.texts())).group()
     await adapter.handle_update(msg(f"/status {code}"))
     assert "on record" in api.texts()[-1]
@@ -446,7 +450,8 @@ async def test_a_failed_menu_update_never_stops_the_bot():
 
 async def test_a_bare_code_is_a_status_request_not_an_answer_to_the_question_on_screen():
     adapter, api, store, _ = make()
-    await adapter.handle_update(msg(STORY_FULL))                 # ends at the opt-in question
+    await adapter.handle_update(msg(STORY_FULL))
+    await adapter.handle_update(msg("done"))                     # ends at the opt-in question
     code = re.search(r"[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}", "\n".join(api.texts())).group()
     await adapter.handle_update(msg("/status"))
     await adapter.handle_update(msg(code))
@@ -470,3 +475,11 @@ async def test_an_answer_that_happens_to_be_twelve_letters_is_not_mistaken_for_a
     for answer in ("Alpha General", "Appendicitis"):             # well-formed once I/L/O are forgiven
         await adapter.handle_update(msg(answer))
     assert seen[-2:] == ["Alpha General", "Appendicitis"]
+
+
+async def test_the_finished_step_shows_a_done_button_and_a_tap_records_the_report():
+    adapter, api, store, _ = make()
+    await adapter.handle_update(msg(STORY_FULL))
+    assert store.reports == {} and [label for label, _ in api.last_buttons()] == ["Done"]
+    await adapter.handle_update(tap(api.last_buttons()[0][1]))
+    assert len(store.reports) == 1 and "Your report is recorded" in "\n".join(api.texts())
