@@ -68,6 +68,9 @@ A solo developer should not be the publisher.
 and what to do now → your code.
 **Say:** I assume the person is angry, tired and stressed. No form, no app, no name, five kilobytes.
 Help first, data second: they leave with something useful even if no pattern ever forms.
+**One line on consent:** "Nothing is recorded until they say they have finished. In an emergency the
+bot says 'if you need to go, go', and records it for them after two quiet minutes. Nobody has to
+choose between the person beside them and their report."
 **One line on insiders:** "A patient can say they were asked for money. Only an insider can say it
 is policy. Staff can report safely too, and the bot adapts to who is writing: it never nudges them
 to expose themselves." Do not say "identify" or "detect".

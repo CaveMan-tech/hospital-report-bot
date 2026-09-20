@@ -70,6 +70,10 @@ real hospitals would be exactly the harm this project is meant to avoid.
   stories passing in three consecutive runs, at about four seconds per reply. I wrote these stories,
   so this is evidence, not proof; the design assumes the model will sometimes be wrong, and a wrong
   guess can never bypass the danger question.
+- **The reporter decides when it is a report.** People type in bursts, so they can keep adding
+  detail, and nothing is recorded until they say they have finished. The one exception is an
+  emergency: the bot tells them "if you need to go, go", and records what they have said after two
+  quiet minutes. Nobody has to choose between the person beside them and their report.
 - **Privacy promises are tests.** No identity is collected. The original message is deleted the
   moment the report is written. The reference code is never stored, only a keyed hash. IP addresses
   are never written to a database or a log. Small groups never appear, and masked numbers cannot be
