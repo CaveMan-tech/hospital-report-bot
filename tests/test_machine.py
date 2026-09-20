@@ -520,3 +520,21 @@ async def test_other_emergencies_get_no_link_and_an_unsigned_pack_sends_none(sto
     assert "http" not in "\n".join(r.replies)
     engine = Engine(MemoryStore(), mock_extract, unsigned("ng-lagos"), "s")
     assert "http" not in "\n".join((await say(engine, None, EMERGENCY)).replies)
+
+
+async def test_an_unclear_optin_answer_is_asked_again_once_and_never_recorded_as_no(engine, store):
+    r = await say(engine, None, "A nurse slapped me last week at Harmattan General Hospital maternity ward")
+    assert r.state == "B5"
+    r = await say(engine, r.session_id, "hmm what do you mean")
+    assert r.state == "B5" and "check in tomorrow" in r.replies[-1]        # asked again, buttons and all
+    assert [q.value for q in r.quick_replies] == ["yes", "no"]
+    r = await say(engine, r.session_id, "yes")
+    assert r.done and next(iter(store.reports.values())).followup_opt_in is True
+
+
+async def test_a_second_unclear_optin_answer_ends_without_opting_in(engine, store):
+    r = await say(engine, None, "A nurse slapped me last week at Harmattan General Hospital maternity ward")
+    r = await say(engine, r.session_id, "hmm")
+    r = await say(engine, r.session_id, "hmm")
+    assert r.done and "No problem" in r.replies[-1]
+    assert next(iter(store.reports.values())).followup_opt_in is False

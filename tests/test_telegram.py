@@ -442,3 +442,31 @@ async def test_a_failed_menu_update_never_stops_the_bot():
 
     api.set_commands = down
     await adapter.publish_commands()
+
+
+async def test_a_bare_code_is_a_status_request_not_an_answer_to_the_question_on_screen():
+    adapter, api, store, _ = make()
+    await adapter.handle_update(msg(STORY_FULL))                 # ends at the opt-in question
+    code = re.search(r"[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}", "\n".join(api.texts())).group()
+    await adapter.handle_update(msg("/status"))
+    await adapter.handle_update(msg(code))
+    assert "on record" in api.texts()[-1]
+    assert next(iter(store.sessions.values())).state == "B5"     # the opt-in is still open
+    await adapter.handle_update(msg("yes"))
+    assert next(iter(store.reports.values())).followup_opt_in is True
+
+
+async def test_an_answer_that_happens_to_be_twelve_letters_is_not_mistaken_for_a_code():
+    adapter, _api, _store, engine = make()
+    seen, original = [], engine.handle_message
+
+    async def spy(session_id, channel, text, **kw):
+        seen.append(text)
+        return await original(session_id, channel, text, **kw)
+
+    engine.handle_message = spy
+    await adapter.handle_update(msg(STORY_ASK))
+    await adapter.handle_update(msg("no"))                       # now asking which hospital
+    for answer in ("Alpha General", "Appendicitis"):             # well-formed once I/L/O are forgiven
+        await adapter.handle_update(msg(answer))
+    assert seen[-2:] == ["Alpha General", "Appendicitis"]

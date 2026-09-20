@@ -443,7 +443,11 @@ class Engine:
         return replies, code
 
     async def _on_optin(self, s: Session, text: str):
-        yes = parse_yes_no(text) is True
+        answer = parse_yes_no(text)
+        if answer is None and not s.context.get("optin_reasked"):
+            s.context["optin_reasked"] = True   # an unclear reply is not a NO: ask once more, then let it go
+            return [self._msg("B5.optin", s)], None
+        yes = answer is True
         report = await self.store.get_report(s.report_id) if s.report_id else None
         if report and yes:
             report.followup_opt_in = True

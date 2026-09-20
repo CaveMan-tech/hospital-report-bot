@@ -15,12 +15,14 @@ import asyncio
 import hashlib
 import hmac
 import logging
+import re
 import secrets
 import time
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Protocol
 
+from app.engine import refcode
 from app.engine.machine import Engine
 from app.engine.models import SESSION_TTL, EngineReply
 from app.engine.packs import Pack
@@ -32,6 +34,19 @@ CHANNEL = "telegram"
 MAX_TEXT = 4096              # Telegram's limit for one message
 MAX_CALLBACK_BYTES = 64      # Telegram's limit for a button's callback_data
 SEEN_UPDATES = 2000
+_DASHED = re.compile(r"\s*\w{4}-\w{4}-\w{4}\s*")
+
+
+def _looks_like_code(text: str) -> bool:
+    """Stricter than refcode.is_wellformed, which forgives spaces and I/L/O: "Alpha General" and
+    "Appendicitis" are well-formed codes to it, and they are answers, not codes. So: the dashed shape
+    the bot prints, or one unbroken word with a digit in it."""
+    if not refcode.is_wellformed(text):
+        return False
+    word = text.strip()
+    return bool(_DASHED.fullmatch(text)) or (" " not in word and any(c.isdigit() for c in word))
+
+
 COMMANDS = ("start", "status", "forget")     # shown in Telegram's menu; "nextday" joins them in demo mode
 PRUNE_ABOVE = 1000
 
@@ -183,6 +198,10 @@ class TelegramAdapter:
             return await self._send(chat_id, state, [pack.message("E.retry", lang)])
         word, _, arg = text.strip().partition(" ")
         command, arg = word.split("@")[0].lower(), arg.strip()
+        if _looks_like_code(text):
+            # A code on its own is what T.status_usage has just asked for. It must never be read as
+            # the answer to whatever question is still on screen.
+            command, arg = "/status", text.strip()
         if command == "/start":
             await self._forget(state)
             state.pack = arg if arg in self.engine.packs else None

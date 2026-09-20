@@ -218,6 +218,8 @@ The receipt never shows a report number or count: that would leak counts below t
 **EN:** May I check in tomorrow to ask if anything changed? It helps show whether hospitals fix problems. Reply YES or NO.
 **PCM:** I fit check on you tomorrow to ask whether anything change? E go help show whether hospital dey fix matter. Reply YES or NO.
 
+An unclear reply is not a NO. The question is asked once more; only an explicit no, or a second unclear reply, ends without opting in.
+
 Web PoC: user returns with their code; a demo-only "simulate next day" control triggers F1. Production: WhatsApp template message.
 
 ### F1 Follow-up
@@ -241,6 +243,7 @@ Follow-up data is only ever reported as "of the N people who answered a follow-u
 | User names a staff member | Accept, strip from stored summary, tell user names are never published. |
 | Private hospital | Store with `facility_type`. Excluded from patterns in PoC. |
 | Reporter is hospital staff | Store `reporter_role = staff`. Always ask the danger question rather than assume (a staff member describing a practice is not necessarily beside a patient in danger). If not in danger, skip the patient-oriented rights and self-help text and send `B3.staff`: no need to confront anyone, note dates and instructions but never copy patient records, do not use work devices or hospital Wi-Fi. Counts as one report like any other. Dedicated whistleblower channel on roadmap. |
+| On Telegram, someone sends their code on its own (after `/status` told them how) | It is treated as `/status <code>` and the question still on screen stays open. Only the dashed shape, or one unbroken word containing a digit, counts as a code, so a twelve-letter answer is never mistaken for one. |
 | Page reloads or the network drops mid-report | The visible chat is kept in the tab's `sessionStorage` only (never `localStorage`, never the server), so a reload resumes where they were, with the tap options restored. A message that failed to send is not lost: "Try again" resends it. If the server session has expired, the bot says so and starts again. |
 | Someone walks up behind the reporter | **Hide this chat**: wipes the chat from the device, deletes the unfinished conversation on the server immediately (`POST /api/chat/forget`) rather than at expiry, and leaves with `location.replace`, so the Back button does not return to it. A finished report is never affected. |
 | The person announces they want to report but describes nothing ("I would like to report an issue") | It is an intention, not a report (`has_incident = false`). No sympathy for nothing, no triage on nothing, and **an empty report is never stored**. The bot asks what happened and offers one button, "Someone is in danger right now" (typing YES works too). That button gives the pre-written danger guidance first and asks for the story after; a report is written only once there is a story. After two such prompts with no story the conversation ends politely with nothing stored. |
