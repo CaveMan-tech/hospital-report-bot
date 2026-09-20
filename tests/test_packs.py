@@ -1,10 +1,11 @@
 import pytest
 
 from app.engine.packs import Pack, UnverifiedContent
+from tests.helpers import unsigned
 
 
 def test_unverified_message_is_blocked_and_falls_back():
-    pack = Pack("ng-lagos", allow_unverified=False)
+    pack = unsigned("ng-lagos")
     assert pack.messages["A1.emergency_refused"]["verified"] is False
     out = pack.message("A1.emergency_refused", "en")
     assert "Section 20" not in out
@@ -12,13 +13,13 @@ def test_unverified_message_is_blocked_and_falls_back():
 
 
 def test_unverified_raises_internally():
-    pack = Pack("ng-lagos", allow_unverified=False)
+    pack = unsigned("ng-lagos")
     with pytest.raises(UnverifiedContent):
         pack._message("A1.generic", "en")
 
 
 def test_unverified_rights_are_not_shown():
-    pack = Pack("ng-lagos", allow_unverified=False)
+    pack = unsigned("ng-lagos")
     assert pack.rights_for("abuse", "en") == []
 
 
@@ -71,7 +72,7 @@ def test_message_or_none_still_checks_nested_contacts():
 
 
 def test_content_review_rows_say_what_a_reporter_gets_today():
-    pack = Pack("ng-lagos", allow_unverified=True)          # dev mode must not change the answer
+    pack = unsigned("ng-lagos", allow_unverified=True)      # dev mode must not change the answer
     rows = {(r["file"], r["id"]): r["now"] for r in pack.gated_entries()}
     fallback = pack.messages["E.unverified_fallback"]["en"]
     assert rows[("messages", "A1.emergency_refused")]["kind"] == "fallback"
@@ -83,7 +84,7 @@ def test_content_review_rows_say_what_a_reporter_gets_today():
 
 
 def test_a_verified_message_is_still_held_back_by_an_unverified_contact():
-    pack = Pack("ng-lagos")
+    pack = unsigned("ng-lagos")
     signed = {"verified": True, "verified_by": "A", "verified_on": "2026-09-20", "verified_source": "x"}
     pack.messages["E.handoff"] = {**pack.messages["E.handoff"], **signed}
     now = {r["id"]: r["now"] for r in pack.gated_entries() if r["file"] == "messages"}["E.handoff"]
@@ -98,7 +99,7 @@ SIGNED = {"verified": True, "verified_by": "A", "verified_on": "2026-09-20", "ve
 
 
 def test_a_reference_is_only_offered_once_a_human_has_checked_the_link():
-    pack = Pack("ng-lagos")
+    pack = unsigned("ng-lagos")
     assert pack.references_for("dignity", "en") == []                    # unverified: nothing is sent
     ref = next(r for r in pack.references if r["id"] == "pbor_guide")
     ref.update(SIGNED)
@@ -116,5 +117,5 @@ def test_every_right_names_a_reference_that_exists_and_every_reference_is_https(
         for right in pack.rights:
             assert set(right.get("references", [])) <= ids, (pack_id, right["id"])
         for ref in pack.references:
-            assert ref["url"].startswith("https://") and ref["verified"] is False, ref["id"]
+            assert ref["url"].startswith("https://"), ref["id"]
         assert any(r["file"] == "references" for r in pack.gated_entries())

@@ -4,6 +4,7 @@ from app.engine.extract import mock_extract
 from app.engine.machine import Engine, parse_yes_no
 from app.engine.packs import Pack
 from app.store.memory import MemoryStore
+from tests.helpers import unsigned
 
 
 @pytest.fixture
@@ -173,7 +174,7 @@ async def test_followup_worse_reenters_danger_check(engine, store):
 
 
 async def test_gate_blocks_unverified_escalation_in_production_mode(store):
-    engine = Engine(store, mock_extract, Pack("ng-lagos", allow_unverified=False), "s")
+    engine = Engine(store, mock_extract, unsigned("ng-lagos"), "s")
     r = await say(engine, None, "My mother is bleeding right now at Harmattan General Hospital, refused to treat, deposit")
     text = "\n".join(r.replies)
     assert "Section 20" not in text and "still being checked" in text

@@ -74,7 +74,14 @@ def test_a_bare_verified_flag_does_not_unlock_gated_content(tmp_path, monkeypatc
     shutil.copytree(P.PACKS_DIR / "ng-lagos", tmp_path / "ng-lagos")
     monkeypatch.setattr(P, "PACKS_DIR", tmp_path)
     path = tmp_path / "ng-lagos" / "messages.json"
-    data = json.loads(path.read_text())
+    cpath = tmp_path / "ng-lagos" / "contacts.json"
+    data, contacts = json.loads(path.read_text()), json.loads(cpath.read_text())
+    # Whatever has been signed off in packs/, this copy starts from no sign-off at all.
+    for entry in (data["A1.emergency_refused"], *contacts):
+        entry["verified"] = False
+        for field in ("verified_by", "verified_on", "verified_source"):
+            entry.pop(field, None)
+    cpath.write_text(json.dumps(contacts))
 
     data["A1.emergency_refused"]["verified"] = True                      # flag flipped by hand
     path.write_text(json.dumps(data))
@@ -86,8 +93,6 @@ def test_a_bare_verified_flag_does_not_unlock_gated_content(tmp_path, monkeypatc
     # Still blocked: the message embeds the emergency numbers, and those need their own sign-off.
     assert "Section 20" not in P.Pack("ng-lagos").message("A1.emergency_refused")
 
-    cpath = tmp_path / "ng-lagos" / "contacts.json"
-    contacts = json.loads(cpath.read_text())
     next(c for c in contacts if c["id"] == "emergency").update(sign_off, verified_source="Ministry page; test-called both")
     cpath.write_text(json.dumps(contacts))
     msg = P.Pack("ng-lagos").message("A1.emergency_refused")

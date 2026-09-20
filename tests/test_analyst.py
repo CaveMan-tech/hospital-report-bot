@@ -11,6 +11,7 @@ from app.config import get_settings
 from app.engine.packs import Pack
 from app.main import app
 from app.seed import build
+from tests.helpers import unsigned
 
 get_settings.cache_clear()
 AUTH = ("analyst", "pw")
@@ -60,7 +61,7 @@ def test_brief_contains_only_numbers_that_exist_in_the_pattern():
 
 def test_brief_withholds_unverified_law_in_production_mode():
     reports, _ = build()
-    pack = Pack("ng-lagos", allow_unverified=False)
+    pack = unsigned("ng-lagos")
     text = A.brief(A.patterns(reports, pack)[0], pack)
     assert "Section 20" not in text and "pending verification" in text
 
@@ -104,7 +105,8 @@ def test_content_review_page_lists_everything_to_verify():
         assert "0 of" in page and "Article 43(2)" in page and "new.kenyalaw.org" in page
         assert "app.verify mark ke-nairobi" in page and "ALLOW_UNVERIFIED is ON" in page
         assert "A1.emergency_refused" in c.get("/analyst/content", auth=AUTH).text
-        lagos = c.get("/analyst/content", auth=AUTH).text
+        c.app.state.engine.packs["ng-lagos"] = unsigned("ng-lagos", allow_unverified=True)   # before review
+        lagos = c.get("/analyst/content?pack=ng-lagos", auth=AUTH).text
         assert "What reporters get today" in lagos
         assert "The guidance for this situation is still being checked" in lagos      # the fallback, in full
         assert "Left out of the reply" in lagos and "Held back with it" in lagos
