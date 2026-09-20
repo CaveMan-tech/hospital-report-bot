@@ -60,7 +60,7 @@ mark asks neglect 'FCCPC Patients'"'"' Bill of Rights, illustrated guide (policy
 
 # ---- references (open each link on a phone: it must load, be the right document, and match the stated size)
 mark references pbor_guide 'Opened the link and confirmed the document and its size: https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf'
-# nha_2014: text copy on UNCTAD/ICC iGuides, not the Gazette print. Compare s.20 and s.30 with the Gazette scan first.
-mark references nha_2014 'Opened the link and confirmed the document and its size; s.20 and s.30 compared with the Gazette scan https://faolex.fao.org/docs/pdf/nig162642.pdf : https://admin.theiguides.org/Media/Documents/National%20Health%20Act%202014.pdf'
+# nha_2014: Gazette scan hosted by PRB, 11 MB. The line tells the reporter the size.
+mark references nha_2014 'Opened the link and confirmed the document and its size: https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf'
 
 echo; uv run python -m app.verify list ng-lagos | head -1
