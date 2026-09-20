@@ -34,6 +34,15 @@ _NO_PHRASES = ("no o", "not now", "nobody", "no one", "e no dey")
 _FOLLOWUP_STATUS = {"1": "resolved", "2": "unchanged", "3": "worse", "4": "left"}
 
 
+MORE_STORY_WORDS = 8  # longer than any hospital name or yes/no answer: the person is still telling us
+
+
+def _more_story(text: str) -> bool:
+    """People type in bursts. A long message sent while we wait for a short answer is more of the
+    story, and must go to the classifier: never into a field, where it would be stored as typed."""
+    return not text.startswith(TAP) and len(text.split()) > MORE_STORY_WORDS
+
+
 def parse_yes_no(text: str) -> bool | None:
     low = re.sub(r"[^a-z0-9 ]", " ", text.lower()).strip()
     if not low:
@@ -224,6 +233,9 @@ class Engine:
     async def _on_danger_answer(self, s: Session, text: str):
         ex = self._ex(s)
         answer = parse_yes_no(text)
+        first = re.sub(r"[^a-z0-9 ]", " ", text.lower()).split()[:1]
+        if _more_story(text) and not (first and first[0] in _YES | _NO):
+            return await self._on_story(s, text)   # not an answer: "nobody attended to her…" is no NO
         if answer is None:
             if not s.context.get("danger_retried"):
                 s.context["danger_retried"] = True
@@ -243,6 +255,9 @@ class Engine:
         escalation = self._msg(key, s)
         if s.context.get("generic_escalation_sent") and escalation == self._msg("A1.generic", s):
             escalation = ""  # they already have it from the danger button; do not repeat it
+        if s.context.get("escalation_sent") == key:
+            ack = escalation = ""  # they added to the story: the steps are already on their screen
+        s.context["escalation_sent"] = key
         replies = [ack, escalation]
         if escalation:  # the law to show them, after what to do and never before it
             replies += self.pack_for(s.pack).escalation_references(key, s.context.get("lang", "en"))
@@ -264,6 +279,9 @@ class Engine:
 
     async def _on_severe_hospital(self, s: Session, text: str):
         ex = self._ex(s)
+        if _more_story(text) and not self.pack_for(s.pack).match_hospital(text):
+            s.context["danger_answer"] = True   # more detail never takes someone out of the emergency branch
+            return await self._on_story(s, text)
         ex.hospital_name_raw = text[:120] or None
         return await self._finalise(s, ex)
 
@@ -325,6 +343,11 @@ class Engine:
     async def _on_field_answer(self, s: Session, text: str):
         ex = self._ex(s)
         field = s.context.pop("pending_field", None)
+        if field == "hospital" and _more_story(text) and not self.pack_for(s.pack).match_hospital(text):
+            s.context["asked"].remove("hospital")       # not answered yet, so it does not use up a question
+            if s.context.get("danger_answer") is False:
+                s.context.pop("danger_answer")          # that NO was about a smaller story than this one
+            return await self._on_story(s, text)
         if field == "hospital":
             ex.hospital_name_raw = text[:120] or None
         elif field == "category_confirm":

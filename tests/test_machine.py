@@ -538,3 +538,61 @@ async def test_a_second_unclear_optin_answer_ends_without_opting_in(engine, stor
     r = await say(engine, r.session_id, "hmm")
     assert r.done and "No problem" in r.replies[-1]
     assert next(iter(store.reports.values())).followup_opt_in is False
+
+
+BURST = ("Also they refused to treat my wife until we paid 50 thousand, she is bleeding on the floor "
+         "right now, her name is Ngozi Eze")
+
+
+def _dump(store):
+    import json
+    return json.dumps([r.model_dump(mode="json") for r in store.reports.values()])
+
+
+async def test_more_story_sent_at_the_hospital_question_is_classified_and_never_stored(engine, store):
+    r = await say(engine, None, "A nurse insulted me in front of everybody")
+    r = await say(engine, r.session_id, "no")
+    assert r.state == "B1" and "Which hospital" in r.replies[-1]
+    r = await say(engine, r.session_id, BURST)
+    assert "112" in "\n".join(r.replies)                        # the emergency was seen, steps were shown
+    assert "Which hospital" in r.replies[-1]                    # and the question is asked again
+    r = await say(engine, r.session_id, "Harmattan General Hospital")
+    report = next(iter(store.reports.values()))
+    assert report.category == "emergency_refused" and report.severity == "severe"
+    assert report.hospital_id and report.hospital_name_raw is None
+    assert "Ngozi" not in _dump(store) and "bleeding on the floor" not in _dump(store)
+
+
+async def test_more_story_sent_at_the_danger_check_is_read_as_story_not_as_an_unclear_answer(engine, store):
+    r = await say(engine, None, "A nurse insulted me in front of everybody")
+    assert r.state == "S2"
+    r = await say(engine, r.session_id, BURST)
+    assert "112" in "\n".join(r.replies) and "Section 20" in "\n".join(r.replies)
+    assert "Which hospital" in r.replies[-1]
+
+
+async def test_a_long_danger_answer_that_starts_with_no_is_still_an_answer(engine):
+    r = await say(engine, None, "A nurse insulted me in front of everybody")
+    r = await say(engine, r.session_id, "No, nobody is in danger right now, this thing happened to me last week")
+    assert r.state == "B1" and "Which hospital" in r.replies[-1]
+
+
+async def test_more_story_in_the_emergency_branch_does_not_repeat_the_steps_or_store_the_text(engine, store):
+    r = await say(engine, None, "My mother is bleeding right now and they refused to treat her until we pay deposit")
+    assert r.state == "A2" and "112" in "\n".join(r.replies)
+    r = await say(engine, r.session_id, "The doctor on duty walked past us three times and the cashier "
+                                        "said no deposit no treatment, my name is Ngozi Eze")
+    assert r.state == "A2" and "112" not in "\n".join(r.replies) and "Which hospital" in r.replies[-1]
+    r = await say(engine, r.session_id, "Harmattan General Hospital")
+    assert next(iter(store.reports.values())).severity == "severe" and "Ngozi" not in _dump(store)
+
+
+async def test_a_short_unknown_hospital_name_is_still_kept_for_review(engine, store):
+    r = await say(engine, None, "A nurse insulted me in front of everybody last week at the maternity ward")
+    assert "Which hospital" in r.replies[-1]
+    r = await say(engine, r.session_id, "Saint Nowhere Clinic")
+    for _ in range(3):
+        if store.reports:
+            break
+        r = await say(engine, r.session_id, "last week")
+    assert next(iter(store.reports.values())).hospital_name_raw == "Saint Nowhere Clinic"
