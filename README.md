@@ -1,4 +1,4 @@
-# [BOT_NAME]: private hospital reporting, public patterns
+# Open Ward: private hospital reporting, public patterns
 
 Built for the Andela x Open Society Foundations hackathon, 2026.
 Tracks: Safety, Reporting & Protection + Transparency & Accountability.

@@ -5,8 +5,8 @@ big type, almost no bullets on screen: the words below are what the slide has to
 has to show. Judges score four things equally: uniqueness, scalability, AI coding tool usage,
 presentation and track fit. Each slide is tagged with what it scores._
 
-**Name.** Still `[BOT_NAME]`. One option that ties to the closing line is **Counted**
-("People are already telling these stories. Nobody is counting them."). Your call.
+**Name.** The product is **Open Ward**. The fictional organisation that runs it in the demo is
+Open Ward Initiative; keep the two distinct on slides.
 
 ---
 

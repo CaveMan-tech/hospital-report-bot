@@ -1,4 +1,4 @@
-# Build Spec: Hospital Pattern Reporting (working title: [BOT_NAME])
+# Build Spec: Open Ward, hospital pattern reporting
 
 Andela x OSF Hackathon. Deadline **Mon 21 Sept 2026, 23:59 UTC**. Target submit time: Mon 18:00 UTC.
 Tracks: Safety, Reporting & Protection + Transparency & Accountability.

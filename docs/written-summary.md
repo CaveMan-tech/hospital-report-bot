@@ -2,11 +2,11 @@
 
 _Draft for Ikechi to rewrite in his own voice. The submission asks the summary to cover: the
 track, information sources, the approach to trust and accuracy, and how AI tools were used.
-About 750 words. Replace `[BOT_NAME]` and resolve every `[ ]` before submitting._
+About 750 words. Resolve every `[ ]` before submitting._
 
 ---
 
-## [BOT_NAME]: private reports in, public pressure out
+## Open Ward: private reports in, public pressure out
 
 **Tracks:** Safety, Reporting & Protection, and Transparency & Accountability.
 
