@@ -90,7 +90,7 @@ class Pack:
             return self._message("E.unverified_fallback", lang)
 
     def message_or_none(self, key: str, lang: str = "en", **fields: str) -> str | None:
-        """For channel notices where the fallback would be untrue (it says "I have recorded what
+        """For channel notices where the fallback would be untrue (it says "I have noted what
         you told me"). Same gate as `message`; unverified text is simply not sent."""
         try:
             return self._message(key, lang, **fields)

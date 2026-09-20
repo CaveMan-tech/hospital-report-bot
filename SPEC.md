@@ -240,8 +240,15 @@ After each addition: "Thank you, I have added that. Anything else? ..." with the
 - This step does not count towards the three questions.
 - Rights and self-help (B2, B3) come after it, so they match the whole story, not its first line.
 - The wording is reviewed by hand like the other notices. In a pack where it is not signed off the
-  step is skipped and the report is recorded after the last question: the unverified fallback says
-  "I have recorded what you told me", which would be untrue here.
+  step is skipped and the report is recorded after the last question: the unverified fallback is
+  written for guidance we cannot show, and would leave the person with no way to finish.
+- **Emergencies are the one exception to "only when they say so".** Someone dealing with an emergency
+  puts the phone down. If a report on the emergency branch waits here and the person adds nothing for
+  two minutes, it is recorded as if they had tapped Done, and the flow carries on: reference code,
+  counted line, follow-up opt-in. Anything they add restarts the two minutes. The engine decides
+  (`Engine.auto_record`); channels only keep time. Telegram holds the chat id in memory for the length
+  of the wait and nowhere else; a restart drops the wait and the report is not recorded. The web page
+  keeps time in the open tab. Every other report is recorded only when the person says they have finished.
 
 ### B5 / A3 Follow-up opt-in
 

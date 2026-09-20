@@ -191,7 +191,7 @@
   },
   "E.unverified_fallback": {
     "verified": true,
-    "en": "I have recorded what you told me. The guidance for this situation is still being checked, so I cannot show it yet. If anyone is in danger, please get to the nearest other hospital or emergency service now."
+    "en": "I have noted what you told me. The guidance for this situation is still being checked, so I cannot show it yet. If anyone is in danger, please get to the nearest other hospital or emergency service now."
   },
   "L.not_found": {
     "verified": true,
@@ -303,6 +303,11 @@
   "M1.more_again": {
     "verified": false,
     "en": "Thank you, I have added that. Anything else? When you have finished, tap Done or reply DONE.",
+    "pcm": null
+  },
+  "M1.auto": {
+    "verified": false,
+    "en": "You have not added anything for a little while, so I have recorded your report now, so that it is not lost.",
     "pcm": null
   }
 }

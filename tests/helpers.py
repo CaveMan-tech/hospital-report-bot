@@ -3,7 +3,7 @@
 from app.engine.packs import PROVENANCE, Pack
 
 # Plain wording a person reviews and switches on by hand (no law or number in it, so no provenance).
-NOTICES = ("B2.reference", "S0.privacy.telegram", "T.forgotten", "T.status_usage", "M1.more", "M1.more_again")
+NOTICES = ("B2.reference", "S0.privacy.telegram", "T.forgotten", "T.status_usage", "M1.more", "M1.more_again", "M1.auto")
 
 
 def unsigned(pack_id: str = "ng-lagos", allow_unverified: bool = False) -> Pack:

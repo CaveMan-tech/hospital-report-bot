@@ -130,3 +130,19 @@ def test_voice_script_is_small_and_never_auto_sends():
     js = Path("app/web/static/voice.js").read_text()
     assert len(js) < 3000 and "getTracks().forEach" in js            # microphone released after each note
     assert "send(" not in js and "requestSubmit" not in js            # text goes to the box for the person to check
+
+
+def test_a_quiet_emergency_is_recorded_over_http():
+    with TestClient(app) as c:
+        engine = c.app.state.engine
+        was, engine.auto_record_after = engine.auto_record_after, 0.0
+        try:
+            r = c.post("/api/chat", json={"text": "My mother is bleeding right now at Harmattan General Hospital "
+                                                  "emergency and they refused to treat her until we pay deposit"}).json()
+            assert r["state"] == "M1" and r["auto_record_after"] == 0.0
+            auto = c.post("/api/chat/auto-record", json={"session_id": r["session_id"]})
+            assert auto.status_code == 200 and auto.json()["ref_code"]
+            assert c.post("/api/chat/auto-record", json={"session_id": r["session_id"]}).status_code == 204
+        finally:
+            engine.auto_record_after = was
+        assert "auto-record" in c.get("/static/chat.js").text

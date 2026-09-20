@@ -671,3 +671,38 @@ async def test_until_the_wording_is_signed_off_the_step_is_skipped_not_replaced_
     engine = Engine(store, mock_extract, unsigned("ng-lagos", False), ref_secret="test-secret")
     r = await say(engine, None, FIRST, finish=False)
     assert r.state == "B5" and r.ref_code and len(store.reports) == 1
+
+
+# ------------------------------------------- emergencies are recorded if the person goes quiet
+
+EMERGENCY = ("My mother is bleeding right now at Harmattan General Hospital emergency and they refused "
+             "to treat her until we pay deposit")
+
+
+def _quick_engine(store, after=0.0):
+    return Engine(store, mock_extract, Pack("ng-lagos", allow_unverified=True), "s", auto_record_after=after)
+
+
+async def test_an_emergency_is_recorded_by_itself_when_the_person_goes_quiet(store):
+    engine = _quick_engine(store)
+    r = await tell(engine, None, EMERGENCY)
+    assert r.state == "M1" and r.auto_record_after == 0.0 and store.reports == {}
+    auto = await engine.auto_record(r.session_id)
+    assert auto.ref_code and auto.state == "B5" and "Your report is recorded" in "\n".join(auto.replies)
+    assert [q.value for q in auto.quick_replies] == ["yes", "no"]          # the rest of the flow carries on
+    assert next(iter(store.reports.values())).severity == "severe"
+    assert await engine.auto_record(r.session_id) is None                  # once only
+
+
+async def test_only_emergencies_are_recorded_without_being_told(store):
+    engine = _quick_engine(store)
+    r = await tell(engine, None, FIRST)
+    assert r.state == "M1" and r.auto_record_after is None
+    assert await engine.auto_record(r.session_id) is None and store.reports == {}
+
+
+async def test_the_wait_starts_again_whenever_they_add_something(store):
+    engine = _quick_engine(store, after=60)
+    r = await tell(engine, None, EMERGENCY)
+    assert await engine.auto_record(r.session_id) is None and store.reports == {}   # not quiet for long enough
+    assert await engine.auto_record("no-such-session") is None

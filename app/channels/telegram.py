@@ -94,6 +94,7 @@ class TelegramAdapter:
         self.dedupe = DailyDedupe()
         self._salt = secrets.token_bytes(32)
         self._chats: dict[str, ChatState] = {}
+        self._timers: dict[str, asyncio.Task] = {}   # a quiet emergency is recorded; see _auto_record
         self._seen: set[int] = set()
         self._seen_order: deque[int] = deque()
 
@@ -248,6 +249,7 @@ class TelegramAdapter:
     # --------------------------------------------------------------- rendering
 
     async def _render(self, chat_id: int, state: ChatState, reply: EngineReply, notice: str | None = None) -> None:
+        self._wait_for_quiet(chat_id, state, reply)
         texts = list(reply.replies)
         buttons = [(q.label, q.value) for q in reply.quick_replies]
         if notice:  # keep the question, and its buttons, as the last thing on screen
@@ -281,6 +283,35 @@ class TelegramAdapter:
                 raise
             except Exception as e:  # noqa: BLE001 - one lost message must not lose the rest
                 log.warning("Telegram send failed (%s)", type(e).__name__)
+
+    # -------------------------------------------------- a quiet emergency
+
+    def _wait_for_quiet(self, chat_id: int, state: ChatState, reply: EngineReply) -> None:
+        """Every reply restarts or ends the wait. The chat id lives only in the waiting task, in
+        memory, for as long as the wait: it is never stored, and a restart simply drops it."""
+        key = self._key(chat_id)
+        if (old := self._timers.pop(key, None)) and old is not asyncio.current_task():
+            old.cancel()
+        if reply.auto_record_after is not None:
+            self._timers[key] = asyncio.create_task(
+                self._auto_record(chat_id, key, state, reply.session_id, reply.auto_record_after))
+
+    async def _auto_record(self, chat_id: int, key: str, state: ChatState, session_id: str, after: float) -> None:
+        await asyncio.sleep(after)
+        try:
+            async with state.lock:
+                if state.session_id != session_id:
+                    return
+                reply = await self.engine.auto_record(session_id)
+                if reply is not None:
+                    await self._render(chat_id, state, reply)
+        except Blocked:
+            await self._quiet(self._forget(state))
+        except Exception as e:  # noqa: BLE001 - a background task has nobody to raise to
+            log.warning("Auto-record failed (%s)", type(e).__name__)
+        finally:
+            if self._timers.get(key) is asyncio.current_task():
+                del self._timers[key]
 
     # ----------------------------------------------------------------- helpers
 

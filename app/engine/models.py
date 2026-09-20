@@ -185,3 +185,6 @@ class EngineReply(BaseModel):
     ref_code: str | None = None
     done: bool = False
     quick_replies: list[QuickReply] = Field(default_factory=list)
+    # Set only while an emergency report waits at "have you finished?". If the person stays quiet
+    # this many seconds, the channel calls Engine.auto_record so the report is not lost.
+    auto_record_after: float | None = None

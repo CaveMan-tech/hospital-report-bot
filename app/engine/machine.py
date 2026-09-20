@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import time
 from datetime import UTC, datetime, timedelta
 
 from app.store.base import Store
@@ -96,13 +97,14 @@ def parse_yes_no(text: str) -> bool | None:
 
 class Engine:
     def __init__(self, store: Store, extractor: Extractor, pack: Pack | list[Pack], ref_secret: str,
-                 extract_timeout: float = 15.0):
+                 extract_timeout: float = 15.0, auto_record_after: float = 120.0):
         """`pack` may be one pack or several. The first is the default; each conversation
         picks its pack once, when it starts, and keeps it."""
         packs = pack if isinstance(pack, list) else [pack]
         self.store = store
         self.extract = extractor
         self.extract_timeout = extract_timeout
+        self.auto_record_after = auto_record_after
         self.packs: dict[str, Pack] = {p.id: p for p in packs}
         self.pack = packs[0]
         self.ref_secret = ref_secret
@@ -161,7 +163,26 @@ class Engine:
             ref_code=ref_code,
             done=session.state == "DONE",
             quick_replies=self._quick_replies(session),
+            auto_record_after=self.auto_record_after if self._may_auto_record(session) else None,
         )
+
+    @staticmethod
+    def _may_auto_record(s: Session) -> bool:
+        return s.state == "M1" and s.context.get("severity") == "severe"
+
+    async def auto_record(self, session_id: str) -> EngineReply | None:
+        """Someone dealing with an emergency puts the phone down. If they have said nothing since we
+        asked "anything else?", record what they told us and carry on as if they had tapped Done.
+        Emergencies only: everyone else is recorded when they say so. None means there was nothing to do."""
+        s = await self.store.get_session(session_id)
+        if s is None or s.expired or not self._may_auto_record(s):
+            return None
+        if time.time() - s.context.get("waiting_since", 0.0) < self.auto_record_after:
+            return None                 # they added something since: that reply started a new wait
+        s.context["finished"] = True
+        lead = self.pack_for(s.pack).message_or_none("M1.auto", s.context.get("lang", "en"))
+        replies, code = await self._wrap_up(s, self._ex(s), [lead] if lead else [])
+        return await self._reply(s, replies, code)
 
     def _quick_replies(self, s: Session) -> list[QuickReply]:
         """Tap-to-answer for every closed question. A stressed person, or one who does not type
@@ -344,7 +365,7 @@ class Engine:
     async def _wrap_up(self, s: Session, ex: Extraction, replies: list[str]):
         """Nothing is recorded until the person tells us they have finished. Until then they can keep
         adding to the story. Where a pack's wording for this step is not signed off, the step is
-        skipped: the fallback text would say "I have recorded what you told me", which would be untrue."""
+        skipped: the fallback text is written for guidance we cannot show, and says nothing about finishing."""
         ctx = s.context
         if not ctx.get("finished"):
             pack, lang = self.pack_for(s.pack), ctx.get("lang", "en")
@@ -352,6 +373,7 @@ class Engine:
             again = pack.message_or_none("M1.more_again", lang) if ctx.get("more_asked") else None
             if prompt:
                 ctx["more_asked"] = True
+                ctx["waiting_since"] = time.time()
                 ctx["extraction"] = ex.model_dump()
                 s.state = "M1"
                 return replies + [again or prompt], None

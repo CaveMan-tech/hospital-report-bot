@@ -6,7 +6,7 @@
     get(k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } },
     set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   };
-  let sid = S.get('sid'), hist = S.get('hist') || [];
+  let sid = S.get('sid'), hist = S.get('hist') || [], auto;
 
   function draw(text, cls) {
     const d = document.createElement('div');
@@ -52,11 +52,14 @@
   }
   function show(data) {
     setSid(data.done ? null : data.session_id);
+    // A quiet emergency is recorded for them, so the report is not lost.
+    if (data.auto_record_after != null) auto = setTimeout(() => post('/api/chat/auto-record', { session_id: sid })
+      .then(d => d.replies && show(d), () => {}), data.auto_record_after * 1000);
     data.replies.forEach((t, i) => setTimeout(() => add(t, 'bot'), i * 250));
     setTimeout(() => quick(data.quick_replies), data.replies.length * 250);
   }
   async function send(text) {
-    quick(null); drop('retry'); drop('err');
+    quick(null); drop('retry'); drop('err'); clearTimeout(auto);
     btn.disabled = true;
     try { show(await post('/api/chat', { session_id: sid, channel: 'web', pack: window.PACK, text })); }
     catch (e) {

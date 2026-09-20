@@ -259,8 +259,8 @@
   },
   "E.unverified_fallback": {
     "verified": true,
-    "en": "I have recorded what you told me. The guidance for this situation is still being checked, so I cannot show it yet. If anyone is in danger, please get to the nearest other hospital or emergency service now.",
-    "pcm": "I don record wetin you tell me. We still dey check the advice for this kind matter, so I no fit show am yet. If anybody dey for danger, abeg carry am go another hospital wey near now now."
+    "en": "I have noted what you told me. The guidance for this situation is still being checked, so I cannot show it yet. If anyone is in danger, please get to the nearest other hospital or emergency service now.",
+    "pcm": "I don note wetin you tell me. We still dey check the advice for this kind matter, so I no fit show am yet. If anybody dey for danger, abeg carry am go another hospital wey near now now."
   },
   "L.not_found": {
     "verified": true,
@@ -427,5 +427,10 @@
     "verified": false,
     "en": "Thank you, I have added that. Anything else? When you have finished, tap Done or reply DONE.",
     "pcm": "Thank you, I don add am. Anything else? When you don finish, tap Done or reply DONE."
+  },
+  "M1.auto": {
+    "verified": false,
+    "en": "You have not added anything for a little while, so I have recorded your report now, so that it is not lost.",
+    "pcm": "You never add anything for small time now, so I don record your report now, make e no lost."
   }
 }

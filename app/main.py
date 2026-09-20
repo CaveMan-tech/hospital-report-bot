@@ -224,6 +224,16 @@ async def forget(body: ForgetIn, engine: Engine = Depends(engine_of)):
     await engine.store.delete_session(body.session_id)
 
 
+@app.post("/api/chat/auto-record", response_model=EngineReply)
+async def auto_record(body: ForgetIn, request: Request, engine: Engine = Depends(engine_of)):
+    """The page calls this when someone reporting an emergency has been quiet for the time the
+    engine asked it to wait. The engine decides; 204 means there was nothing to do."""
+    if not chat_limiter.allow(client_ip(request)):
+        raise HTTPException(429, "Too many messages. Please wait a few minutes.")
+    reply = await engine.auto_record(body.session_id)
+    return reply if reply is not None else Response(status_code=204)
+
+
 _telegram_tasks: set[asyncio.Task] = set()
 
 

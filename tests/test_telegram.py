@@ -192,7 +192,7 @@ async def test_unverified_notices_are_skipped_not_replaced_by_the_fallback():
     await adapter.handle_update(msg("/forget"))
     await adapter.handle_update(msg("/status"))
     joined = "\n".join(api.texts())
-    assert "Telegram itself" not in joined and "I have recorded what you told me" not in joined
+    assert "Telegram itself" not in joined and "I have noted what you told me" not in joined
     assert "safe place" in joined                                # the conversation itself is unaffected
 
 
@@ -483,3 +483,34 @@ async def test_the_finished_step_shows_a_done_button_and_a_tap_records_the_repor
     assert store.reports == {} and [label for label, _ in api.last_buttons()] == ["Done"]
     await adapter.handle_update(tap(api.last_buttons()[0][1]))
     assert len(store.reports) == 1 and "Your report is recorded" in "\n".join(api.texts())
+
+
+EMERGENCY = ("My mother is bleeding right now at Harmattan General Hospital emergency and they refused "
+             "to treat her until we pay deposit")
+
+
+async def test_a_quiet_emergency_is_recorded_and_the_code_is_sent_without_keeping_the_chat_id():
+    import asyncio
+    adapter, api, store, engine = make()
+    engine.auto_record_after = 0.05
+    await adapter.handle_update(msg(EMERGENCY))
+    assert store.reports == {} and str(CHAT) not in repr(vars(adapter))
+    await asyncio.sleep(0.2)
+    assert len(store.reports) == 1 and "Your report is recorded" in "\n".join(api.texts())
+    assert [label for label, _ in api.last_buttons()] == ["Yes", "No"]     # the opt-in, with its buttons
+    assert not adapter._timers
+
+
+async def test_adding_detail_restarts_the_wait_and_done_cancels_it():
+    import asyncio
+    adapter, api, store, engine = make()
+    engine.auto_record_after = 0.15
+    await adapter.handle_update(msg(EMERGENCY))
+    await asyncio.sleep(0.1)
+    await adapter.handle_update(msg("The cashier said no deposit no treatment and walked away from us"))
+    await asyncio.sleep(0.1)
+    assert store.reports == {}                                             # 0.2s since the start, 0.1s since they spoke
+    await adapter.handle_update(msg("done"))
+    assert len(store.reports) == 1
+    await asyncio.sleep(0.2)
+    assert len(store.reports) == 1 and "\n".join(api.texts()).count("Your report is recorded") == 1
