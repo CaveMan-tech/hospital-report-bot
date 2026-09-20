@@ -8,28 +8,39 @@
     "size_en": "PDF, about 4 MB",
     "size_pcm": null,
     "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "Open the link on a phone: it must load, be the FCCPC illustrated guide, and be about the stated size",
         "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
       }
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Opened the link and confirmed the document and its size: https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "nha_2014",
     "title_en": "National Health Act 2014",
     "title_pcm": null,
-    "note_en": "the law, as printed in the Official Gazette",
+    "note_en": "the full text of the law",
     "note_pcm": null,
-    "size_en": "PDF, about 11 MB",
+    "size_en": "PDF, about 0.5 MB",
     "size_pcm": null,
-    "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf",
+    "url": "https://admin.theiguides.org/Media/Documents/National%20Health%20Act%202014.pdf",
     "verified": false,
-    "note": "This copy is hosted by PRB, not by a Nigerian government site. Prefer an official copy if one can be found; change the url and size before signing off.",
+    "note": "No copy on a Nigerian government site could be found (searched 2026-09-20). This is a 44-page text copy hosted by the UNCTAD/ICC iGuides platform: small enough for a weak connection, and searchable. It is not the Gazette print, so it has no Gazette page numbers. The Gazette scan (11 MB) is on FAOLEX and PRB; compare sections 20 and 30 against it before signing off, and confirm the section numbers are visible in the margin.",
     "check_against": [
       {
-        "label": "Open the link on a phone: it must load, be the full Act (Gazette No. 145, Vol. 101), and be about the stated size",
+        "label": "Open the link on a phone: it must load, be the full Act (44 pages, ends with 'This Act may be cited as the National Health Act, 2014'), and be about the stated size",
+        "url": "https://admin.theiguides.org/Media/Documents/National%20Health%20Act%202014.pdf"
+      },
+      {
+        "label": "Compare s.20 and s.30 word for word with the Official Gazette scan (FAO's legal database, 11 MB)",
+        "url": "https://faolex.fao.org/docs/pdf/nig162642.pdf"
+      },
+      {
+        "label": "Same Gazette scan, second host (PRB)",
         "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
       }
     ]

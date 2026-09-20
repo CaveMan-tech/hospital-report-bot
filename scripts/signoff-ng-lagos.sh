@@ -16,7 +16,7 @@
 # packs/ng-lagos/messages.json, fix the wording, and set "verified": true by hand.
 # To undo one:  uv run python -m app.verify unmark ng-lagos <file> <id>
 set -eu
-NAME=""
+NAME="Ikechi Okoro"
 [ -n "$NAME" ] || { echo "Put your name in NAME at the top of this script first."; exit 1; }
 mark() { uv run python -m app.verify mark ng-lagos "$1" "$2" --by "$NAME" --source "$3"; }
 
@@ -60,7 +60,7 @@ mark asks neglect 'FCCPC Patients'"'"' Bill of Rights, illustrated guide (policy
 
 # ---- references (open each link on a phone: it must load, be the right document, and match the stated size)
 mark references pbor_guide 'Opened the link and confirmed the document and its size: https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf'
-# This copy is hosted by PRB, not by a Nigerian government site. Prefer an official copy if one can be found; change the url and size before signing off.
-mark references nha_2014 'Opened the link and confirmed the document and its size: https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf'
+# nha_2014: text copy on UNCTAD/ICC iGuides, not the Gazette print. Compare s.20 and s.30 with the Gazette scan first.
+mark references nha_2014 'Opened the link and confirmed the document and its size; s.20 and s.30 compared with the Gazette scan https://faolex.fao.org/docs/pdf/nig162642.pdf : https://admin.theiguides.org/Media/Documents/National%20Health%20Act%202014.pdf'
 
 echo; uv run python -m app.verify list ng-lagos | head -1
