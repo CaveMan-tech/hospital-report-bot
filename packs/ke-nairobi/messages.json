@@ -276,5 +276,9 @@
   "T.status_usage": {
     "verified": false,
     "en": "Send /status followed by your code, like this: /status 7K3M-9QWX-2B4D"
+  },
+  "B2.reference": {
+    "verified": false,
+    "en": "You can read it for yourself: {title} ({note}; {size}): {url}"
   }
 }

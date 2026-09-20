@@ -21,6 +21,9 @@
         "label": "Kenya National Patients' Rights Charter 2013",
         "url": "https://kmpdc.go.ke/resources/PATIENTS_CHARTER_2013.pdf"
       }
+    ],
+    "references": [
+      "health_act_2017"
     ]
   },
   {
@@ -40,6 +43,9 @@
         "label": "MAO & another v Attorney General [2015] KEHC 8096 (KLR)",
         "url": "https://new.kenyalaw.org/akn/ke/judgment/kehc/2015/8096/eng@2015-09-17"
       }
+    ],
+    "references": [
+      "constitution"
     ]
   },
   {
@@ -63,6 +69,10 @@
         "label": "JOO v Attorney General [2018] KEHC 7540 (KLR)",
         "url": "https://new.kenyalaw.org/akn/ke/judgment/kehc/2018/7540/eng@2018-03-22"
       }
+    ],
+    "references": [
+      "health_act_2017",
+      "patients_charter"
     ]
   },
   {
@@ -82,6 +92,9 @@
         "label": "Health Act 2017 (ss.5, 7, 12, 14)",
         "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
       }
+    ],
+    "references": [
+      "health_act_2017"
     ]
   },
   {
@@ -105,6 +118,9 @@
         "label": "Kenya National Patients' Rights Charter 2013",
         "url": "https://kmpdc.go.ke/resources/PATIENTS_CHARTER_2013.pdf"
       }
+    ],
+    "references": [
+      "health_act_2017"
     ]
   }
 ]

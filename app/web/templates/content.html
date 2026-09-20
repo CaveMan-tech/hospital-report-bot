@@ -29,7 +29,7 @@ pack files (who, when, against what), so the repository history is the audit tra
 {% elif r.now.kind == "fallback" %}{{ r.now.text }}
 {% if r.now.blocked_by %}<br><small>Held back because these contacts are not verified: {% for c in r.now.blocked_by %}<code>{{ c }}</code>{{ ", " if not loop.last }}{% endfor %}</small>{% endif %}
 {% if r.now.used_in is defined %}<br><small>{% if r.now.used_in %}Held back with it, every message that includes this contact: {% for k in r.now.used_in %}<code>{{ k }}</code>{{ ", " if not loop.last }}{% endfor %}{% else %}No message uses this contact yet.{% endif %}</small>{% endif %}
-{% elif r.now.kind == "omitted" %}<em>Nothing.</em> Left out of the reply; the rest of the reply is sent without a rights line.
+{% elif r.now.kind == "omitted" %}<em>Nothing.</em> Left out of the reply; the rest of the reply is sent without it.
 {% else %}<em>Reporters never see this.</em> In the analyst brief and thread, the law line reads “[legal reference pending verification]”.{% endif %}</td>
 <td>{% for c in r.check_against %}{% if c.url and c.url.startswith("http") %}<a href="{{ c.url }}" target="_blank" rel="noopener noreferrer">{{ c.label }}</a>{% else %}{{ c.label }}{% if c.url %} <small>({{ c.url }})</small>{% endif %}{% endif %}<br>{% endfor %}</td>
 </tr>

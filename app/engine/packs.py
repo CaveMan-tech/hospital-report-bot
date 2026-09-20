@@ -40,6 +40,9 @@ class Pack:
         self.contacts = {c["id"]: c for c in self._load(root / "contacts.json")}
         self.asks = {a["category"]: a for a in self._load(root / "asks.json")}
         self.hospitals = [Hospital(pack=pack_id, **h) for h in self._load(root / "hospitals.seed.json")]
+        # Documents a reporter can open to read the law or the policy for themselves. Optional.
+        refs = root / "references.json"
+        self.references: list[dict] = self._load(refs) if refs.exists() else []
 
     @staticmethod
     def _load(path: Path):
@@ -125,7 +128,7 @@ class Pack:
         if file == "contacts":  # one unverified number holds back every message that includes it
             used_in = [k for k, m in self.messages.items() if "{contact:" + key + "}" in m["en"]]
             return {"kind": "fallback", "text": self.messages["E.unverified_fallback"]["en"], "used_in": used_in}
-        return {"kind": "omitted"} if file == "rights" else {"kind": "brief_placeholder"}
+        return {"kind": "omitted"} if file in ("rights", "references") else {"kind": "brief_placeholder"}
 
     def gated_entries(self) -> list[dict]:
         """Everything a human must verify, for the content review page and the verify command."""
@@ -150,6 +153,8 @@ class Pack:
             row("contacts", e["id"], f"{e['label']}: {e['text']}", e)
         for e in self.asks.values():
             row("asks", e["category"], f"{e['ask_text']}  |  {e['law_line']}", e)
+        for e in self.references:
+            row("references", e["id"], f"{e['title_en']} ({e['note_en']}; {e['size_en']}): {e['url']}", e)
         return out
 
     def label(self, group: str, key: str, lang: str = "en") -> str:
@@ -177,6 +182,22 @@ class Pack:
             right_text = (r.get(f"text_{lang}") or r["text_en"])
             out.append((r["id"], self._message("B2.template", lang, right_text=right_text, source=r["source"])))
         return out[:1]
+
+    def references_for(self, right_id: str, lang: str) -> list[str]:
+        """"Read it for yourself" lines for the documents behind one right. A link is something a
+        person acts on, so it is gated like a phone number: no sign-off, no link."""
+        right = next((r for r in self.rights if r["id"] == right_id), None)
+        out = []
+        for ref in self.references:
+            if right is None or ref["id"] not in right.get("references", []):
+                continue
+            try:
+                self._check("reference", ref["id"], ref, always_gated=True)
+                out.append(self._message("B2.reference", lang, url=ref["url"], **{
+                    f: ref.get(f"{f}_{lang}") or ref[f"{f}_en"] for f in ("title", "note", "size")}))
+            except UnverifiedContent:
+                continue
+        return out
 
     def match_hospital(self, raw: str | None) -> Hospital | None:
         if not raw:

@@ -485,3 +485,12 @@ async def test_typing_yes_after_being_offered_the_danger_button_works_like_tappi
     r = await say(engine, r.session_id, "Yes")
     assert "767 or 112" in "\n".join(r.replies) and "did not quite understand" not in " ".join(r.replies)
     assert store.reports == {}
+
+
+async def test_the_reporter_can_read_the_source_for_themselves_but_never_in_an_emergency(engine, store):
+    r = await say(engine, None, "A nurse slapped me last week at Harmattan General Hospital maternity ward")
+    text = "\n".join(r.replies)
+    assert "fccpc.gov.ng" in text and text.index("respect and dignity") < text.index("fccpc.gov.ng")
+    r = await say(engine, None, "My brother is bleeding badly now at Harmattan General Hospital and they refuse "
+                                "to treat him until we pay deposit")
+    assert "http" not in "\n".join(r.replies)

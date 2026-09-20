@@ -177,6 +177,8 @@ Hospital is the one required field. A report with no hospital is stored but cann
 
 From the country pack's `rights.json`, by category.
 
+**Read it for yourself.** Each right can name documents in the pack's `references.json` (the Act, the illustrated Patients' Bill of Rights). After the right is quoted, the bot adds one line per document: what it is, whether it is law or policy, how big it is to open, and the link. A link is something a person acts on, so it is gated like a phone number: no recorded sign-off, no link, and a link that goes dead has its sign-off withdrawn. The bot links and never attaches, so a person on a weak connection chooses the cost. References are never sent on the emergency branch: that reply is what to do now, not reading. The line is plain text ending in the URL, so every channel can show it; the web page turns it into a link that sends no referrer.
+
 | Category | Right shown | Source |
 |---|---|---|
 | `abuse` | You have the right to be treated with respect and dignity. | Patients' Bill of Rights (2018) `[VERIFY wording]` |
@@ -349,6 +351,7 @@ packs/ng-lagos/
   pack.json        { id, country, languages[], emergency_numbers[], org_name }
   rights.json      { id, category[], text_en, text_pcm, source, verified }
   contacts.json    { id, label, number, applies_to[], verified, verified_on }
+  references.json  { id, title_en, note_en, size_en, url, verified }   rights name them in `references[]`
   messages.json    every bot message in section 4, keyed by state + language
   asks.json        { category, ask_text, law_line, verified }
   hospitals.seed.json  (fictional in PoC)

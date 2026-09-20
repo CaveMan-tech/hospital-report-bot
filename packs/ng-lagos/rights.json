@@ -13,6 +13,9 @@
         "label": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156",
         "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
       }
+    ],
+    "references": [
+      "nha_2014"
     ]
   },
   {
@@ -30,7 +33,10 @@
         "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
       }
     ],
-    "note": "Deliberately does not cite the constitutional right to liberty to the reporter."
+    "note": "Deliberately does not cite the constitutional right to liberty to the reporter.",
+    "references": [
+      "pbor_guide"
+    ]
   },
   {
     "id": "dignity",
@@ -46,6 +52,9 @@
         "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
         "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
       }
+    ],
+    "references": [
+      "pbor_guide"
     ]
   },
   {
@@ -63,7 +72,10 @@
         "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
       }
     ],
-    "note": "Two separate rights in the source, kept distinct. 'Urgent' is limited to emergencies."
+    "note": "Two separate rights in the source, kept distinct. 'Urgent' is limited to emergencies.",
+    "references": [
+      "pbor_guide"
+    ]
   },
   {
     "id": "complain",
@@ -84,6 +96,9 @@
         "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
       }
     ],
-    "note": "Replaces 'to complain and to be heard', which is not in the Bill of Rights. This is statute, and stronger."
+    "note": "Replaces 'to complain and to be heard', which is not in the Bill of Rights. This is statute, and stronger.",
+    "references": [
+      "nha_2014"
+    ]
   }
 ]

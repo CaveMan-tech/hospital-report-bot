@@ -17,6 +17,10 @@ The engine contains no law, no phone number, no hospital and no organisation nam
 3. `messages.json`: keep every key. Rewrite the country-specific ones: the greeting, the three `A1.*`
    escalation messages, `E.clinical`, `E.handoff`. Add a field per extra language code.
 4. `rights.json`, `asks.json`, `contacts.json`: the local law, the asks to management, and contacts.
+   Optional `references.json`: documents a reporter can open to read the source for themselves
+   (title, whether it is law or policy, size, https link). A right lists the ones behind it in
+   `"references": [...]`. Prefer official hosts, state the size honestly, and sign one off only
+   after opening the link on a phone.
 5. `hospitals.seed.json`: at least five facilities (fictional for a demo).
 6. Mark every message that mentions a law, a number or an organisation `"gated": true`, leave
    it `"verified": false`, and list what it must be checked against in `check_against`. Rights,

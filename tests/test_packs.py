@@ -92,3 +92,29 @@ def test_a_verified_message_is_still_held_back_by_an_unverified_contact():
         pack.contacts[cid] = {**pack.contacts[cid], **signed}
     now = {r["id"]: r["now"] for r in pack.gated_entries() if r["file"] == "messages"}["E.handoff"]
     assert now == {"kind": "as_written"}
+
+
+SIGNED = {"verified": True, "verified_by": "A", "verified_on": "2026-09-20", "verified_source": "checked x"}
+
+
+def test_a_reference_is_only_offered_once_a_human_has_checked_the_link():
+    pack = Pack("ng-lagos")
+    assert pack.references_for("dignity", "en") == []                    # unverified: nothing is sent
+    ref = next(r for r in pack.references if r["id"] == "pbor_guide")
+    ref.update(SIGNED)
+    pack.messages["B2.reference"]["verified"] = True
+    (line,) = pack.references_for("dignity", "en")
+    assert ref["url"] in line and line.endswith(ref["url"])              # the link is last, so it stays tappable
+    assert "not a law" in line and "MB" in line                          # says what it is and what it costs to open
+    assert pack.references_for("emergency", "en") == []                  # a different document, still unchecked
+
+
+def test_every_right_names_a_reference_that_exists_and_every_reference_is_https():
+    for pack_id in ("ng-lagos", "ke-nairobi"):
+        pack = Pack(pack_id)
+        ids = {r["id"] for r in pack.references}
+        for right in pack.rights:
+            assert set(right.get("references", [])) <= ids, (pack_id, right["id"])
+        for ref in pack.references:
+            assert ref["url"].startswith("https://") and ref["verified"] is False, ref["id"]
+        assert any(r["file"] == "references" for r in pack.gated_entries())

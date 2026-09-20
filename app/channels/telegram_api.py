@@ -45,7 +45,8 @@ class HttpBotAPI:
         raise TelegramError(f"{method}: {code}")
 
     async def send_message(self, chat_id: int, text: str, buttons: Buttons | None = None) -> None:
-        params: dict = {"chat_id": chat_id, "text": text}       # no parse_mode: pack text is never markup
+        # No parse_mode: pack text is never markup. No preview: a link stays a link, not a large card.
+        params: dict = {"chat_id": chat_id, "text": text, "link_preview_options": {"is_disabled": True}}
         if buttons:
             params["reply_markup"] = {"inline_keyboard": [[{"text": label, "callback_data": data}]
                                                           for label, data in buttons]}

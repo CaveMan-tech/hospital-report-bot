@@ -1,0 +1,44 @@
+[
+  {
+    "id": "constitution",
+    "title_en": "Constitution of Kenya 2010",
+    "note_en": "the law, on the Kenya Law website",
+    "size_en": "web page",
+    "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution",
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Open the link on a phone: it must load and be the Constitution on Kenya Law",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2010/constitution"
+      }
+    ]
+  },
+  {
+    "id": "health_act_2017",
+    "title_en": "Health Act 2017",
+    "note_en": "the law, on the Kenya Law website",
+    "size_en": "web page",
+    "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31",
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Open the link on a phone: it must load and be the Health Act 2017 on Kenya Law",
+        "url": "https://new.kenyalaw.org/akn/ke/act/2017/21/eng@2022-12-31"
+      }
+    ]
+  },
+  {
+    "id": "patients_charter",
+    "title_en": "Kenya National Patients' Rights Charter 2013",
+    "note_en": "the official charter; it is policy, not a law",
+    "size_en": "PDF, about 2 MB",
+    "url": "https://kmpdc.go.ke/resources/PATIENTS_CHARTER_2013.pdf",
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Open the link on a phone: it must load, be the 2013 Charter, and be about the stated size",
+        "url": "https://kmpdc.go.ke/resources/PATIENTS_CHARTER_2013.pdf"
+      }
+    ]
+  }
+]

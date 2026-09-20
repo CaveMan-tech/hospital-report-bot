@@ -1,0 +1,37 @@
+[
+  {
+    "id": "pbor_guide",
+    "title_en": "Patients' Bill of Rights, illustrated guide by the FCCPC",
+    "title_pcm": null,
+    "note_en": "the official guide; it is policy, not a law",
+    "note_pcm": null,
+    "size_en": "PDF, about 4 MB",
+    "size_pcm": null,
+    "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
+    "verified": false,
+    "check_against": [
+      {
+        "label": "Open the link on a phone: it must load, be the FCCPC illustrated guide, and be about the stated size",
+        "url": "https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf"
+      }
+    ]
+  },
+  {
+    "id": "nha_2014",
+    "title_en": "National Health Act 2014",
+    "title_pcm": null,
+    "note_en": "the law, as printed in the Official Gazette",
+    "note_pcm": null,
+    "size_en": "PDF, about 11 MB",
+    "size_pcm": null,
+    "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf",
+    "verified": false,
+    "note": "This copy is hosted by PRB, not by a Nigerian government site. Prefer an official copy if one can be found; change the url and size before signing off.",
+    "check_against": [
+      {
+        "label": "Open the link on a phone: it must load, be the full Act (Gazette No. 145, Vol. 101), and be about the stated size",
+        "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
+      }
+    ]
+  }
+]

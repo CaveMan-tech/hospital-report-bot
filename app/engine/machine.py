@@ -283,6 +283,8 @@ class Engine:
             rights = self.pack_for(s.pack).rights_for(ex.category, s.context["lang"])
             s.context["rights_shown"] = [rid for rid, _ in rights]
             replies += [text for _, text in rights]
+            for rid, _ in rights:   # never on the emergency branch: that reply is what to do, not reading
+                replies += self.pack_for(s.pack).references_for(rid, s.context["lang"])
             help_key = f"B3.{ex.category}" if ex.category in ("abuse", "neglect") else "B3.other"
         replies.append(self._msg(help_key, s))
         more, code = await self._finalise(s, ex)

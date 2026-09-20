@@ -10,6 +10,10 @@
 #   3. If you checked an entry against something other than the source shown, edit --source.
 #
 #   sh scripts/signoff-ng-lagos.sh      then:  git diff packs/   and commit.
+#
+# Not covered here, because they are plain wording with no law or number in them: the messages
+# B2.reference, S0.privacy.telegram, T.forgotten and T.status_usage. Read them in
+# packs/ng-lagos/messages.json, fix the wording, and set "verified": true by hand.
 # To undo one:  uv run python -m app.verify unmark ng-lagos <file> <id>
 set -eu
 NAME=""
@@ -53,5 +57,10 @@ mark asks emergency_refused 'National Health Act 2014, Official Gazette No. 145 
 mark asks detention 'FCCPC Patients'"'"' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf; Constitution of Nigeria 1999, ss.34 and 35 https://nigeriarights.gov.ng/files/constitution.pdf'
 mark asks abuse 'Constitution of Nigeria 1999, ss.34 and 35 https://nigeriarights.gov.ng/files/constitution.pdf; National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156 https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf; FCCPC Patients'"'"' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf'
 mark asks neglect 'FCCPC Patients'"'"' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf; National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156 https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf'
+
+# ---- references (open each link on a phone: it must load, be the right document, and match the stated size)
+mark references pbor_guide 'Opened the link and confirmed the document and its size: https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf'
+# This copy is hosted by PRB, not by a Nigerian government site. Prefer an official copy if one can be found; change the url and size before signing off.
+mark references nha_2014 'Opened the link and confirmed the document and its size: https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf'
 
 echo; uv run python -m app.verify list ng-lagos | head -1

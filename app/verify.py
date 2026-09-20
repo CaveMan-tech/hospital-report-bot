@@ -18,7 +18,7 @@ from datetime import UTC, datetime
 
 from app.engine.packs import PACKS_DIR, PROVENANCE, Pack
 
-ID_FIELD = {"messages": None, "rights": "id", "contacts": "id", "asks": "category"}
+ID_FIELD = {"messages": None, "rights": "id", "contacts": "id", "asks": "category", "references": "id"}
 
 
 def _load(pack: str, file: str):

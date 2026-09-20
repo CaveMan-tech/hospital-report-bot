@@ -14,6 +14,8 @@
     d.textContent = text;
     // Make the reference code easy to read and copy.
     d.innerHTML = d.innerHTML.replace(/\b([0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4})\b/, '<span class="code">$1</span>');
+    // Links in the bot's own words only (never in what the reporter typed). No referrer, new tab.
+    if (cls === 'bot') d.innerHTML = d.innerHTML.replace(/https:\/\/[^\s<"'`]+/g, u => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);
     log.appendChild(d);
     d.scrollIntoView({ block: 'end' });
   }
