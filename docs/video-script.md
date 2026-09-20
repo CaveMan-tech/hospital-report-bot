@@ -69,18 +69,24 @@ Fast cuts, one line each. Show code or a test name on screen for each claim.
 | `severity.py`. | "It never decides alone whether someone is in danger. Rules do, and when in doubt, it asks." |
 | Terminal: `pytest` going green, then `evals/RESULTS.llm.md` with the headline line. | "The privacy promises are tests, not promises. And I measured it: forty-four hand-written stories, English and Pidgin, two countries. Missed emergencies: zero, three runs in a row." |
 
-## 3:05 to 3:30 · Scale (scalability)
+## 3:05 to 3:45 · Scale (scalability)
 
 | Picture | Voice |
 |---|---|
 | Folder tree: `packs/ng-lagos/`, `packs/ke-nairobi/`. | "Nothing about Nigeria is in the code. Laws, contacts, messages, hospitals and the organisation's name live in a country pack." |
 | Switch the demo to the Kenya pack. Send one report. Kenyan law and numbers appear. | "Here is Nairobi. Same engine, different folder, no code change. Any advocacy organisation in any country can run this under its own name." |
-| Diagram from earlier with WhatsApp and USSD greyed in. | "The engine does not know what a web page is. WhatsApp and USSD are small adapters on the roadmap." |
+| Phone: open the bot in Telegram. Tap **Menu** so the commands show, send a short report, tap the **No** button on the danger question. | "And the engine does not know what a web page is. This is the same engine on Telegram. Same questions, the same verified messages, with Telegram's own buttons. It keeps no Telegram name, number or id." |
+| Cut to the laptop: refresh `/analyst`, the same count goes up again. | "Same analyst screen. The Telegram channel is one small file that only translates; the engine did not change to make it work. WhatsApp and USSD are the same kind of adapter." |
 
 _If the Kenya pack is not ready, cut the second row and show the folder structure only. Do not
 fake it._
 
-## 3:30 to 3:55 · How it was built, and close (AI usage, presentation)
+_The Telegram rows add about 15 seconds. To stay under four minutes, drop the optional staff row in
+Demo 1 or shorten the brief row in Demo 2. If the bot misbehaves on the day, cut both Telegram rows
+and keep the old line: "The engine does not know what a web page is. Telegram already runs on it;
+WhatsApp and USSD are the same kind of small adapter."_
+
+## 3:45 to 4:00 · How it was built, and close (AI usage, presentation)
 
 | Picture | Voice |
 |---|---|
@@ -100,6 +106,9 @@ fake it._
       number beats a suspicious one.
 - [ ] Deploy, then film against the deployed link, so the URL on screen is the one judges will open.
 - [ ] Correct the Pidgin. Judges from the region will notice.
+- [ ] Telegram: send one full report through the deployed bot the day you record, and check it on
+      `/analyst`. The three Telegram notices (`S0.privacy.telegram`, `T.forgotten`,
+      `T.status_usage`) stay silent until you have reviewed them and switched them on.
 - [ ] Reset the demo data so the count you watch go up is easy to spot.
 - [ ] Phone on Do Not Disturb. Hide bookmarks, tabs and notifications on the laptop.
 

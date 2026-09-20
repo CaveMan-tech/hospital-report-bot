@@ -15,7 +15,7 @@ that it can turn into public pressure.
 
 ```
  Web chat ─────────────┐
- WhatsApp (adapter) ───┼─▶ engine.handle_message(session_id, channel, text)
+ WhatsApp (roadmap) ───┼─▶ engine.handle_message(session_id, channel, text)
  Telegram (adapter) ───┘        ├─ state machine + deterministic severity rules
                                 ├─ extract()  → gpt-5-mini via Pydantic AI (structured output)
                                 ├─ country pack: verified messages, rights, contacts, asks

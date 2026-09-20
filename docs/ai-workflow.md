@@ -5,6 +5,7 @@ _Draft for Ikechi to review and edit before submission._
 ## Tools
 
 Claude Code (Anthropic) for specification review, implementation, tests and evaluation.
+OpenAI Codex CLI as a second, independent reviewer of designs and plans before they were built.
 OpenAI `gpt-5-mini` through Pydantic AI inside the product, for one narrow job: turning a
 reporter's story into a validated structured record.
 
@@ -16,7 +17,10 @@ pressure works, and pressure only works on patterns, so collect privately and su
 X as the pressure channel in Nigeria; the deployment model (the bot is one cog inside an advocacy
 organisation that does the campaigning); the launch categories; the emotional-state design rule
 (assume the user is angry, tired or stressed); triage before everything else; next-day follow-up;
-the choice of extraction model; all Pidgin wording and the tone of the emergency messages.
+the choice of extraction model; all Pidgin wording and the tone of the emergency messages. On the
+Telegram channel: bringing it back into scope as the proof that the engine is channel agnostic,
+cutting Telegram voice notes to protect the deadline, shipping every new message unverified for
+human review, and refusing buttons that would carry a reference code.
 
 **Done with AI assistance:** stress-testing the idea and finding holes in it; drafting and revising
 the build spec; scaffolding; implementing the engine, storage layer, analyst view and pages;
@@ -51,6 +55,21 @@ writing tests and the evaluation runner; first drafts of message copy for the au
 - **The author broke it by using it.** Typing "I would like to report an issue" produced sympathy
   for nothing, a danger check on nothing, an empty stored report and a false "your report has been
   counted". Fixed the same hour, with tests and six new evaluation stories.
+- **A second model as a gate.** The Telegram design, and then the implementation plan, were each
+  reviewed by a different AI tool with read-only access to the repository, asked only for concrete
+  defects. It found that the first privacy line was false (Telegram does send the bot a name with
+  every message, so the honest claim is "we do not keep it", not "we never see it"); that a button
+  from an earlier question could have answered the danger check; and that with demo mode off,
+  `/nextday <code>` would have reached the engine as text and could have been stored as a hospital
+  name, reference code and all. Each finding was checked against the code before it was accepted;
+  one was declined, with the reason written into the design. All the accepted ones are now tests.
+- **Testing the tests.** After the Telegram tests passed, each safety guard was deliberately
+  broken to see whether a test noticed. Two tests did not: they passed with the guard removed. Both
+  were rewritten until they failed for the right reason.
+- **Proving a claim instead of stating it.** "The engine is channel agnostic" is a test: one
+  scripted conversation goes through the web endpoint and through Telegram turn by turn, and the
+  replies, states and buttons must match. Another test fails if anything in the engine imports a
+  web framework, an HTTP client or a channel.
 - **Evaluation, not vibes.** A 30-story set with a single headline metric: missed emergencies.
 - **AI output that was rejected or corrected:** _[Ikechi to fill in: e.g. the first stack choice
   and the first database choice were both changed after questioning; an AI-suggested alternative idea was set aside; a breakdown table

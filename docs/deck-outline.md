@@ -99,8 +99,9 @@ is a new folder, not new code."
 **Visual:** the same report answered with Section 20 of Nigeria's National Health Act on the left
 and Article 43(2) of Kenya's Constitution on the right.
 **Say:** a test fails if any law, phone number or city name appears in the engine. Any advocacy
-organisation in any country runs this under its own name. WhatsApp and USSD are thin adapters on
-the roadmap; the engine does not know what a web page is.
+organisation in any country runs this under its own name. The engine does not know what a web
+page is: the same engine already answers on Telegram through one small adapter, with no change to
+the engine and no Telegram name, number or id kept. WhatsApp and USSD are the same kind of adapter.
 **Honesty line:** every legal line in both packs ships unverified until a local lawyer signs it off.
 That is the process working, not a gap.
 
@@ -145,7 +146,7 @@ organisation in one hospital catchment, on WhatsApp with voice notes, (3) a thir
   Protection Act (s.49 on sensitive data leaving the country) would need a proper assessment before
   a pilot. `[VERIFY]`
 - **E. Limits.** Not an emergency service. Cannot send help and says so. Proof of concept.
-- **F. Architecture**, for the technical judge: engine, packs, store, adapters; 81 automated tests.
+- **F. Architecture**, for the technical judge: engine, packs, store, channel adapters (web, Telegram); 166 automated tests.
 
 ## Design notes
 

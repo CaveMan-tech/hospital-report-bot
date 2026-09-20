@@ -96,11 +96,12 @@ boxed in. `docs/ai-workflow.md` and the commit history show the process.
 
 A new country is a new folder: laws, contacts, messages, languages, currency and organisation name.
 A test fails if any of that leaks into the engine. The demo switches from Lagos to Nairobi live,
-with no code change. The engine knows nothing about web pages, so WhatsApp and USSD are small
-adapters. Next: legal review of both packs, then a pilot with one health-rights organisation in
+with no code change. The engine knows nothing about web pages: the same engine already answers on
+Telegram through one small adapter that keeps no Telegram name, number or id, and WhatsApp and USSD
+are the same kind of adapter. Next: legal review of both packs, then a pilot with one health-rights organisation in
 one hospital catchment, on WhatsApp with voice notes.
 
 This is a proof of concept. It is not an emergency service and says so.
 
-**Links:** live demo `[URL]` · analyst view `[URL]/analyst` (password in submission notes) ·
-repository `[URL]` · video `[URL]`
+**Links:** live demo https://web-production-e2ff0.up.railway.app · analyst view https://web-production-e2ff0.up.railway.app/analyst (password in submission notes) ·
+Telegram https://t.me/opidemo_bot · repository `[URL]` · video `[URL]`
