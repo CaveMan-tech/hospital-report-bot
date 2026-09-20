@@ -7,7 +7,7 @@
     "text_en": "A health care provider, health worker or health establishment must not refuse a person emergency medical treatment for any reason.",
     "text_pcm": "Hospital or health worker no suppose refuse to treat person wey get emergency, for any reason.",
     "source": "National Health Act 2014, section 20(1)",
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156",
@@ -16,7 +16,10 @@
     ],
     "references": [
       "nha_2014"
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156 https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "billing",
@@ -26,7 +29,7 @@
     "text_en": "You have the right to transparent and itemised billing. Hospitals have a right to their fees and should use legal means to recover fees owed.",
     "text_pcm": null,
     "source": "Patients' Bill of Rights (FCCPC and Federal Ministry of Health, 2018)",
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
@@ -36,7 +39,10 @@
     "note": "Deliberately does not cite the constitutional right to liberty to the reporter.",
     "references": [
       "pbor_guide"
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "dignity",
@@ -46,7 +52,7 @@
     "text_en": "You have the right to be treated with respect and dignity, whatever your gender, religion, ethnicity, disability or economic circumstances.",
     "text_pcm": "You get right make dem treat you with respect, whether you be man or woman, any religion, any tribe, whether you get money or you no get.",
     "source": "Patients' Bill of Rights (FCCPC and Federal Ministry of Health, 2018)",
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
@@ -55,7 +61,10 @@
     ],
     "references": [
       "pbor_guide"
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "quality_care",
@@ -65,7 +74,7 @@
     "text_en": "You have the right to quality care in line with prevailing standards, and to urgent, immediate and sufficient care in an emergency.",
     "text_pcm": null,
     "source": "Patients' Bill of Rights (FCCPC and Federal Ministry of Health, 2018)",
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law)",
@@ -75,7 +84,10 @@
     "note": "Two separate rights in the source, kept distinct. 'Urgent' is limited to emergencies.",
     "references": [
       "pbor_guide"
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "complain",
@@ -89,7 +101,7 @@
     "text_en": "You may lay a complaint about how you were treated at a health establishment and have the complaint investigated.",
     "text_pcm": null,
     "source": "National Health Act 2014, section 30(1)",
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156",
@@ -99,6 +111,9 @@
     "note": "Replaces 'to complain and to be heard', which is not in the Bill of Rights. This is statute, and stronger.",
     "references": [
       "nha_2014"
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156 https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf",
+    "verified_on": "2026-09-20"
   }
 ]

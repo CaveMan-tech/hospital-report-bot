@@ -20,7 +20,7 @@
     "pcm": "Abeg, I no too understand. Anybody dey for danger now now? Reply YES or NO."
   },
   "A1.emergency_refused": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "Get care first. If the person is getting worse, call {contact:emergency}, or go to the nearest other hospital. Do not wait for an answer from this one, and do not stay to argue.\n\nThen, if you can:\n1. Ask calmly for the most senior doctor or officer on duty. You can say: \"Section 20 of the National Health Act says a hospital or health worker must not refuse a person emergency medical treatment for any reason.\"\n2. The law is about not being refused. It does not say the treatment is free; the bill can be sorted out after the person is safe. If money is the problem, ask for the hospital's Social Welfare Unit.\n3. When you can, note the time, the department (for example Casualty), and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
     "pcm": "Make the person get treatment first. If e condition dey worse, call {contact:emergency}, or carry am go another hospital wey near. No wait for this one, no stay dey argue.\n\nAfter that, if you fit:\n1. Ask gently for the most senior doctor or officer wey dey duty. You fit talk say: \"Section 20 of National Health Act talk say hospital or health worker no suppose refuse to treat person wey get emergency, for any reason.\"\n2. Wetin the law talk na say dem no fit refuse. E no talk say the treatment free; una fit settle the bill after the person don safe. If na money be the problem, ask for the hospital Social Welfare Unit.\n3. When you fit, write the time, the department (like Casualty), and who you follow talk.\n\nI no fit send anybody come meet you. But I go record am make e count.",
@@ -42,10 +42,13 @@
         "url": "docs/research/nigeria-pack.md"
       }
     ],
-    "note": "No longer opens with 'what you describe is against the law': the bot cannot check the facts, and hospitals dispute what counts as an emergency. Quote matches the gazette. Does not claim care is free, does not mention the penalty. TBD Ikechi: keep or drop the line to say to staff. Pidgin is a draft."
+    "note": "No longer opens with 'what you describe is against the law': the bot cannot check the facts, and hospitals dispute what counts as an emergency. Quote matches the gazette. Does not claim care is free, does not mention the penalty. TBD Ikechi: keep or drop the line to say to staff. Pidgin is a draft.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "National Health Act 2014, Official Gazette No. 145 Vol. 101: s.20 on p. A153, s.30 on p. A156 https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf; Lagos State Ministry of Health contact page: 'Emergency Line: 767 / 112'. Then test-call both. https://lagosministryofhealth.org/contact/; FCCPC Patients' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
+    "verified_on": "2026-09-20"
   },
   "A1.detention": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "Many people have faced this, and you have options. A hospital bill is a debt, and there are proper ways to settle a debt. The Patients' Bill of Rights says hospitals should use legal means to recover their fees.\n\nWhat you can do:\n1. Ask to speak to the hospital's Social Welfare Unit (some hospitals call it Medical Social Services) about a payment plan or a waiver.\n2. Ask for a written, itemised bill.\n3. Ask the Medical Director's office to tell you in writing what is needed for discharge.\n4. {contact:legal_aid}\n\nIf the person being held is unwell, or is a newborn or a child, tell the staff clearly.\n\nI cannot send anyone to you. I will record this so it is counted.",
     "pcm": "Plenty people don face this kind thing, and you get options. Hospital bill na debt, and correct way dey to settle debt. Patients' Bill of Rights talk say hospital suppose use legal way collect dem money.\n\nWetin you fit do:\n1. Ask make you see the hospital Social Welfare Unit (some hospital dey call am Medical Social Services), make una talk about how you go pay small small or whether dem fit waive am.\n2. Ask make dem give you the bill for paper, with everything wey dem charge written.\n3. Ask the Medical Director office make dem write wetin remain before dem go discharge the person.\n4. {contact:legal_aid}\n\nIf the person wey dem hold no well, or na newborn or pikin, tell the staff clear clear.\n\nI no fit send anybody come meet you. But I go record am make e count.",
@@ -63,10 +66,13 @@
         "url": "docs/research/nigeria-pack.md"
       }
     ],
-    "note": "States no legal conclusion: there is no Nigerian statute or appellate case on hospital detention. 'Social Welfare Unit' is the term Lagos officials use. Pidgin is a draft."
+    "note": "States no legal conclusion: there is no Nigerian statute or appellate case on hospital detention. 'Social Welfare Unit' is the term Lagos officials use. Pidgin is a draft.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf; Lagos State Public Defender contact page. Then test-call. https://opdlagosstate.org/contact.html",
+    "verified_on": "2026-09-20"
   },
   "A1.generic": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "Getting care comes first. If someone is in danger right now, call {contact:emergency}. If you cannot get through, go to the nearest other hospital, or ask someone near you to help.\n\nIf you can, ask for the most senior doctor or nurse on duty and tell them plainly that the patient needs help now. Note the time, the department, and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
     "pcm": "Make the person get treatment first. If anybody dey for danger now now, call {contact:emergency}. If the call no go, carry the person go another hospital wey near, or ask person wey dey near you make e help.\n\nIf you fit, ask for the most senior doctor or nurse wey dey duty, tell am straight say the patient need help now now. Write the time, the department, and who you follow talk.\n\nI no fit send anybody come meet you. But I go record am make e count.",
@@ -80,7 +86,10 @@
         "url": "docs/research/nigeria-pack.md"
       }
     ],
-    "note": "Pidgin is a draft."
+    "note": "Pidgin is a draft.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Lagos State Ministry of Health contact page: 'Emergency Line: 767 / 112'. Then test-call both. https://lagosministryofhealth.org/contact/",
+    "verified_on": "2026-09-20"
   },
   "Q.hospital": {
     "verified": true,
@@ -183,7 +192,7 @@
     "pcm": "Sorry to hear that one. We don record am."
   },
   "E.clinical": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "I cannot judge medical decisions, like whether a diagnosis or treatment was right. I can still record what happened. Complaints about a doctor's or dentist's professional conduct are handled by the Medical and Dental Council of Nigeria; its form asks for a sworn affidavit. The Patients' Bill of Rights says to complain to the hospital first, then the regulator, then the FCCPC.",
     "pcm": null,
@@ -201,10 +210,13 @@
         "url": "docs/research/nigeria-pack.md"
       }
     ],
-    "note": "Does not send people to the Nursing and Midwifery Council: its complaints portal says it is for technical issues only and its report-a-nurse page returns 404."
+    "note": "Does not send people to the Nursing and Midwifery Council: its complaints portal says it is for technical issues only and its report-a-nurse page returns 404.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "MDCN doctor complaint form (asks for an affidavit) https://www.portal.mdcn.gov.ng/doctor-complaint; FCCPC Patients' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf",
+    "verified_on": "2026-09-20"
   },
   "E.handoff": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. I have not shared anything you told me.\n\n{contact:dsva}\n\nIf anyone is in immediate danger, call {contact:emergency}.",
     "pcm": null,
@@ -222,7 +234,10 @@
         "url": "docs/research/nigeria-pack.md"
       }
     ],
-    "note": "Used for violence that is not sexual violence or self-harm."
+    "note": "Used for violence that is not sexual violence or self-harm.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Lagos DSVA FAQ and contact pages. Then test-call. https://lagosdsva.org/frequently-asked-questionsfaqs/; Lagos State Ministry of Health contact page: 'Emergency Line: 767 / 112'. Then test-call both. https://lagosministryofhealth.org/contact/",
+    "verified_on": "2026-09-20"
   },
   "E.retry": {
     "verified": true,
@@ -270,7 +285,7 @@
     "pcm": "Something spoil for our side, I no fit record am. Abeg try again small time. If anybody dey for danger, no wait for me: carry am go another hospital wey near now now."
   },
   "A1.detention_body": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "We are sorry for your loss.\n\nWhat you can do:\n1. Ask the hospital's Social Welfare Unit and the Medical Director's office what is needed to release your relative, and ask them to put it in writing.\n2. Ask for a written, itemised bill, including mortuary charges.\n3. {contact:legal_aid}\n\nI cannot send anyone to you. I will record this so it is counted.",
     "pcm": null,
@@ -288,10 +303,13 @@
         "url": "docs/research/nigeria-pack.md"
       }
     ],
-    "note": "States no right at all: no Nigerian authority was found on holding a body over a bill. Needs a lawyer's view. Pidgin not written."
+    "note": "States no right at all: no Nigerian authority was found on holding a body over a bill. Needs a lawyer's view. Pidgin not written.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "FCCPC Patients' Bill of Rights, illustrated guide (policy, not law) https://fccpc.gov.ng/wp-content/uploads/2023/04/PATIENTS-BILL-OF-RIGHTS-ILLUSTRATED-GUIDE.pdf; Lagos State Public Defender contact page. Then test-call. https://opdlagosstate.org/contact.html",
+    "verified_on": "2026-09-20"
   },
   "E.handoff.sexual_violence": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "I am so sorry this happened. This needs people who are trained to help right away, and I am not the right place for it. I have not shared anything you told me.\n\n{contact:dsva}\n\n{contact:sarc}",
     "pcm": null,
@@ -308,10 +326,13 @@
         "label": "Research notes with confidence labels and open questions",
         "url": "docs/research/nigeria-pack.md"
       }
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Lagos DSVA FAQ and contact pages. Then test-call. https://lagosdsva.org/frequently-asked-questionsfaqs/; Mirabel Centre contact page. Then test-call. https://mirabelcentre.org/contact-us/",
+    "verified_on": "2026-09-20"
   },
   "E.handoff.self_harm": {
-    "verified": false,
+    "verified": true,
     "gated": true,
     "en": "I am so sorry you are carrying this. You deserve a person to talk to, and people who are trained to help right away. I have not shared anything you told me.\n\n{contact:crisis}\n\nIf you are in immediate danger, call {contact:emergency}.",
     "pcm": null,
@@ -329,7 +350,10 @@
         "url": "docs/research/nigeria-pack.md"
       }
     ],
-    "note": "SURPIN's hours are unconfirmed. Do not sign this off without a test call."
+    "note": "SURPIN's hours are unconfirmed. Do not sign this off without a test call.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "SURPIN site footer. Hours unconfirmed: MUST be test-called. https://www.surpinng.com/; Lagos State Ministry of Health contact page: 'Emergency Line: 767 / 112'. Then test-call both. https://lagosministryofhealth.org/contact/",
+    "verified_on": "2026-09-20"
   },
   "S0.voice": {
     "verified": true,

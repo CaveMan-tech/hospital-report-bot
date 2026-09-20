@@ -6,14 +6,17 @@
     "applies_to": [
       "A1"
     ],
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "Lagos State Ministry of Health contact page: 'Emergency Line: 767 / 112'. Then test-call both.",
         "url": "https://lagosministryofhealth.org/contact/"
       }
     ],
-    "note": "Whether both are free on every network is reported but not confirmed, so the text does not say 'free'."
+    "note": "Whether both are free on every network is reported but not confirmed, so the text does not say 'free'.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Lagos State Ministry of Health contact page: 'Emergency Line: 767 / 112'. Then test-call both. https://lagosministryofhealth.org/contact/",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "legal_aid",
@@ -22,7 +25,7 @@
     "applies_to": [
       "detention"
     ],
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "Lagos State Public Defender contact page. Then test-call.",
@@ -33,7 +36,10 @@
         "url": "https://legalaidcouncil.gov.ng/contact-us/"
       }
     ],
-    "note": "The office now calls itself the Bureau of the Public Defender; 'OPD' is still widely used."
+    "note": "The office now calls itself the Bureau of the Public Defender; 'OPD' is still widely used.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Lagos State Public Defender contact page. Then test-call. https://opdlagosstate.org/contact.html; Backup: Legal Aid Council of Nigeria, Lagos https://legalaidcouncil.gov.ng/contact-us/",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "dsva",
@@ -42,14 +48,17 @@
     "applies_to": [
       "handoff"
     ],
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "Lagos DSVA FAQ and contact pages. Then test-call.",
         "url": "https://lagosdsva.org/frequently-asked-questionsfaqs/"
       }
     ],
-    "note": "The old *6820# code no longer appears on the agency's site."
+    "note": "The old *6820# code no longer appears on the agency's site.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Lagos DSVA FAQ and contact pages. Then test-call. https://lagosdsva.org/frequently-asked-questionsfaqs/",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "sarc",
@@ -58,13 +67,16 @@
     "applies_to": [
       "handoff"
     ],
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "Mirabel Centre contact page. Then test-call.",
         "url": "https://mirabelcentre.org/contact-us/"
       }
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Mirabel Centre contact page. Then test-call. https://mirabelcentre.org/contact-us/",
+    "verified_on": "2026-09-20"
   },
   {
     "id": "crisis",
@@ -73,13 +85,16 @@
     "applies_to": [
       "handoff"
     ],
-    "verified": false,
+    "verified": true,
     "check_against": [
       {
         "label": "SURPIN site footer. Hours unconfirmed: MUST be test-called.",
         "url": "https://www.surpinng.com/"
       }
     ],
-    "note": "24-hour claim unconfirmed. MUST be test-called before sign-off."
+    "note": "24-hour claim unconfirmed. MUST be test-called before sign-off.",
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "SURPIN site footer. Hours unconfirmed: MUST be test-called. https://www.surpinng.com/",
+    "verified_on": "2026-09-20"
   }
 ]
