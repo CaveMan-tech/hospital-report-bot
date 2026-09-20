@@ -434,7 +434,7 @@
     "pcm": "You never add anything for small time now, so I don record your report now, make e no lost."
   },
   "M1.more.severe": {
-    "verified": false,
+    "verified": true,
     "en": "Is there anything else you want to tell me about what happened? You can send it now. When you have finished, tap Done or reply DONE. If you need to go, go. If I do not hear from you for two minutes, I will record what you have told me so far, so that it is not lost.",
     "pcm": "Anything else dey wey you wan tell me about wetin happen? You fit send am now. When you don finish, tap Done or reply DONE. If you need to go, go. If I no hear from you for two minutes, I go record wetin you don tell me so far, make e no lost."
   }
