@@ -31,6 +31,9 @@ class FakeAPI:
     async def typing(self, chat_id):
         pass
 
+    async def set_commands(self, commands):
+        self.commands = commands
+
     def texts(self):
         return [t for _, t, _ in self.sent]
 
@@ -415,3 +418,24 @@ async def test_poll_once_advances_the_offset_past_handled_updates():
     api.get_updates = get_updates
     offset = await poll_once(adapter, api, None)
     assert offset > 0 and len(api.sent) >= 2
+
+
+async def test_the_command_menu_comes_from_the_pack_and_hides_the_demo_command():
+    adapter, api, _store, engine = make(demo_mode=True)
+    await adapter.publish_commands()
+    assert [c for c, _ in api.commands] == ["start", "status", "forget", "nextday"]
+    assert dict(api.commands)["forget"] == engine.pack.label("telegram_commands", "forget", "en")
+    assert all(3 <= len(d) <= 256 for _, d in api.commands)          # Telegram's limits
+    adapter, api, _store, _ = make(demo_mode=False)
+    await adapter.publish_commands()
+    assert [c for c, _ in api.commands] == ["start", "status", "forget"]
+
+
+async def test_a_failed_menu_update_never_stops_the_bot():
+    adapter, api, _store, _ = make()
+
+    async def down(commands):
+        raise RuntimeError("telegram is down")
+
+    api.set_commands = down
+    await adapter.publish_commands()

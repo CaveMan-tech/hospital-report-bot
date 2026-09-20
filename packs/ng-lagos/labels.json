@@ -89,5 +89,23 @@
       "en": "Someone is in danger right now",
       "pcm": "Person dey for danger now now"
     }
+  },
+  "telegram_commands": {
+    "start": {
+      "en": "Start a new report",
+      "pcm": null
+    },
+    "status": {
+      "en": "Check a report using your code",
+      "pcm": null
+    },
+    "forget": {
+      "en": "Delete this unfinished conversation",
+      "pcm": null
+    },
+    "nextday": {
+      "en": "Demo only: pretend a day has passed",
+      "pcm": null
+    }
   }
 }

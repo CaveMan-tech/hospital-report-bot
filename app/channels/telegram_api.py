@@ -61,6 +61,10 @@ class HttpBotAPI:
     async def typing(self, chat_id: int) -> None:
         await self._call("sendChatAction", chat_id=chat_id, action="typing")
 
+    async def set_commands(self, commands: list[tuple[str, str]]) -> None:
+        await self._call("setMyCommands", commands=[{"command": name, "description": text}
+                                                    for name, text in commands])
+
     async def get_updates(self, offset: int | None, timeout: int = 25) -> list[dict]:
         params: dict = {"timeout": timeout, "allowed_updates": ["message", "callback_query"]}
         if offset is not None:

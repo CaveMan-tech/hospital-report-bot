@@ -71,5 +71,19 @@
     "danger": {
       "en": "Someone is in danger right now"
     }
+  },
+  "telegram_commands": {
+    "start": {
+      "en": "Start a new report"
+    },
+    "status": {
+      "en": "Check a report using your code"
+    },
+    "forget": {
+      "en": "Delete this unfinished conversation"
+    },
+    "nextday": {
+      "en": "Demo only: pretend a day has passed"
+    }
   }
 }

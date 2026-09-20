@@ -60,3 +60,15 @@ async def test_errors_never_carry_the_token(caplog):
         await api_with(handler).send_message(5, "x")
     assert TOKEN not in str(err.value) and TOKEN not in repr(err.value.__cause__) and TOKEN not in caplog.text
     assert logging.getLogger("httpx").level >= logging.WARNING
+
+
+async def test_set_commands_sends_the_menu():
+    seen = {}
+
+    def handler(request):
+        seen["path"], seen["body"] = request.url.path, json.loads(request.content)
+        return httpx.Response(200, json={"ok": True, "result": True})
+
+    await api_with(handler).set_commands([("start", "Start a new report")])
+    assert seen["path"].endswith("/setMyCommands")
+    assert seen["body"]["commands"] == [{"command": "start", "description": "Start a new report"}]

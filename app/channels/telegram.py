@@ -32,6 +32,7 @@ CHANNEL = "telegram"
 MAX_TEXT = 4096              # Telegram's limit for one message
 MAX_CALLBACK_BYTES = 64      # Telegram's limit for a button's callback_data
 SEEN_UPDATES = 2000
+COMMANDS = ("start", "status", "forget")     # shown in Telegram's menu; "nextday" joins them in demo mode
 PRUNE_ABOVE = 1000
 
 Buttons = list[tuple[str, str]]  # (label, callback_data)
@@ -46,6 +47,7 @@ class BotAPI(Protocol):
     async def answer_callback(self, callback_id: str) -> None: ...
     async def strip_keyboard(self, chat_id: int, message_id: int) -> None: ...
     async def typing(self, chat_id: int) -> None: ...
+    async def set_commands(self, commands: list[tuple[str, str]]) -> None: ...
 
 
 @dataclass
@@ -79,6 +81,14 @@ class TelegramAdapter:
         self._chats: dict[str, ChatState] = {}
         self._seen: set[int] = set()
         self._seen_order: deque[int] = deque()
+
+    async def publish_commands(self) -> None:
+        """Put the commands in Telegram's menu so nobody has to know them. The wording is the default
+        pack's: the menu belongs to the bot, not to a conversation. Best effort; never blocks a start."""
+        pack = self.engine.pack
+        names = (*COMMANDS, "nextday") if self.demo_mode else COMMANDS
+        menu = [(name, pack.label("telegram_commands", name, pack.languages[0])) for name in names]
+        await self._quiet(self.api.set_commands(menu))
 
     # ---------------------------------------------------------------- identity
 

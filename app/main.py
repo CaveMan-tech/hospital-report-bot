@@ -82,6 +82,7 @@ async def lifespan(app: FastAPI):
     if cfg.telegram_bot_token and cfg.telegram_webhook_secret:
         bot_api = HttpBotAPI(cfg.telegram_bot_token)
         app.state.telegram = TelegramAdapter(app.state.engine, bot_api, demo_mode=cfg.demo_mode)
+        await app.state.telegram.publish_commands()
     if get_settings().demo_mode:
         n = await seed(app.state.engine.store, list(app.state.engine.packs.values()))
         logging.getLogger(__name__).info("Seeded %s sample reports", n)

@@ -114,6 +114,11 @@ severity decision at any point; it only relays text.
 | `/status <code>` | `engine.lookup(code)`. Limited to 10 per 10 minutes per `key`, as on web. With no code, send `T.status_usage` if verified. |
 | `/nextday <code>` | Only when `DEMO_MODE` is on. `engine.start_followup(code, "telegram")`; on `None`, send the pack's existing `L.not_found`, which is what `engine.lookup` returns for an unknown code. Shares the lookup limit. |
 
+The commands are published to Telegram's menu (`setMyCommands`) when the app or the poller starts,
+so a reporter can pick them instead of knowing them. Descriptions come from `telegram_commands` in
+the default pack's `labels.json`; `/nextday` is listed only in demo mode. Publishing is best effort
+and never blocks a start.
+
 A first message that is not a command starts a conversation exactly as on web: the engine greets
 short openers and treats anything longer as the story. The Telegram privacy line is sent after the
 engine's greeting whenever a new session is created.

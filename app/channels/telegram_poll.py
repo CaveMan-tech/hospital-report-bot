@@ -50,6 +50,7 @@ async def poll() -> None:
     if cfg.demo_mode:
         await seed(engine.store, list(engine.packs.values()))
     adapter = TelegramAdapter(engine, api, demo_mode=cfg.demo_mode)
+    await adapter.publish_commands()
 
     async def purge_loop():
         while True:  # same promise as the web app: expired sessions may hold an unfinished story

@@ -70,6 +70,8 @@ The same engine answers on Telegram; `app/channels/telegram.py` is only a transl
    it and the web app at the same Postgres to see Telegram reports on `/analyst`.
 5. Commands: `/start` (or `/start ke-nairobi`), `/forget`, `/status <code>`, and in demo mode
    `/nextday <code>`.
+   They appear in Telegram's menu button, so nobody has to know them; the wording comes from
+   `telegram_commands` in the default pack's `labels.json`.
 
 No Telegram id, name or username is stored or logged. The Telegram-specific notices in the packs
 are unverified until a person reviews them, so production stays silent on those until then.
