@@ -17,6 +17,8 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from app import analyst as A
+from app.channels.telegram import TelegramAdapter
+from app.channels.telegram_api import HttpBotAPI
 from app.config import get_settings
 from app.engine.extract import get_extractor
 from app.engine.machine import Engine
@@ -76,6 +78,10 @@ async def lifespan(app: FastAPI):
     app.state.engine = await build_engine()
     app.state.transcriber = (make_openai_transcriber(cfg.openai_api_key, cfg.openai_transcribe_model)
                              if cfg.voice_enabled and cfg.openai_api_key else None)
+    app.state.telegram, app.state.telegram_secret, bot_api = None, cfg.telegram_webhook_secret, None
+    if cfg.telegram_bot_token and cfg.telegram_webhook_secret:
+        bot_api = HttpBotAPI(cfg.telegram_bot_token)
+        app.state.telegram = TelegramAdapter(app.state.engine, bot_api, demo_mode=cfg.demo_mode)
     if get_settings().demo_mode:
         n = await seed(app.state.engine.store, list(app.state.engine.packs.values()))
         logging.getLogger(__name__).info("Seeded %s sample reports", n)
@@ -84,10 +90,14 @@ async def lifespan(app: FastAPI):
         while True:  # expired sessions may still hold an unfinished story; do not keep them
             await asyncio.sleep(600)
             await app.state.engine.store.purge_expired_sessions()
+            if app.state.telegram:
+                app.state.telegram.prune()
 
     task = asyncio.create_task(purge_loop())
     yield
     task.cancel()
+    if bot_api:
+        await bot_api.close()
     if hasattr(app.state.engine.store, "close"):
         await app.state.engine.store.close()
 
@@ -121,7 +131,7 @@ async def privacy_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    if request.url.path.startswith(("/analyst", "/api")):
+    if request.url.path.startswith(("/analyst", "/api", "/telegram")):
         response.headers["Cache-Control"] = "no-store"
         response.headers["X-Robots-Tag"] = "noindex, nofollow"
     return response
@@ -129,7 +139,7 @@ async def privacy_headers(request: Request, call_next):
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
 async def robots():
-    return "User-agent: *\nDisallow: /analyst\nDisallow: /api\n"
+    return "User-agent: *\nDisallow: /analyst\nDisallow: /api\nDisallow: /telegram\n"
 
 
 class ChatIn(BaseModel):
@@ -212,6 +222,30 @@ async def forget(body: ForgetIn, engine: Engine = Depends(engine_of)):
     A finished report is untouched; it holds no story and the session no longer links to it."""
     await engine.store.delete_session(body.session_id)
 
+
+_telegram_tasks: set[asyncio.Task] = set()
+
+
+@app.post("/telegram/webhook")
+async def telegram_webhook(request: Request):
+    """Telegram adapter, webhook side. Answers at once and does the work afterwards, so Telegram
+    never times out waiting on extraction and sends the same story again."""
+    adapter = getattr(request.app.state, "telegram", None)
+    if adapter is None:
+        raise HTTPException(404)
+    expected = getattr(request.app.state, "telegram_secret", "")
+    sent = request.headers.get("x-telegram-bot-api-secret-token", "")
+    if not expected or not secrets.compare_digest(sent.encode(), expected.encode()):
+        raise HTTPException(403)
+    try:
+        update = await request.json()
+    except ValueError:
+        return {"ok": True}
+    if isinstance(update, dict):
+        task = asyncio.create_task(adapter.handle_update(update))
+        _telegram_tasks.add(task)                      # keep a reference until it finishes
+        task.add_done_callback(_telegram_tasks.discard)
+    return {"ok": True}
 
 @app.post("/api/report/lookup")
 async def lookup(body: CodeIn, request: Request, engine: Engine = Depends(engine_of)):

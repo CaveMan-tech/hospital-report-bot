@@ -41,6 +41,8 @@ Set these in the Railway dashboard (Service > Variables) so secrets never enter 
 | `ALLOW_UNVERIFIED` | `false` |
 | `DEMO_MODE` | `true` for the hackathon (seeds labelled sample data, enables "simulate next day") |
 | `PACK` | `ng-lagos` |
+| `TELEGRAM_BOT_TOKEN` | optional. From @BotFather. Empty keeps the Telegram channel off. |
+| `TELEGRAM_WEBHOOK_SECRET` | required with the token: 24+ random characters. The app refuses to start without it. Then run `set-webhook` once (see README). Keep `--workers 1`: the Telegram adapter holds its chat map in one process. |
 
 ## 4. What the app checks for you
 

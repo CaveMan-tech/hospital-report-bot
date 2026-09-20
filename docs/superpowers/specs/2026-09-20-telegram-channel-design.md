@@ -90,11 +90,13 @@ A Telegram chat id is an identifier, so CLAUDE.md rule 4 applies.
 
 ### Taps
 
-On `callback_query`: answer the callback first (so the button stops spinning), then compare the
+On `callback_query`: inside the chat's lock, so a later message cannot overtake the tap, answer the
+callback (so the button stops spinning), then compare the
 nonce in `callback_data` with the chat's current nonce.
 
-- Match: clear the nonce, strip the keyboard from that message (best effort; failure is ignored),
-  and pass `value` to the engine as the user's text.
+- Match, and the value is one of those offered with that nonce, and the session still exists, has
+  not expired and is not finished: strip the keyboard (best effort; failure is ignored) and pass
+  `value` to the engine as the user's text. The nonce is cleared either way.
 - No match, or no current nonce: strip the keyboard and do nothing else. The value never reaches
   the engine.
 
@@ -108,19 +110,19 @@ severity decision at any point; it only relays text.
 | Command | Behaviour |
 |---|---|
 | `/start`, `/start <pack>` | Delete any open session for this chat, clear the nonce, begin a new conversation by calling the engine with empty text and `pack_id`. An unknown pack falls back to the default, as on web. Then send `S0.privacy.telegram` if it passes the verified gate. |
-| `/forget` | `store.delete_session`, drop the map entry, send `T.forgotten` if verified. |
+| `/forget` | `store.delete_session`, then clear the map entry (session id, pack, buttons), send `T.forgotten` if verified. The session id is kept until the delete succeeds, so a failed `/forget` can be retried. The emptied entry stays until pruning, so an update already waiting on its lock never produces a second state for one chat. |
 | `/status <code>` | `engine.lookup(code)`. Limited to 10 per 10 minutes per `key`, as on web. With no code, send `T.status_usage` if verified. |
-| `/nextday <code>` | Only when `DEMO_MODE` is on; otherwise treated as ordinary text. `engine.start_followup(code, "telegram")`; on `None`, send the pack's existing `L.not_found`, which is what `engine.lookup` returns for an unknown code. Shares the lookup limit. |
+| `/nextday <code>` | Only when `DEMO_MODE` is on. `engine.start_followup(code, "telegram")`; on `None`, send the pack's existing `L.not_found`, which is what `engine.lookup` returns for an unknown code. Shares the lookup limit. |
 
 A first message that is not a command starts a conversation exactly as on web: the engine greets
 short openers and treats anything longer as the story. The Telegram privacy line is sent after the
 engine's greeting whenever a new session is created.
 
-Non-text messages (voice, photo, sticker, document, location) get `E.retry`.
+Non-text messages (voice, photo, sticker, document, location) get `E.retry`. So does any other message that starts with `/`, including `/nextday` outside demo mode: a command is never handed to the engine as text, because its argument (a reference code) could otherwise be taken for a hospital name and stored.
 
 ## Transport failures
 
-- `403` from `sendMessage` (the person blocked the bot): delete the open session, drop the map
+- `403` from `sendMessage` (the person blocked the bot): delete the open session, clear the map
   entry, stop.
 - `429`: wait `retry_after` seconds, capped at 5, retry once, then give up on that message.
 - Timeouts (10 s per call) and other errors: log the exception type, continue with the next

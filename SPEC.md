@@ -379,11 +379,14 @@ Deck framing: any advocacy organisation in any country deploys this with a count
 | `POST /analyst/reports/{id}/{exclude,accept,hold}` | Analyst. Sets credibility; `accept` can also assign a hospital. Always logged. |
 | `GET /analyst/review`, `GET /analyst/content` | Analyst. Review queue with decision log; content sign-off status. |
 | `POST /api/chat/forget` | Deletes an unfinished conversation now. Used by quick exit and "start again". |
+| `POST /telegram/webhook` | Telegram adapter. Checks Telegram's secret header, answers at once, then passes the update to the same `engine.handle_message`. 404 when no bot token is set. |
 | `POST /api/demo/next-day` | Demo only. Triggers F1. |
 
 Stack: Python, FastAPI + Pydantic AI, deployed as one always-on service on Railway. Railway Postgres (asyncpg). OpenAI `gpt-5-mini` behind a small `extract()` wrapper. Pages are server-rendered plain HTML with a few lines of vanilla JS.
 
 **The engine is framework-independent:** `engine.handle_message(session_id, channel, text)` returns replies and the new state, and knows nothing about HTTP or any chat platform. `POST /api/chat` is a thin wrapper; WhatsApp and Telegram become webhook adapters that call the same function; next-day follow-ups run as a background job in the same process. Storage sits behind a `Store` interface with Postgres and in-memory implementations, so the app runs locally and in tests with no external services. Chat page: no images, no framework, a few kilobytes, works on a weak connection.
+
+**Telegram is the second channel, and the proof of that claim.** `app/channels/telegram.py` translates updates into `engine.handle_message` calls and renders `quick_replies` as native buttons; the engine did not change. A chat id is an identifier, so it is never stored or logged: it is reduced to an HMAC under a salt that exists only in the running process, and used to find the conversation, rate-limit, and derive the daily dedupe key. A restart forgets every chat. Buttons carry a one-time token so a button from an earlier question can never answer the current one (an old "No" must not land on the danger check). Only private chats are answered. Telegram itself can see that a person messaged the bot; the pack says so in `S0.privacy.telegram`. The adapter relies on the service running as one process.
 
 ---
 
@@ -418,7 +421,7 @@ Unit tests (few, high value): severity rules, verified-only content gate, thresh
 | Mon AM | Record video (3 to 4 min: problem, Pidgin report on a phone, emergency branch, pattern appears on the organisation's analyst screen, brief exported, pack switch, eval table). | |
 | Mon PM | Deck (PDF), written summary, final verification pass on every `verified: true` entry. **Submit by 18:00 UTC.** | |
 
-Cut from the build, shown on one deck slide as the partner's job: open letter, public patterns page, response clock. Cut entirely: Telegram. Roadmap only: voice notes, USSD follow-up, Yoruba/Hausa/Igbo, evidence upload, partner verification, whistleblower mode.
+Cut from the build, shown on one deck slide as the partner's job: open letter, public patterns page, response clock. Roadmap only: Telegram voice notes, USSD follow-up, Yoruba/Hausa/Igbo, evidence upload, partner verification, whistleblower mode.
 
 ---
 

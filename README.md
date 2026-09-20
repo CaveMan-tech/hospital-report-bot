@@ -58,6 +58,22 @@ Set `EXTRACT_MODE=llm` and `OPENAI_API_KEY` for real extraction, and `STORE=post
 `VOICE_ENABLED=true` adds a microphone button: speech is transcribed, shown in the message box to
 check, and the audio is discarded. Browsers only allow the microphone on HTTPS or `localhost`.
 
+### Telegram
+
+The same engine answers on Telegram; `app/channels/telegram.py` is only a translator.
+
+1. Create a bot with [@BotFather](https://t.me/BotFather) and put its token in `TELEGRAM_BOT_TOKEN`.
+2. Set `TELEGRAM_WEBHOOK_SECRET` to a long random string (`openssl rand -hex 32`).
+3. Deployed: `uv run python -m app.channels.telegram_poll set-webhook https://<your-app>`.
+4. Local: `uv run python -m app.channels.telegram_poll`, with a separate development bot, because
+   one bot cannot poll and have a webhook. With `STORE=memory` the poller has its own store; point
+   it and the web app at the same Postgres to see Telegram reports on `/analyst`.
+5. Commands: `/start` (or `/start ke-nairobi`), `/forget`, `/status <code>`, and in demo mode
+   `/nextday <code>`.
+
+No Telegram id, name or username is stored or logged. The Telegram-specific notices in the packs
+are unverified until a person reviews them, so production stays silent on those until then.
+
 `ALLOW_UNVERIFIED=true` is for local development only: it lets you see messages that have not yet
 been checked against primary sources. Leave it off anywhere real people could reach.
 
@@ -80,6 +96,7 @@ The headline metric is **missed emergencies, target zero**. Results are written 
 |---|---|
 | `SPEC.md` | The build spec this repository was built from |
 | `app/engine/` | Channel-independent engine: state machine, severity rules, extraction, packs, reference codes |
+| `app/channels/` | Telegram adapter, Bot API client, development poller |
 | `app/analyst.py` | Patterns, masked breakdowns, brief and CSV. Template fill only, no LLM |
 | `app/store/` | `Store` interface with Postgres and in-memory implementations, held to one contract test suite |
 | `app/main.py` | FastAPI wrapper: chat API, lookup, follow-up simulation, analyst pages |
