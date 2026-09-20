@@ -28,7 +28,7 @@
     "size_en": "PDF, about 11 MB",
     "size_pcm": null,
     "url": "https://faolex.fao.org/docs/pdf/nig162642.pdf",
-    "verified": false,
+    "verified": true,
     "note": "Scan of the Official Gazette (No. 145, Vol. 101), hosted by FAOLEX, the UN Food and Agriculture Organization's legal database; no copy on a Nigerian government site could be found (searched 2026-09-20). It is large: the line tells the reporter the size before they tap.",
     "check_against": [
       {
@@ -39,6 +39,9 @@
         "label": "Same Gazette scan, second host (PRB), if the first ever goes down",
         "url": "https://scorecard.prb.org/wp-content/uploads/2019/06/Nigeria-National-Health-Act-2014.pdf"
       }
-    ]
+    ],
+    "verified_by": "Ikechi Okoro",
+    "verified_source": "Opened the link and confirmed it is the Official Gazette print of the National Health Act 2014, about 11 MB: https://faolex.fao.org/docs/pdf/nig162642.pdf",
+    "verified_on": "2026-09-20"
   }
 ]
