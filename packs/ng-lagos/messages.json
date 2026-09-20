@@ -429,7 +429,7 @@
     "pcm": "Thank you, I don add am. Anything else? When you don finish, tap Done or reply DONE."
   },
   "M1.auto": {
-    "verified": false,
+    "verified": true,
     "en": "You have not added anything for a little while, so I have recorded your report now, so that it is not lost.",
     "pcm": "You never add anything for small time now, so I don record your report now, make e no lost."
   }
