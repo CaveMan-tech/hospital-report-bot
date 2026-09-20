@@ -68,3 +68,27 @@ def test_message_or_none_still_checks_nested_contacts():
     pack.messages["X.test"] = {"verified": True, "en": "Call {contact:emergency}"}
     pack.contacts["emergency"] = {**pack.contacts["emergency"], "verified": False}
     assert pack.message_or_none("X.test", "en") is None
+
+
+def test_content_review_rows_say_what_a_reporter_gets_today():
+    pack = Pack("ng-lagos", allow_unverified=True)          # dev mode must not change the answer
+    rows = {(r["file"], r["id"]): r["now"] for r in pack.gated_entries()}
+    fallback = pack.messages["E.unverified_fallback"]["en"]
+    assert rows[("messages", "A1.emergency_refused")]["kind"] == "fallback"
+    assert rows[("messages", "A1.emergency_refused")]["text"] == fallback
+    assert rows[("rights", "dignity")] == {"kind": "omitted"}
+    emergency = rows[("contacts", "emergency")]
+    assert emergency["kind"] == "fallback" and "E.handoff" in emergency["used_in"]
+    assert rows[("asks", "abuse")]["kind"] == "brief_placeholder"
+
+
+def test_a_verified_message_is_still_held_back_by_an_unverified_contact():
+    pack = Pack("ng-lagos")
+    signed = {"verified": True, "verified_by": "A", "verified_on": "2026-09-20", "verified_source": "x"}
+    pack.messages["E.handoff"] = {**pack.messages["E.handoff"], **signed}
+    now = {r["id"]: r["now"] for r in pack.gated_entries() if r["file"] == "messages"}["E.handoff"]
+    assert now["kind"] == "fallback" and now["blocked_by"] == ["dsva", "emergency"]
+    for cid in ("dsva", "emergency"):
+        pack.contacts[cid] = {**pack.contacts[cid], **signed}
+    now = {r["id"]: r["now"] for r in pack.gated_entries() if r["file"] == "messages"}["E.handoff"]
+    assert now == {"kind": "as_written"}

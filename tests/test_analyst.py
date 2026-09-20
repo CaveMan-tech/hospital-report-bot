@@ -104,6 +104,10 @@ def test_content_review_page_lists_everything_to_verify():
         assert "0 of" in page and "Article 43(2)" in page and "new.kenyalaw.org" in page
         assert "app.verify mark ke-nairobi" in page and "ALLOW_UNVERIFIED is ON" in page
         assert "A1.emergency_refused" in c.get("/analyst/content", auth=AUTH).text
+        lagos = c.get("/analyst/content", auth=AUTH).text
+        assert "What reporters get today" in lagos
+        assert "The guidance for this situation is still being checked" in lagos      # the fallback, in full
+        assert "Left out of the reply" in lagos and "Held back with it" in lagos
 
 
 def _all_patterns():

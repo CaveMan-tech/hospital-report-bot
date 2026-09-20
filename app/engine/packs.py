@@ -111,6 +111,22 @@ class Pack:
             text = text.replace("{" + name + "}", value)
         return text.strip()
 
+    def _says_now(self, file: str, key: str, entry: dict) -> dict:
+        """What a reporter gets today for this entry, with the gate on. ALLOW_UNVERIFIED is ignored
+        on purpose: the reviewer needs to see what the public sees, not what a developer sees."""
+        if file == "messages":
+            blocked_by = [c for c in _CONTACT_RE.findall(entry["en"]) if not is_verified(self.contacts[c], True)]
+            if is_verified(entry, always_gated=True) and not blocked_by:
+                return {"kind": "as_written"}
+            return {"kind": "fallback", "text": self.messages["E.unverified_fallback"]["en"],
+                    "blocked_by": blocked_by}
+        if is_verified(entry, always_gated=True):
+            return {"kind": "as_written"}
+        if file == "contacts":  # one unverified number holds back every message that includes it
+            used_in = [k for k, m in self.messages.items() if "{contact:" + key + "}" in m["en"]]
+            return {"kind": "fallback", "text": self.messages["E.unverified_fallback"]["en"], "used_in": used_in}
+        return {"kind": "omitted"} if file == "rights" else {"kind": "brief_placeholder"}
+
     def gated_entries(self) -> list[dict]:
         """Everything a human must verify, for the content review page and the verify command."""
         out = []
@@ -121,6 +137,7 @@ class Pack:
                 "check_against": entry.get("check_against", []), "note": entry.get("note", ""),
                 "verified": is_verified(entry, always_gated=True),
                 "claimed_without_provenance": bool(entry.get("verified")) and not is_verified(entry, True),
+                "now": self._says_now(file, key, entry),
                 **{f: entry.get(f, "") for f in PROVENANCE},
             })
 
