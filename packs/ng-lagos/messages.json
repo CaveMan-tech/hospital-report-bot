@@ -381,22 +381,22 @@
     "pcm": "Person go look your report before we count am join other reports."
   },
   "S0.privacy.telegram": {
-    "verified": false,
+    "verified": true,
     "en": "On Telegram, we do not keep or record your Telegram name, username or phone number. Telegram itself can see that you messaged this bot. Send /forget to delete an unfinished report here. To clear this chat from your phone, delete it in Telegram.",
     "pcm": null
   },
   "T.forgotten": {
-    "verified": false,
+    "verified": true,
     "en": "Done. I have deleted this unfinished conversation. Anything you already finished reporting holds no name and no story. To clear this chat from your phone, delete it in Telegram.",
     "pcm": null
   },
   "T.status_usage": {
-    "verified": false,
+    "verified": true,
     "en": "Send /status followed by your code, like this: /status 7K3M-9QWX-2B4D",
     "pcm": null
   },
   "B2.reference": {
-    "verified": false,
+    "verified": true,
     "en": "You can read it for yourself: {title} ({note}; {size}): {url}",
     "pcm": null
   }
