@@ -503,7 +503,7 @@ async def test_refused_emergency_gets_the_law_to_show_them_after_the_steps_never
     law = next(i for i, t in enumerate(r.replies) if "If it helps to show them" in t)
     steps = next(i for i, t in enumerate(r.replies) if "Get care first" in t)
     assert law == steps + 1                                        # what to do comes first, always
-    assert "page A153" in r.replies[law] and r.replies[law].endswith("nig162642.pdf")
+    assert "page 17 of the file" in r.replies[law] and r.replies[law].endswith("nig162642.pdf")
     assert sum("http" in t for t in r.replies) == 1                # one link, nothing else to read
 
 

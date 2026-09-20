@@ -404,11 +404,11 @@
   "A1.reference": {
     "verified": false,
     "gated": true,
-    "en": "If it helps to show them, this is the law: {title} ({note}; {size}). Section 20 is on page A153: {url}",
+    "en": "If it helps to show them, this is the law: {title} ({note}; {size}). Section 20 is on page 17 of the file (the page is numbered A153): {url}",
     "pcm": null,
     "check_against": [
       {
-        "label": "Official Gazette print of the National Health Act 2014: confirm section 20 is on the page numbered A153",
+        "label": "Official Gazette print of the National Health Act 2014: confirm section 20 is on the 17th page of the file, and that the page is numbered A153",
         "url": "https://faolex.fao.org/docs/pdf/nig162642.pdf"
       }
     ]
