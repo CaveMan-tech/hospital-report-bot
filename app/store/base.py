@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.engine.models import AuditEntry, Followup, Report, Session
+from app.engine.models import AiCall, AuditEntry, Followup, Report, Session
 
 
 class Store(Protocol):
@@ -27,3 +27,6 @@ class Store(Protocol):
 
     async def add_audit(self, entry: AuditEntry) -> None: ...
     async def list_audit(self, limit: int = 50) -> list[AuditEntry]: ...
+
+    async def add_ai_call(self, call: AiCall) -> None: ...
+    async def list_ai_calls(self, limit: int = 5000) -> list[AiCall]: ...

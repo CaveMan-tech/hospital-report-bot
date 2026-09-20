@@ -18,7 +18,7 @@ from datetime import UTC, datetime, timedelta
 from html import escape
 from urllib.parse import quote
 
-from app.engine.models import Report
+from app.engine.models import AiCall, Report
 from app.engine.packs import Pack, UnverifiedContent
 
 THRESHOLD = 5
@@ -355,3 +355,28 @@ def facets_csv(reports: list[Report], pack: Pack) -> str:
                     r.patient_group, r.harm_outcome, r.time_bucket, r.money_demanded,
                     r.amount_bucket, r.status, r.is_sample])
     return buf.getvalue()
+
+
+# ------------------------------------------------------------------ AI usage
+
+def usage(calls: list[AiCall]) -> list[dict]:
+    """Calls and tokens by day, model and purpose, newest day first. Failed calls are counted but
+    kept out of the average latency: a timeout says nothing about how fast the model answers."""
+    groups: dict[tuple[str, str, str], list[AiCall]] = {}
+    for c in calls:
+        groups.setdefault((c.at.date().isoformat(), c.model, c.purpose), []).append(c)
+    rows = []
+    for (day, model, purpose), cs in groups.items():
+        good = [c for c in cs if c.ok]
+        rows.append({
+            "day": day, "model": model, "purpose": purpose, "calls": len(cs), "failed": len(cs) - len(good),
+            "input_tokens": sum(c.input_tokens for c in cs), "output_tokens": sum(c.output_tokens for c in cs),
+            "requests": sum(c.requests for c in cs),
+            "avg_latency_ms": round(sum(c.latency_ms for c in good) / len(good)) if good else 0})
+    return sorted(rows, key=lambda r: (r["day"], r["model"], r["purpose"]), reverse=True)
+
+
+def usage_total(calls: list[AiCall]) -> dict:
+    return {"calls": len(calls), "failed": sum(not c.ok for c in calls),
+            "input_tokens": sum(c.input_tokens for c in calls),
+            "output_tokens": sum(c.output_tokens for c in calls)}

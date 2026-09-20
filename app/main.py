@@ -22,7 +22,7 @@ from app.channels.telegram_api import HttpBotAPI
 from app.config import get_settings
 from app.engine.extract import get_extractor
 from app.engine.machine import Engine
-from app.engine.models import AuditEntry, Channel, EngineReply
+from app.engine.models import AiCall, AuditEntry, Channel, EngineReply
 from app.engine.packs import get_pack
 from app.ratelimit import DailyDedupe, RateLimiter
 from app.seed import seed
@@ -46,6 +46,26 @@ def _pack_ids(cfg) -> list[str]:
     return [cfg.pack, *[p for p in ids if p != cfg.pack]]  # default first
 
 
+_usage_tasks: set[asyncio.Task] = set()
+
+
+def ai_call_recorder(store):
+    """Count every AI call (model, tokens, latency) without making anyone wait for the write, and
+    without letting a failed write reach the person. Runs inside the request's event loop."""
+    async def write(call: AiCall) -> None:
+        try:
+            await store.add_ai_call(call)
+        except Exception as e:  # noqa: BLE001
+            logging.getLogger(__name__).warning("AI call was not recorded (%s)", type(e).__name__)
+
+    def record(call: AiCall) -> None:
+        task = asyncio.get_running_loop().create_task(write(call))
+        _usage_tasks.add(task)
+        task.add_done_callback(_usage_tasks.discard)
+
+    return record
+
+
 async def build_engine() -> Engine:
     cfg = get_settings()
     if cfg.store == "postgres":
@@ -57,7 +77,7 @@ async def build_engine() -> Engine:
     return Engine(
         store=store,
         extractor=get_extractor(cfg.extract_mode, cfg.openai_model, cfg.openai_api_key,
-                                cfg.openai_reasoning_effort),
+                                cfg.openai_reasoning_effort, on_call=ai_call_recorder(store)),
         pack=[get_pack(pid, cfg.allow_unverified) for pid in _pack_ids(cfg)],
         ref_secret=cfg.ref_code_secret,
         extract_timeout=cfg.extract_timeout_seconds,
@@ -76,7 +96,8 @@ async def lifespan(app: FastAPI):
     if fatal:
         raise RuntimeError("Refusing to start: " + "; ".join(fatal))
     app.state.engine = await build_engine()
-    app.state.transcriber = (make_openai_transcriber(cfg.openai_api_key, cfg.openai_transcribe_model)
+    app.state.transcriber = (make_openai_transcriber(cfg.openai_api_key, cfg.openai_transcribe_model,
+                                                     on_call=ai_call_recorder(app.state.engine.store))
                              if cfg.voice_enabled and cfg.openai_api_key else None)
     app.state.telegram, app.state.telegram_secret, bot_api = None, cfg.telegram_webhook_secret, None
     if cfg.telegram_bot_token and cfg.telegram_webhook_secret:
@@ -322,6 +343,15 @@ async def analyst_home(request: Request, pack: str | None = None, engine: Engine
         "org_name": current.org_name, "patterns": rows, "threshold": A.THRESHOLD,
         "window": A.WINDOW_DAYS, "sample": any(p["includes_sample_data"] for p in rows),
         "held_back": len(A.review_queue(reports, current))})
+
+
+@app.get("/analyst/usage", response_class=HTMLResponse, dependencies=[Depends(analyst_auth)])
+async def analyst_usage(request: Request, engine: Engine = Depends(engine_of)):
+    """What the AI costs to run: calls, tokens and failures by day, model and purpose."""
+    calls = await engine.store.list_ai_calls()
+    return templates.TemplateResponse(request, "usage.html", {
+        "rows": A.usage(calls), "total": A.usage_total(calls), "model": get_settings().openai_model,
+        "mode": get_settings().extract_mode})
 
 
 @app.get("/analyst/content", response_class=HTMLResponse, dependencies=[Depends(analyst_auth)])

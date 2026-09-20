@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI usage</title>
+<link rel="stylesheet" href="/static/analyst.css?v={{ asset_v }}">
+</head>
+<body>
+<header><p><a href="/analyst">← Patterns</a></p>
+<h1>AI usage</h1>
+<p>{{ "{:,}".format(total.calls) }} call{{ "" if total.calls == 1 else "s" }} ·
+{{ "{:,}".format(total.input_tokens) }} tokens in · {{ "{:,}".format(total.output_tokens) }} tokens out ·
+{{ "{:,}".format(total.failed) }} failed</p></header>
+<p class="note">Every call to an AI service is counted here: which model, how many tokens, how long it took and
+whether it worked. A call that failed or timed out is counted too; the reporter was answered by the keyword
+fallback. These rows link to no conversation, no report and no person. Now configured:
+{% if mode == "llm" %}<strong>{{ model }}</strong>{% else %}the keyword stub, which makes no AI calls{% endif %}.</p>
+{% if rows %}
+<table>
+<thead><tr><th>Day</th><th>Model</th><th>Purpose</th><th>Calls</th><th>Failed</th><th>Tokens in</th>
+<th>Tokens out</th><th>Requests</th><th>Average time</th></tr></thead>
+<tbody>
+{% for r in rows %}<tr><td>{{ r.day }}</td><td>{{ r.model }}</td><td>{{ r.purpose }}</td>
+<td>{{ "{:,}".format(r.calls) }}</td><td>{{ "{:,}".format(r.failed) }}</td>
+<td>{{ "{:,}".format(r.input_tokens) }}</td><td>{{ "{:,}".format(r.output_tokens) }}</td>
+<td>{{ "{:,}".format(r.requests) }}</td><td>{{ "%.1f"|format(r.avg_latency_ms / 1000) }} s</td></tr>
+{% endfor %}</tbody>
+</table>
+<p class="note">Requests can exceed calls: when the model returns something invalid, the library asks again,
+and every attempt is paid for.</p>
+{% else %}<p>No AI calls recorded yet.</p>{% endif %}
+</body>
+</html>

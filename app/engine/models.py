@@ -150,6 +150,21 @@ class AuditEntry(BaseModel):
     detail: str = ""
 
 
+class AiCall(BaseModel):
+    """One call to an AI service: which model, how many tokens, how long, did it work. It is a cost
+    and reliability record and nothing else, so it links to no session, no report and no person."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    at: datetime = Field(default_factory=_now)
+    purpose: Literal["extract", "transcribe"]
+    model: str
+    ok: bool = True
+    input_tokens: int = 0
+    output_tokens: int = 0
+    requests: int = 0       # more than one when the library retried an invalid answer
+    latency_ms: int = 0
+
+
 SESSION_TTL = timedelta(hours=2)
 
 

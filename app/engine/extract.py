@@ -11,9 +11,10 @@ from __future__ import annotations
 import logging
 import os
 import re
+import time
 from collections.abc import Awaitable, Callable
 
-from .models import Extraction, normalise_subtype
+from .models import AiCall, Extraction, normalise_subtype
 
 log = logging.getLogger(__name__)
 
@@ -116,13 +117,30 @@ def clean(ex: Extraction) -> Extraction:
     return ex
 
 
-def make_llm_extractor(model: str, api_key: str = "", reasoning_effort: str = "minimal") -> Extractor:
-    """Pydantic AI agent. Invalid output is rejected and retried by the library."""
+OnCall = Callable[[AiCall], None]
+
+
+def report_call(on_call: OnCall | None, call: AiCall) -> None:
+    """Hand a finished call to whoever is counting. Counting must never cost someone their reply."""
+    if on_call is None:
+        return
+    try:
+        on_call(call)
+    except Exception as e:  # noqa: BLE001
+        log.warning("AI call was not recorded (%s)", type(e).__name__)
+
+
+def make_llm_extractor(model, api_key: str = "", reasoning_effort: str = "minimal",
+                       on_call: OnCall | None = None) -> Extractor:
+    """Pydantic AI agent. Invalid output is rejected and retried by the library. `model` is a name
+    like "openai:gpt-5-mini", or a model object. Every call, failed or cut off included, is reported
+    to `on_call` with its model and token counts."""
     from pydantic_ai import Agent
 
     os.environ.setdefault("PYDANTIC_AI_NO_BANNER", "1")
     resolved, settings = model, None
-    if api_key and model.startswith("openai:"):
+    name = model if isinstance(model, str) else model.model_name
+    if api_key and isinstance(model, str) and model.startswith("openai:"):
         # The key comes from our settings (.env or the host's variables), so it does not
         # need to be exported into the process environment.
         from pydantic_ai.models.openai import OpenAIResponsesModel, OpenAIResponsesModelSettings
@@ -134,8 +152,18 @@ def make_llm_extractor(model: str, api_key: str = "", reasoning_effort: str = "m
                   model_settings=settings)
 
     async def extract(transcript: list[dict[str, str]], context: str = "") -> Extraction:
-        result = await agent.run(_render(transcript, context))
-        return clean(result.output)
+        started, usage = time.monotonic(), None
+        try:
+            result = await agent.run(_render(transcript, context))
+            usage = result.usage() if callable(result.usage) else result.usage   # a method before pydantic-ai 2
+            return clean(result.output)
+        finally:    # also runs when the engine's timeout cancels us: a call we paid for is still a call
+            report_call(on_call, AiCall(
+                purpose="extract", model=name, ok=usage is not None,
+                input_tokens=usage.input_tokens if usage else 0,
+                output_tokens=usage.output_tokens if usage else 0,
+                requests=usage.requests if usage else 0,
+                latency_ms=int((time.monotonic() - started) * 1000)))
 
     return extract
 
@@ -237,7 +265,8 @@ async def mock_extract(transcript: list[dict[str, str]], context: str = "") -> E
     return clean(ex)
 
 
-def get_extractor(mode: str, model: str, api_key: str = "", reasoning_effort: str = "minimal") -> Extractor:
+def get_extractor(mode: str, model: str, api_key: str = "", reasoning_effort: str = "minimal",
+                  on_call: OnCall | None = None) -> Extractor:
     if mode == "mock":
-        return mock_extract
-    return make_llm_extractor(model, api_key, reasoning_effort)
+        return mock_extract     # a keyword stub is not an AI call: nothing to count
+    return make_llm_extractor(model, api_key, reasoning_effort, on_call)

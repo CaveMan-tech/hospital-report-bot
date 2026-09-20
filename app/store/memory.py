@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from app.engine.models import AuditEntry, Followup, Report, Session
+from app.engine.models import AiCall, AuditEntry, Followup, Report, Session
 
 
 class MemoryStore:
@@ -13,6 +13,7 @@ class MemoryStore:
         self.reports: dict[str, Report] = {}
         self.followups: list[Followup] = []
         self.audit: list[AuditEntry] = []
+        self.ai_calls: list[AiCall] = []
 
     async def create_session(self, session: Session) -> None:
         self.sessions[session.id] = session.model_copy(deep=True)
@@ -72,3 +73,9 @@ class MemoryStore:
 
     async def list_audit(self, limit: int = 50) -> list[AuditEntry]:
         return [e.model_copy(deep=True) for e in sorted(self.audit, key=lambda e: e.at, reverse=True)[:limit]]
+
+    async def add_ai_call(self, call: AiCall) -> None:
+        self.ai_calls.append(call.model_copy(deep=True))
+
+    async def list_ai_calls(self, limit: int = 5000) -> list[AiCall]:
+        return [c.model_copy(deep=True) for c in sorted(self.ai_calls, key=lambda c: c.at, reverse=True)[:limit]]

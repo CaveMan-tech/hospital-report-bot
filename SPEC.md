@@ -333,10 +333,11 @@ Hospital matching: case-insensitive fuzzy match on `hospitals.name` and `aliases
 
 ## 6. Data model (Postgres)
 
-The full schema is `db/schema.sql`. Three tables:
+The full schema is `db/schema.sql`. The tables that matter (analyst decisions are logged in `analyst_actions`, section 7):
 
 - **`reports`**: one row per report. Structured fields and facets (section 2), `summary_redacted`, `ref_code_hmac`, `credibility` (`ok`, `review`, `excluded`), `dedupe_key`, `extraction_version`, `extra jsonb` for future facets, `is_sample`. Never the raw story, never the code, never an identifier.
 - **`followups`**: next-day answers, linked to a report.
+- **`ai_calls`**: one row per call to an AI service (story extraction, voice transcription): time, purpose, model, tokens in and out, requests (retries included), latency, and whether it worked. Failed and timed-out calls are counted too. It is a cost and reliability record and links to nothing: no session, no report, no person. It is written in the background, so counting never delays a reply, and a failed write never reaches the reporter. The keyword stub makes no AI calls and records none.
 - **`sessions`**: short-lived conversation state. The raw story lives in `context` only while the chat is active, is removed the moment the report row is written, and unfinished sessions are purged after 2 hours.
 
 Hospitals are part of the country pack (`hospitals.seed.json`), not a table, so a deployment is fully described by its pack. Reports reference them by pack id; an unmatched name is kept in `hospital_name_raw` and held for review.
@@ -425,6 +426,7 @@ Deck framing: any advocacy organisation in any country deploys this with a count
 | `GET /analyst/patterns.csv`, `GET /analyst/facets.csv` | Analyst. Exports. Facets are week-level, no summaries. |
 | `POST /analyst/reports/{id}/{exclude,accept,hold}` | Analyst. Sets credibility; `accept` can also assign a hospital. Always logged. |
 | `GET /analyst/review`, `GET /analyst/content` | Analyst. Review queue with decision log; content sign-off status. |
+| `GET /analyst/usage` | Analyst. AI calls, tokens and failures by day, model and purpose. |
 | `POST /api/chat/forget` | Deletes an unfinished conversation now. Used by quick exit and "start again". |
 | `POST /telegram/webhook` | Telegram adapter. Checks Telegram's secret header, answers at once, then passes the update to the same `engine.handle_message`. 404 when no bot token is set. |
 | `POST /api/demo/next-day` | Demo only. Triggers F1. |

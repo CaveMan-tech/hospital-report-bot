@@ -76,3 +76,18 @@ create table if not exists analyst_actions (
   detail     text not null default ''
 );
 create index if not exists analyst_actions_at_idx on analyst_actions (at desc);
+
+-- One row per call to an AI service: model, tokens, latency, outcome. A cost and reliability record.
+-- Deliberately links to nothing: no session, no report, no person.
+create table if not exists ai_calls (
+  id             uuid primary key,
+  at             timestamptz not null default now(),
+  purpose        text not null,
+  model          text not null,
+  ok             boolean not null default true,
+  input_tokens   integer not null default 0,
+  output_tokens  integer not null default 0,
+  requests       integer not null default 0,
+  latency_ms     integer not null default 0
+);
+create index if not exists ai_calls_at_idx on ai_calls (at desc);

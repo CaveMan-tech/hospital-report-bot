@@ -13,7 +13,7 @@ from typing import Any
 import asyncpg
 from pydantic import BaseModel
 
-from app.engine.models import AuditEntry, Followup, Report, Session
+from app.engine.models import AiCall, AuditEntry, Followup, Report, Session
 
 SCHEMA = Path(__file__).resolve().parents[2] / "db" / "schema.sql"
 
@@ -139,3 +139,10 @@ class PostgresStore:
     async def list_audit(self, limit: int = 50) -> list[AuditEntry]:
         rows = await self.pool.fetch("select * from analyst_actions order by at desc limit $1", limit)
         return [_model(AuditEntry, r) for r in rows]
+
+    async def add_ai_call(self, call: AiCall) -> None:
+        await self._write("ai_calls", call, upsert=False)
+
+    async def list_ai_calls(self, limit: int = 5000) -> list[AiCall]:
+        rows = await self.pool.fetch("select * from ai_calls order by at desc limit $1", limit)
+        return [_model(AiCall, r) for r in rows]

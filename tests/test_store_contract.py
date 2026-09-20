@@ -134,3 +134,14 @@ async def test_delete_session_and_audit_log(store):
     log = await store.list_audit()
     assert [e.actor for e in log] == ["Tunde", "Ngozi"] and log[0].detail == "hospital set to X"
     assert len(await store.list_audit(limit=1)) == 1
+
+
+async def test_ai_calls_are_kept_newest_first_and_link_to_nothing(store):
+    from app.engine.models import AiCall
+    await store.add_ai_call(AiCall(purpose="extract", model="openai:gpt-5-mini", input_tokens=900,
+                                   output_tokens=120, requests=1, latency_ms=3100))
+    await store.add_ai_call(AiCall(purpose="extract", model="openai:gpt-5-mini", ok=False, latency_ms=15000))
+    calls = await store.list_ai_calls()
+    assert [c.ok for c in calls] == [False, True] and calls[1].input_tokens == 900
+    assert set(AiCall.model_fields) == {"id", "at", "purpose", "model", "ok", "input_tokens",
+                                        "output_tokens", "requests", "latency_ms"}   # no session, no report
