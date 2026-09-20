@@ -20,6 +20,7 @@
     "pcm": "Abeg, I no too understand. Anybody dey for danger now now? Reply YES or NO."
   },
   "A1.emergency_refused": {
+    "references": ["nha_2014"],
     "verified": true,
     "gated": true,
     "en": "Get care first. If the person is getting worse, call {contact:emergency}, or go to the nearest other hospital. Do not wait for an answer from this one, and do not stay to argue.\n\nThen, if you can:\n1. Ask calmly for the most senior doctor or officer on duty. You can say: \"Section 20 of the National Health Act says a hospital or health worker must not refuse a person emergency medical treatment for any reason.\"\n2. The law is about not being refused. It does not say the treatment is free; the bill can be sorted out after the person is safe. If money is the problem, ask for the hospital's Social Welfare Unit.\n3. When you can, note the time, the department (for example Casualty), and who you spoke to.\n\nI cannot send anyone to you. I will record this so it is counted.",
@@ -399,5 +400,17 @@
     "verified": true,
     "en": "You can read it for yourself: {title} ({note}; {size}): {url}",
     "pcm": null
+  },
+  "A1.reference": {
+    "verified": false,
+    "gated": true,
+    "en": "If it helps to show them, this is the law: {title} ({note}; {size}). Section 20 is on page A153: {url}",
+    "pcm": null,
+    "check_against": [
+      {
+        "label": "Official Gazette print of the National Health Act 2014: confirm section 20 is on the page numbered A153",
+        "url": "https://faolex.fao.org/docs/pdf/nig162642.pdf"
+      }
+    ]
   }
 }

@@ -488,10 +488,35 @@ async def test_typing_yes_after_being_offered_the_danger_button_works_like_tappi
     assert store.reports == {}
 
 
-async def test_the_reporter_can_read_the_source_for_themselves_but_never_in_an_emergency(engine, store):
+async def test_the_reporter_can_read_the_source_for_themselves(engine, store):
     r = await say(engine, None, "A nurse slapped me last week at Harmattan General Hospital maternity ward")
     text = "\n".join(r.replies)
     assert "fccpc.gov.ng" in text and text.index("respect and dignity") < text.index("fccpc.gov.ng")
-    r = await say(engine, None, "My brother is bleeding badly now at Harmattan General Hospital and they refuse "
-                                "to treat him until we pay deposit")
+
+
+EMERGENCY = ("My brother is bleeding badly now at Harmattan General Hospital and they refuse "
+             "to treat him until we pay deposit")
+
+
+async def test_refused_emergency_gets_the_law_to_show_them_after_the_steps_never_before(engine, store):
+    r = await say(engine, None, EMERGENCY)
+    law = next(i for i, t in enumerate(r.replies) if "If it helps to show them" in t)
+    steps = next(i for i, t in enumerate(r.replies) if "Get care first" in t)
+    assert law == steps + 1                                        # what to do comes first, always
+    assert "page A153" in r.replies[law] and r.replies[law].endswith("nig162642.pdf")
+    assert sum("http" in t for t in r.replies) == 1                # one link, nothing else to read
+
+
+async def test_the_law_link_comes_before_the_hospital_question_so_the_question_stays_last(engine, store):
+    r = await say(engine, None, "My brother is bleeding badly right now and they refuse to treat him until we pay deposit")
+    assert r.state == "A2" and "http" not in r.replies[-1]
+    assert any("If it helps to show them" in t for t in r.replies[:-1])
+
+
+async def test_other_emergencies_get_no_link_and_an_unsigned_pack_sends_none(store):
+    engine = Engine(store, mock_extract, Pack("ng-lagos", allow_unverified=True), "s")
+    r = await say(engine, None, "They are holding my wife right now at Harmattan General Hospital because of the bill, "
+                                "she cannot leave")
     assert "http" not in "\n".join(r.replies)
+    engine = Engine(MemoryStore(), mock_extract, unsigned("ng-lagos"), "s")
+    assert "http" not in "\n".join((await say(engine, None, EMERGENCY)).replies)

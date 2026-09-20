@@ -239,21 +239,28 @@ class Engine:
     async def _severe(self, s: Session, ex: Extraction, ack: str = ""):
         s.context["severity"] = "severe"
         s.context["escalation_shown"] = True
-        escalation = self._escalation(s, ex.category, ex.subtype)
+        key = self._escalation_key(ex.category, ex.subtype)
+        escalation = self._msg(key, s)
         if s.context.get("generic_escalation_sent") and escalation == self._msg("A1.generic", s):
             escalation = ""  # they already have it from the danger button; do not repeat it
         replies = [ack, escalation]
+        if escalation:  # the law to show them, after what to do and never before it
+            replies += self.pack_for(s.pack).escalation_references(key, s.context.get("lang", "en"))
         if not ex.hospital_name_raw:
             s.state = "A2"
             return replies + [self._msg("Q.hospital", s)], None
         more, code = await self._finalise(s, ex)
         return replies + more, code
 
-    def _escalation(self, s: Session, category: str, subtype: str = "") -> str:
+    @staticmethod
+    def _escalation_key(category: str, subtype: str = "") -> str:
         key = f"A1.{category}" if category in ("emergency_refused", "detention") else "A1.generic"
         if category == "detention" and subtype == "body_held":
             key = "A1.detention_body"  # a bereaved family needs different words, and no talk of "discharge"
-        return self._msg(key, s)
+        return key
+
+    def _escalation(self, s: Session, category: str, subtype: str = "") -> str:
+        return self._msg(self._escalation_key(category, subtype), s)
 
     async def _on_severe_hospital(self, s: Session, text: str):
         ex = self._ex(s)

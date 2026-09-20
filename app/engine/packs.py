@@ -187,13 +187,21 @@ class Pack:
         """"Read it for yourself" lines for the documents behind one right. A link is something a
         person acts on, so it is gated like a phone number: no sign-off, no link."""
         right = next((r for r in self.rights if r["id"] == right_id), None)
+        return self._reference_lines(right.get("references", []) if right else [], lang, "B2.reference")
+
+    def escalation_references(self, message_key: str, lang: str) -> list[str]:
+        """The law to show the person refusing care. Sent after the escalation message, never
+        before it, and only for the escalation messages that name a document."""
+        return self._reference_lines(self.messages[message_key].get("references", []), lang, "A1.reference")
+
+    def _reference_lines(self, ids: list[str], lang: str, template: str) -> list[str]:
         out = []
         for ref in self.references:
-            if right is None or ref["id"] not in right.get("references", []):
+            if ref["id"] not in ids:
                 continue
             try:
                 self._check("reference", ref["id"], ref, always_gated=True)
-                out.append(self._message("B2.reference", lang, url=ref["url"], **{
+                out.append(self._message(template, lang, url=ref["url"], **{
                     f: ref.get(f"{f}_{lang}") or ref[f"{f}_en"] for f in ("title", "note", "size")}))
             except UnverifiedContent:
                 continue
