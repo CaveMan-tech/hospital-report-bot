@@ -21,8 +21,9 @@
 <footer>
   <button type="button" class="link" id="new">Start a new report</button>
   <button type="button" class="link" id="check">Check a report with my code</button>
-  {% if demo_mode %}<button type="button" class="link" id="nextday">Demo: simulate next day</button>
-  {% for p in packs %}{% if p.id != pack.id %}<a class="link" href="/?pack={{ p.id }}">Demo: switch to {{ p.title }}</a>{% endif %}{% endfor %}{% endif %}
+  {% if demo_mode %}<details><summary class="link">Demo</summary>
+  <button type="button" class="link" id="nextday">Simulate next day</button>
+  {% for p in packs %}{% if p.id != pack.id %}<a class="link" href="/?pack={{ p.id }}">Switch to {{ p.title }}</a>{% endif %}{% endfor %}</details>{% endif %}
 </footer>
 <script>window.PACK = {{ pack.id|tojson }}; window.OFFLINE = {{ pack.message("E.unavailable")|tojson }};</script>
 <script src="/static/chat.js?v={{ asset_v }}" defer></script>

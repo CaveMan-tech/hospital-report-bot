@@ -202,7 +202,7 @@ def test_patterns_never_mix_countries():
 def test_pack_switch_over_http():
     with TestClient(app) as c:
         page = c.get("/?pack=ke-nairobi").text
-        assert 'window.PACK = "ke-nairobi"' in page and "Open Ward Kenya" in page and "switch to Nigeria (Lagos)" in page
+        assert 'window.PACK = "ke-nairobi"' in page and "Open Ward Kenya" in page and "<details>" in page and "Switch to Nigeria (Lagos)" in page
         r = c.post("/api/chat", json={"text": KE_STORY, "pack": "ke-nairobi"}).json()
         assert "Article 43(2)" in "\n".join(r["replies"])
         ke = c.get("/analyst?pack=ke-nairobi", auth=AUTH).text
