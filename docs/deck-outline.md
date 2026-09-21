@@ -135,9 +135,34 @@ the tools."
 
 ## 12. What next, and the ask · presentation
 **On the slide:** three steps: (1) legal review of both packs, (2) a pilot with one health-rights
-organisation in one hospital catchment, on WhatsApp with voice notes, (3) a third country pack.
-**Name the kind of partner** you would approach first in Lagos, and why they would want it.
-`[TBD Ikechi]`
+organisation in one maternity catchment in Lagos, on WhatsApp with voice notes, (3) a third country pack.
+Under step 2, one line: "First partner: a rights organisation with its own lawyers, that has already
+taken a Lagos hospital to court."
+**Say:** nobody has been approached yet. The partner I would go to first is a women's-rights legal
+centre in Lagos: lawyers on staff, a record of suing a public hospital over exactly this, and
+outreach that already reaches women in markets, health centres and faith gatherings. An organisation
+like that would want this for one reason: its evidence today is one case at a time. The best-known
+Lagos detention case was built on one woman's death, and it was struck out on procedure. Five
+reports of the same thing at the same hospital is the evidence a single case cannot give, it keeps
+arriving between grants, and it costs almost nothing to collect.
+Two supporting roles, and why they are not first. A bill-relief charity already works inside Lagos
+public hospitals through their social workers and sees these cases every day, so it is how patients
+would hear about the tool; it depends on the hospitals' goodwill, so it cannot be the one to publish.
+A newsroom is the amplifier, not the holder: reporters in Lagos have been detained under the
+Cybercrimes Act, and the state rebuts single stories in public, one at a time.
+**If asked for names** (say them, do not put them on a slide, and repeat that none has been
+approached): WARDC in Ikeja, which sued Lagos University Teaching Hospital over Folake Oduyoye, who
+was detained over a bill, denied care, and died in December 2014; Health Emergency Initiative in
+Surulere for reach; THISDAY's health desk, which ran the 2026 investigation into payment barriers
+across Lagos's 36 public hospitals.
+**Be ready for:** "that only covers women". Yes, and maternity is where detention and deposit
+stories cluster, so the pilot starts in a maternity catchment and the pattern view already breaks
+down by department. "Does Open Society fund this?" Do not claim it. Its Abuja office closed in 2023
+and its current Africa programmes name Nigeria under democratic governance and citizen trust in
+institutions; the honest fit is citizen monitoring of public services.
+**The model this follows:** Transparency International's legal advice centres: help the person
+first, then turn the cases into advocacy run by an organisation with lawyers.
+**Sources, in the notes:** `docs/research/first-partner.md`.
 **Last line:** "People are already telling these stories. Nobody is counting them. This counts them."
 
 ---
@@ -188,11 +213,11 @@ organisation in one hospital catchment, on WhatsApp with voice notes, (3) a thir
   linked to anyone after a day, implausible reports held for review, "unverified" on every
   surface, the partner's editorial checks). What is next (optional evidence, partner-verified reports).
 - **C. How patients find it.** Through the partner's community network, pharmacies, churches and
-  mosques, radio, and the partner's own campaigns. Not posters inside hospitals. `[TBD: which are real]`
+  mosques, radio, and the partner's own campaigns. Not posters inside hospitals.
 - **D. Data protection.** No identity collected; original message not retained; an AI service
   abroad processes the text, which the greeting discloses. Nigeria's NDPA and Kenya's Data
   Protection Act (s.49 on sensitive data leaving the country) would need a proper assessment before
-  a pilot. `[VERIFY]`
+  a pilot.
 - **E. Limits.** Not an emergency service. Cannot send help and says so. Proof of concept.
 - **F. Architecture**, for the technical judge: engine, packs, store, channel adapters (web, Telegram); over 200 automated tests, run against both the in-memory and
   the Postgres store. Every AI call is counted (model, tokens, latency, outcome) and linked to nothing.
