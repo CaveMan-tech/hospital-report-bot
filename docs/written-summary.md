@@ -21,24 +21,20 @@ died. And a single story is easy to dismiss.
 
 ### The idea
 
-Pressure works on patterns, not anecdotes. So I did not build another complaints channel. I built
-the missing piece: a safe way to collect the reports nobody hears and turn them into patterns an
-advocacy organisation can campaign on.
+Pressure works on patterns, not anecdotes. So I did not build another complaints channel. I built a
+safe way to collect the reports nobody hears and turn them into patterns an advocacy organisation
+can campaign on.
 
-A reporter uses what they already have. Today that is a web link that opens on any phone, or a
-Telegram bot, and it is the same conversation on both: the bot is not tied to a platform, so
-WhatsApp is one more adapter, not a rebuild. There is no app to install, no sign-up and no name,
-and the whole web page is about five kilobytes. They describe what happened in their own words, in
-English or Pidgin. The
-bot checks first whether anyone is in danger right now. Then the person gets something useful
-immediately: the right that was violated and where it comes from, practical next steps, and a
-private reference code. Staff can report from the inside too, and receive guidance written for
-their situation rather than a patient's.
+A reporter uses what they already have: a web link that opens on any phone, or a Telegram bot. It
+is the same conversation on both. There is no app, no sign-up and no name, and the web page is about
+five kilobytes. They say what happened in their own words, in English or Pidgin. The bot first
+checks whether anyone is in danger, then gives them something useful straight away: the right that
+was violated and where it comes from, what to do next, and a private reference code. Staff can
+report from the inside too, with guidance written for them.
 
-The partner organisation sees only patterns: a hospital and a problem appear once five separate
-credible reports exist. Analysts see redacted summaries, masked breakdowns, and a one-click brief
-with the numbers, the relevant law, a specific ask and honest caveats. The organisation verifies
-and publishes.
+The partner organisation sees only patterns: a hospital and a problem appear once five credible
+reports exist. Analysts get redacted summaries, masked breakdowns and a one-click brief with the
+numbers, the law, a specific ask and honest caveats. The organisation verifies and publishes.
 
 ### Information sources
 
