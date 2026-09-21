@@ -42,20 +42,19 @@ and publishes.
 
 ### Information sources
 
-All country-specific content lives in a "country pack", not in code. The Lagos pack draws on the
-National Health Act 2014 (sections 20 and 30, read from the Official Gazette), the 1999 Constitution,
-and the FCCPC Patients' Bill of Rights (2018), which is policy rather than law and is described that
-way. The research behind it is in the repository (`docs/research/nigeria-pack.md`), with a primary
-source and a confidence label for every claim, and it corrected my first drafts: the bot no longer
-tells a reporter "this is against the law" about facts it cannot check, and it never says care is free.
-The Nairobi pack draws on the Constitution of Kenya 2010 (Article 43(2)), the Health Act 2017
-(section 7), the Kenya National Patients' Rights Charter (2013) and High Court decisions on the
-detention of patients and bodies. The Kenya research is in the repository
-(`docs/research/kenya-pack.md`) with a primary source and a confidence label for every claim.
+Everything country-specific lives in a "country pack", not in code, and every claim in a pack has a
+primary source and a confidence label in the repository (`docs/research/`).
 
-All hospitals and both partner organisations in the demo are fictional, and all seeded reports are
-generated sample data, labelled as such wherever they appear. Publishing invented numbers against
-real hospitals would be exactly the harm this project is meant to avoid.
+- **Lagos:** the National Health Act 2014 (sections 20 and 30, read from the Official Gazette), the
+  1999 Constitution, and the FCCPC Patients' Bill of Rights (2018), which is policy rather than law
+  and is described that way.
+- **Nairobi:** the Constitution of Kenya 2010 (Article 43(2)), the Health Act 2017 (section 7), the
+  Patients' Rights Charter (2013) and High Court decisions on detaining patients and bodies.
+
+The research corrected my first drafts: the bot never says "this is against the law" about facts it
+cannot check, and never says care is free. All hospitals and both organisations in the demo are
+fictional, and seeded reports are labelled sample data. Invented numbers against real hospitals
+would be exactly the harm this project exists to prevent.
 
 ### Trust and accuracy
 
