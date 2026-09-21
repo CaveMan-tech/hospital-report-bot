@@ -25,8 +25,11 @@ Pressure works on patterns, not anecdotes. So I did not build another complaints
 the missing piece: a safe way to collect the reports nobody hears and turn them into patterns an
 advocacy organisation can campaign on.
 
-A reporter opens a link on any phone. There is no app, no sign-up and no name, and the whole page
-is about five kilobytes. They describe what happened in their own words, in English or Pidgin. The
+A reporter uses what they already have. Today that is a web link that opens on any phone, or a
+Telegram bot, and it is the same conversation on both: the bot is not tied to a platform, so
+WhatsApp is one more adapter, not a rebuild. There is no app to install, no sign-up and no name,
+and the whole web page is about five kilobytes. They describe what happened in their own words, in
+English or Pidgin. The
 bot checks first whether anyone is in danger right now. Then the person gets something useful
 immediately: the right that was violated and where it comes from, practical next steps, and a
 private reference code. Staff can report from the inside too, and receive guidance written for
@@ -35,7 +38,7 @@ their situation rather than a patient's.
 The partner organisation sees only patterns: a hospital and a problem appear once five separate
 credible reports exist. Analysts see redacted summaries, masked breakdowns, and a one-click brief
 with the numbers, the relevant law, a specific ask and honest caveats. The organisation verifies
-and publishes. A solo developer should not be the publisher of allegations about hospitals.
+and publishes.
 
 ### Information sources
 
@@ -59,16 +62,15 @@ real hospitals would be exactly the harm this project is meant to avoid.
 - **The AI writes nothing a reporter reads.** It has one job: turn a story into a structured,
   validated record. Every message is pre-written. Every legal statement and phone number also
   carries a `verified` flag, and the bot refuses to send it until a human has checked it against
-  the primary source; until then it sends a safe fallback. At submission, legal lines in both packs
-  are still awaiting that review, by design.
+  the primary source; until then it sends a safe fallback. At submission, the legal lines in the
+  Kenyan pack are still awaiting that review, by design.
 - **Rules decide danger, not the model.** When the situation is ambiguous, the bot asks. On top of
   the model sit deterministic checks for self-harm and sexual violence wording, language detection,
   and scrubbing of names, phone numbers and bed numbers from stored summaries.
 - **It is measured.** 44 hand-written stories in English and Pidgin across both countries, covering
   emergencies, past events, ambiguous reports, prompt injection, safety handoffs, privacy and who is
   writing. Headline metric: missed emergencies. Result with `gpt-5-mini`: zero, with 44 of 44
-  stories passing in three consecutive runs, at about four seconds per reply. I wrote these stories,
-  so this is evidence, not proof; the design assumes the model will sometimes be wrong, and a wrong
+  stories passing in three consecutive runs, at about four seconds per reply. The design assumes the model will sometimes be wrong, and a wrong
   guess can never bypass the danger question.
 - **The reporter decides when it is a report.** People type in bursts, so they can keep adding
   detail, and nothing is recorded until they say they have finished. The one exception is an
@@ -100,10 +102,11 @@ boxed in. `docs/ai-workflow.md` and the commit history show the process.
 
 A new country is a new folder: laws, contacts, messages, languages, currency and organisation name.
 A test fails if any of that leaks into the engine. The demo switches from Lagos to Nairobi live,
-with no code change. The engine knows nothing about web pages: the same engine already answers on
-Telegram through one small adapter that keeps no Telegram name, number or id, and WhatsApp and USSD
-are the same kind of adapter. Next: legal review of both packs, then a pilot with one health-rights organisation in
-one hospital catchment, on WhatsApp with voice notes.
+with no code change. Channels scale the same way. The engine knows nothing about web pages or
+Telegram; each channel is one small adapter, and a test proves the web and Telegram conversations
+match reply for reply. The Telegram adapter keeps no Telegram name, number or id. WhatsApp and USSD
+are the same kind of adapter. Next: legal review of both packs, then a pilot with one
+health-rights organisation in one hospital catchment, on WhatsApp with voice notes.
 
 This is a proof of concept. It is not an emergency service and says so.
 
