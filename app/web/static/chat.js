@@ -6,6 +6,8 @@
     get(k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } },
     set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   };
+  // A conversation belongs to the pack it started in: switching pack must start a fresh one.
+  if (S.get('pack') !== window.PACK) { S.set('sid', null); S.set('hist', null); S.set('pack', window.PACK); }
   let sid = S.get('sid'), hist = S.get('hist') || [], auto;
 
   function draw(text, cls) {

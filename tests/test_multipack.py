@@ -213,3 +213,11 @@ def test_pack_switch_over_http():
         assert "Mugumo Ridge" in c.get("/analyst/patterns.csv?pack=ke-nairobi", auth=AUTH).text
         total = sum(len(c.get(p).content) for p in ("/?pack=ke-nairobi", "/static/app.css", "/static/chat.js"))
         assert total < 10_000
+
+
+def test_switching_pack_on_the_web_page_starts_a_fresh_conversation():
+    """The page keeps the conversation in sessionStorage, which survives navigation in the tab.
+    Without this, opening /?pack=ke-nairobi mid-conversation carried on in Nigerian content."""
+    with TestClient(app) as c:
+        js = c.get("/static/chat.js").text
+        assert "S.get('pack') !== window.PACK" in js and "S.set('sid', null)" in js
