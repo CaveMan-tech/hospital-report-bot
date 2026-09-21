@@ -16,7 +16,7 @@
 reports exist. These are signals that warrant investigation, not rates. Do not rank hospitals with them.
 {% if held_back %}<br><a href="/analyst/review?pack={{ pack.id }}">{{ held_back }} report{{ "" if held_back == 1 else "s" }} held back for review</a> and not counted.{% endif %}</p>
 {% if patterns %}
-<div class="scroll"><table>
+<div class="scroll"><table class="patterns">
 <thead><tr><th>Hospital</th><th>Problem</th><th class="n">Reports</th><th class="n">In danger at the time</th>
 <th class="n">Answered follow-up</th><th class="n">Unchanged or worse</th><th class="n">Held for review</th><th>Last 13 weeks</th><th></th></tr></thead>
 <tbody>

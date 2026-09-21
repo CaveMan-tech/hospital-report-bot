@@ -373,9 +373,10 @@ async def analyst_pattern(hospital_id: str, category: str, request: Request,
     reports = await engine.store.list_reports()
     pattern = _pattern_or_404(A.patterns(reports, pack), hospital_id, category)
     rs = A.pattern_reports(reports, hospital_id, category)
+    brief = A.brief(pattern, pack)
     return templates.TemplateResponse(request, "pattern.html", {
         "pack": pack, "org_name": pack.org_name, "p": pattern, "reports": rs, "slices": A.slices(rs),
-        "brief": A.brief(pattern, pack), "trend": A.trend(rs),
+        "brief": brief, "brief_blocks": A.brief_blocks(brief), "trend": A.trend(rs),
         "spark": A.sparkline_svg(A.weekly_counts(rs), width=260, height=48),
         "posts": [{"text": t, "url": A.intent_url(t), "chars": len(t)} for t in A.thread(pattern, rs, pack)],
         "target": pack.meta.get("target", {})})

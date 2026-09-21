@@ -243,3 +243,16 @@ def test_long_posts_are_split_on_sentences_and_never_overflow():
     assert len(parts) > 1 and all(len(p) <= A.POST_LIMIT for p in parts)
     assert " ".join(parts).split() == long.split()                    # nothing lost, nothing added
     assert A._split_post("Short.") == ["Short."]
+
+
+def test_brief_blocks_only_reshape_the_brief():
+    reports, _ = build()
+    pack = Pack("ng-lagos", allow_unverified=True)
+    text = A.brief(A.patterns(reports, pack)[0], pack)
+    blocks = A.brief_blocks(text)
+    assert blocks[0][0] == "h1" and blocks[0][1].startswith("13 unverified")
+    assert [t for k, t in blocks if k == "h2"] == [
+        "What was reported", "The rule", "What we are asking for", "Method and caveats"]
+    assert ("quote", "SAMPLE DATA. Fictional hospital, generated reports. For demonstration only.") in blocks
+    flat = " ".join(text.split())
+    assert all(t in flat for _, t in blocks)  # nothing on screen that is not in the brief

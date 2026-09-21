@@ -10,6 +10,7 @@ header p{margin:2px 0;color:var(--mut)}a{color:inherit}
 table{border-collapse:collapse;width:100%}
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:.8rem;color:var(--mut);font-weight:600;white-space:nowrap}
+.patterns th{white-space:normal;vertical-align:bottom}.patterns th:nth-child(4){min-width:108px}.patterns th:nth-child(7){min-width:92px}.patterns td:nth-child(-n+2){min-width:18ch}.patterns td:nth-last-child(-n+2){white-space:nowrap}
 tbody tr:last-child td{border-bottom:0}
 .n{text-align:right;font-variant-numeric:tabular-nums}.strong{font-weight:700}
 tr.held{background:var(--held)}
@@ -33,3 +34,6 @@ code{font:12px ui-monospace,Menlo,monospace}
 select{font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);max-width:22ch}
 .row-actions{white-space:nowrap}.row-actions form{display:inline}
 .row-actions button{background:none;color:var(--fg);border:1px solid var(--line);padding:3px 8px;font-size:.85rem}
+.brief{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 24px;max-width:75ch}
+.brief h3{font-size:1.15rem;line-height:1.3;margin:0 0 6px}.brief h4{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:18px 0 4px}
+.brief p{margin:0 0 8px}.brief .banner{font-size:.9rem;margin:10px 0}.brief ul{margin:0;padding-left:1.2em}.brief li{margin:0 0 6px}

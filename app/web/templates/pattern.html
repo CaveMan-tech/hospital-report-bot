@@ -26,7 +26,11 @@
 </div></section>
 
 <section><h2>Pattern brief</h2>
-<pre id="brief">{{ brief }}</pre>
+<article class="brief">{% set ns = namespace(ul=false) %}
+{% for kind, text in brief_blocks %}{% if kind == "li" and not ns.ul %}<ul>{% set ns.ul = true %}{% elif kind != "li" and ns.ul %}</ul>{% set ns.ul = false %}{% endif %}
+{% if kind == "h1" %}<h3>{{ text }}</h3>{% elif kind == "h2" %}<h4>{{ text }}</h4>{% elif kind == "quote" %}<p class="banner">{{ text }}</p>{% elif kind == "li" %}<li>{{ text }}</li>{% else %}<p>{{ text }}</p>{% endif %}
+{% endfor %}{% if ns.ul %}</ul>{% endif %}</article>
+<pre id="brief" hidden>{{ brief }}</pre>
 <p class="actions"><button class="btn" id="copy" type="button">Copy brief</button>
 <a class="btn" href="/analyst/brief/{{ p.hospital_id }}/{{ p.category }}.md">Download .md</a></p></section>
 

@@ -148,6 +148,25 @@ def brief(pattern: dict, pack: Pack, now: datetime | None = None) -> str:
     return "\n".join(lines)
 
 
+def brief_blocks(text: str) -> list[tuple[str, str]]:
+    """The brief as (kind, text) blocks so the screen can show it as a document. It only re-shapes
+    the brief's own lines (h1, h2, quote, li, p); the copy and download stay the markdown itself."""
+    blocks: list[tuple[str, str]] = []
+    for line in text.splitlines():
+        for prefix, kind in (("# ", "h1"), ("## ", "h2"), ("> ", "quote"), ("- ", "li")):
+            if line.startswith(prefix):
+                blocks.append((kind, line[len(prefix):]))
+                break
+        else:
+            if not line.strip():
+                blocks.append(("gap", ""))
+            elif blocks and blocks[-1][0] == "p":
+                blocks[-1] = ("p", f"{blocks[-1][1]} {line}")
+            else:
+                blocks.append(("p", line))
+    return [b for b in blocks if b[0] != "gap"]
+
+
 REVIEW_REASONS = {
     "unknown_hospital": "Hospital name not recognised",
     "possible_duplicate": "Possible duplicate (same source, hospital and problem within 24 hours)",
