@@ -54,31 +54,28 @@ would be exactly the harm this project exists to prevent.
 
 ### Trust and accuracy
 
-- **The AI writes nothing a reporter reads.** It has one job: turn a story into a structured,
-  validated record. Every message is pre-written. Every legal statement and phone number also
-  carries a `verified` flag, and the bot refuses to send it until a human has checked it against
-  the primary source; until then it sends a safe fallback. At submission, the legal lines in the
-  Kenyan pack are still awaiting that review, by design.
-- **Rules decide danger, not the model.** When the situation is ambiguous, the bot asks. On top of
-  the model sit deterministic checks for self-harm and sexual violence wording, language detection,
-  and scrubbing of names, phone numbers and bed numbers from stored summaries.
+- **The AI writes nothing a reporter reads.** It only turns a story into a structured, validated
+  record. Every message is pre-written, and every legal line and phone number stays unsent until a
+  human has checked it against the primary source; until then the bot sends a safe fallback. At
+  submission the Kenyan pack is still awaiting that review, by design.
+- **Rules decide danger, not the model.** When a situation is ambiguous, the bot asks. Deterministic
+  checks sit on top of the model for self-harm and sexual violence wording, and names, phone numbers
+  and bed numbers are scrubbed from stored summaries.
 - **It is measured.** 44 hand-written stories in English and Pidgin across both countries, covering
-  emergencies, past events, ambiguous reports, prompt injection, safety handoffs, privacy and who is
-  writing. Headline metric: missed emergencies. Result with `gpt-5-mini`: zero, with 44 of 44
-  stories passing in three consecutive runs, at about four seconds per reply. The design assumes the model will sometimes be wrong, and a wrong
-  guess can never bypass the danger question.
-- **The reporter decides when it is a report.** People type in bursts, so they can keep adding
-  detail, and nothing is recorded until they say they have finished. The one exception is an
-  emergency: the bot tells them "if you need to go, go", and records what they have said after two
-  quiet minutes. Nobody has to choose between the person beside them and their report.
+  emergencies, prompt injection, safety handoffs and privacy. Missed emergencies with `gpt-5-mini`:
+  zero, with 44 of 44 passing in three consecutive runs, at about four seconds per reply. The model
+  will sometimes be wrong, and a wrong guess can never bypass the danger question.
+- **The reporter decides when it is a report.** They can keep adding detail, and nothing is recorded
+  until they say they have finished. In an emergency the bot says "if you need to go, go" and
+  records what they said after two quiet minutes. Nobody has to choose between the person beside
+  them and their report.
 - **Privacy promises are tests.** No identity is collected. The original message is deleted the
-  moment the report is written. The reference code is never stored, only a keyed hash. IP addresses
-  are never written to a database or a log. Small groups never appear, and masked numbers cannot be
-  recovered by subtraction. The greeting tells the reporter plainly that an AI service reads their
-  words.
-- **Honest outputs.** Every brief says: anonymous, unverified, self-selected; signals that warrant
-  investigation, not rates; never a ranking. It frames the problem as system failure, because
-  deposits are often demanded where emergency care is unfunded.
+  moment the report is written, the reference code is kept only as a keyed hash, and IP addresses
+  never reach a database or a log. Small groups never appear, and masked numbers cannot be recovered
+  by subtraction. The greeting says plainly that an AI service reads their words.
+- **Honest outputs.** Every brief says: anonymous, unverified, self-selected; signals to
+  investigate, not rates; never a ranking. It frames the problem as system failure, because deposits
+  are often demanded where emergency care is unfunded.
 
 ### How AI tools were used
 
