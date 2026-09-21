@@ -67,7 +67,7 @@ Fast cuts, one line each. Show code or a test name on screen for each claim.
 | `extract.py` prompt header. | "The AI has one job: read the story and fill in a structured record." |
 | `packs/ng-lagos/messages.json` showing a `verified` flag. | "It writes nothing the person reads. Every message is pre-written, and the bot refuses to send a legal claim or a phone number until a human has verified it." |
 | `severity.py`. | "It never decides alone whether someone is in danger. Rules do, and when in doubt, it asks." |
-| Terminal: `pytest` going green, then `evals/RESULTS.llm.md` with the headline line. | "The privacy promises are tests, not promises. And I measured it: forty-four hand-written stories, English and Pidgin, two countries. Missed emergencies: zero, three runs in a row." |
+| Terminal: `pytest` going green, then `evals/RESULTS.llm.md` with the headline line. | "The privacy promises are tests, not promises. And I measured it: fifty hand-written stories, English and Pidgin, two countries. Missed emergencies: zero." |
 
 ## 3:05 to 3:45 · Scale (scalability)
 

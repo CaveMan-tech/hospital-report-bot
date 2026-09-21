@@ -61,9 +61,9 @@ would be exactly the harm this project exists to prevent.
 - **Rules decide danger, not the model.** When a situation is ambiguous, the bot asks. Deterministic
   checks sit on top of the model for self-harm and sexual violence wording, and names, phone numbers
   and bed numbers are scrubbed from stored summaries.
-- **It is measured.** 44 hand-written stories in English and Pidgin across both countries, covering
+- **It is measured.** 50 hand-written stories in English and Pidgin across both countries, covering
   emergencies, prompt injection, safety handoffs and privacy. Missed emergencies with `gpt-5-mini`:
-  zero, with 44 of 44 passing in three consecutive runs, at about four seconds per reply. The model
+  zero, with 50 of 50 passing on the latest run (21 Sep 2026), at about four seconds per reply. The model
   will sometimes be wrong, and a wrong guess can never bypass the danger question.
 - **The reporter decides when it is a report.** They can keep adding detail, and nothing is recorded
   until they say they have finished. In an emergency the bot says "if you need to go, go" and

@@ -101,8 +101,8 @@ Three short lines under it: "It only classifies." / "Rules decide danger. When u
 **Say:** most AI tools in this space improvise. This one cannot.
 
 ## 9. Measured, not claimed · AI usage
-**On the slide:** one big number: "0 missed emergencies". Under it: "44 hand-written stories,
-English and Pidgin, Nigeria and Kenya. 44/44 across three consecutive runs. About 4 seconds a reply."
+**On the slide:** one big number: "0 missed emergencies". Under it: "50 hand-written stories,
+English and Pidgin, Nigeria and Kenya. 50/50 on the latest run (21 Sep 2026). About 4 seconds a reply."
 **Say:** the privacy promises are tests, not promises: the original message and the code are never
 stored, small groups never appear, identifiers are scrubbed from summaries.
 **Be ready for:** "you wrote the stories yourself". Answer: yes, and the design assumes the model

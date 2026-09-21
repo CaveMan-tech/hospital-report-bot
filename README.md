@@ -87,7 +87,7 @@ TEST_DATABASE_URL=postgresql://localhost/hospital_bot_test uv run pytest   # als
 uv run python -m evals.run
 ```
 
-`evals/stories.jsonl` holds 44 hand-written stories across both packs, including eight on who is writing (patient, relative, witness, staff): emergencies, past events, ambiguous reports,
+`evals/stories.jsonl` holds 50 hand-written stories across both packs, including eight on who is writing (patient, relative, witness, staff) and six on whether there is an incident to report at all: emergencies, past events, ambiguous reports,
 clinical complaints, out-of-scope text, prompt injection, safety handoffs and a privacy check.
 The headline metric is **missed emergencies, target zero**. Results are written to
 `evals/RESULTS.llm.md`.

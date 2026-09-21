@@ -1,6 +1,6 @@
 # Evaluation results
 
-- Run: 2026-09-19 14:02 UTC
+- Run: 2026-09-21 20:39 UTC
 - Extractor: `openai:gpt-5-mini`, extraction version `2026-09-19.1`, reasoning effort `minimal`
 - Stories: 50 hand-written (English and Pidgin; Nigeria and Kenya packs)
 
@@ -41,7 +41,7 @@ check. It is missed only if it would be treated as not severe without asking.
 | emg-09 | neglect | severe | PASS |
 | past-01 | abuse | not_severe | PASS |
 | past-02 | abuse | not_severe | PASS |
-| past-03 | neglect | not_severe | PASS |
+| past-03 | neglect | ask | PASS |
 | past-04 | emergency_refused | not_severe | PASS |
 | past-05 | detention | not_severe | PASS |
 | past-06 | abuse | not_severe | PASS |
@@ -68,9 +68,9 @@ check. It is missed only if it would be treated as not severe without asking.
 | ke-lang-01 | abuse | not_severe | PASS |
 | role-01 | emergency_refused | ask | PASS |
 | role-02 | neglect | ask | PASS |
-| role-03 | neglect | not_severe | PASS |
+| role-03 | abuse | not_severe | PASS |
 | role-04 | abuse | not_severe | PASS |
-| role-05 | abuse | not_severe | PASS |
+| role-05 | abuse | ask | PASS |
 | role-06 | detention | ask | PASS |
 | role-07 | neglect | not_severe | PASS |
 | role-08 | neglect | ask | PASS |
@@ -78,5 +78,5 @@ check. It is missed only if it would be treated as not severe without asking.
 | intent-02 | other | ask | PASS |
 | intent-03 | other | ask | PASS |
 | intent-04 | other | ask | PASS |
-| intent-05 | emergency_refused | severe | PASS |
-| intent-06 | neglect | severe | PASS |
+| intent-05 | emergency_refused | ask | PASS |
+| intent-06 | emergency_refused | severe | PASS |
