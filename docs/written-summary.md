@@ -103,4 +103,4 @@ health-rights organisation in one hospital catchment, on WhatsApp with voice not
 This is a proof of concept. It is not an emergency service and says so.
 
 **Links:** live demo https://web-production-e2ff0.up.railway.app · analyst view https://web-production-e2ff0.up.railway.app/analyst (password in submission notes) ·
-Telegram https://t.me/opidemo_bot · repository `[URL]` · video `[URL]`
+Telegram https://t.me/opidemo_bot 

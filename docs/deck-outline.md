@@ -5,6 +5,14 @@ big type, almost no bullets on screen: the words below are what the slide has to
 has to show. Judges score four things equally: uniqueness, scalability, AI coding tool usage,
 presentation and track fit. Each slide is tagged with what it scores._
 
+**For the designer.** Only what follows **On the slide** and **Visual** goes on a slide. **Say** is
+the speaker note. Everything else (evidence notes, "how to use it honestly", "do not use", "be ready
+for") is guidance for the presenter and must not appear on any slide. Do not add numbers, quotes,
+logos, hospital names or organisation names that are not written here: the hospitals and the
+organisation are fictional on purpose. Screenshots are real ones from the live app and will be
+supplied; leave a labelled phone-frame placeholder for each. Anything in `[square brackets]` is
+unresolved: leave it out rather than fill it in.
+
 **Name.** The product is **Open Ward**. The fictional organisation that runs it in the demo is
 Open Ward Initiative; keep the two distinct on slides.
 
@@ -12,7 +20,8 @@ Open Ward Initiative; keep the two distinct on slides.
 
 ## 1. Title · presentation
 **On the slide:** the name. One line: "Private reports in. Public pressure out."
-Tracks: Safety, Reporting & Protection + Transparency & Accountability. Your name, the link.
+Tracks: Safety, Reporting & Protection + Transparency & Accountability.
+Ikechi Okoro · web-production-e2ff0.up.railway.app · t.me/opidemo_bot
 **Visual:** a phone showing the chat in Pidgin.
 
 ## 2. The problem · track fit
@@ -48,6 +57,7 @@ complained about. A first-hand story also works. One true story beats one shaky 
 ## 3. What actually works · uniqueness
 **On the slide:** "What works is X. If you have followers. Or if someone has already died."
 **Visual:** mock-up of a call-out post with 40 followers and no replies, beside one with 40,000.
+Invented handles and a fictional hospital only; no real person, hospital or logo.
 **Say:** public pressure is the only lever, and today it is a lottery.
 
 ## 4. The insight · uniqueness
@@ -58,15 +68,17 @@ headline. Nobody is collecting the twenty-three.
 
 ## 5. The idea · uniqueness, track fit
 **On the slide:** the one diagram in the deck.
-Many phones → one engine → a partner organisation → X, press, regulators.
+Many phones (web link, Telegram; WhatsApp next) → one engine → a partner organisation → X, press, regulators.
 **Say:** I did not build another complaints channel. The bot is one cog inside an organisation that
 already campaigns. It collects, protects and aggregates. They verify, publish and push.
 A solo developer should not be the publisher.
 
 ## 6. For the reporter · track fit
-**On the slide:** four screenshots in a row: tell it your way (Pidgin) → danger check → your right
-and what to do now → your code.
-**Say:** I assume the person is angry, tired and stressed. No form, no app, no name, five kilobytes.
+**On the slide:** five screenshots in a row: tell it your way (Pidgin) → danger check → "anything
+else?" with its Done button → your right and what to do now → your code. One of the five is the
+Telegram chat, so both channels are seen.
+**Say:** I assume the person is angry, tired and stressed. They use what they already have: a web
+link or Telegram. No form, no app, no name, five kilobytes.
 Help first, data second: they leave with something useful even if no pattern ever forms.
 **One line on consent:** "Nothing is recorded until they say they have finished. In an emergency the
 bot says 'if you need to go, go', and records it for them after two quiet minutes. Nobody has to
@@ -105,8 +117,10 @@ and Article 43(2) of Kenya's Constitution on the right.
 organisation in any country runs this under its own name. The engine does not know what a web
 page is: the same engine already answers on Telegram through one small adapter, with no change to
 the engine and no Telegram name, number or id kept. WhatsApp and USSD are the same kind of adapter.
-**Honesty line:** every legal line in both packs ships unverified until a local lawyer signs it off.
-That is the process working, not a gap.
+**Honesty line:** the bot will not send a legal line or phone number until a person has checked it
+against the primary source. I have done that for all 25 in the Lagos pack; the 27 in the Kenyan pack
+are still waiting, so in Nairobi the bot sends a safe fallback instead. A local lawyer's review of
+both packs comes before any pilot. That is the process working, not a gap.
 
 ## 11. How I built it with AI · AI usage
 **On the slide:** a timeline: spec → adversarial review → tests with every feature → real-model
@@ -149,7 +163,8 @@ organisation in one hospital catchment, on WhatsApp with voice notes, (3) a thir
   Protection Act (s.49 on sensitive data leaving the country) would need a proper assessment before
   a pilot. `[VERIFY]`
 - **E. Limits.** Not an emergency service. Cannot send help and says so. Proof of concept.
-- **F. Architecture**, for the technical judge: engine, packs, store, channel adapters (web, Telegram); 166 automated tests.
+- **F. Architecture**, for the technical judge: engine, packs, store, channel adapters (web, Telegram); over 200 automated tests, run against both the in-memory and
+  the Postgres store. Every AI call is counted (model, tokens, latency, outcome) and linked to nothing.
 
 ## Design notes
 
