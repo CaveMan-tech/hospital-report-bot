@@ -144,15 +144,46 @@ organisation in one hospital catchment, on WhatsApp with voice notes, (3) a thir
 
 ## Appendix slides (for questions, not for presenting)
 
-- **A0. Why aggregated counts, never a single viral story.** Two Nigerian cases where a viral
-  hospital allegation was disputed or a panel cleared the hospital (see
-  `docs/research/nigeria-pack.md`, section H3) show how one account can be wrong. It is the
-  strongest argument for this design: patterns, unverified-signal wording, and an organisation
-  that checks before it publishes. `[VERIFY the two cases before citing]`
-- **A. Prior art and the difference.** I Paid A Bribe, Ushahidi, Care Opinion, Tracka, SERVICOM.
-  `[VERIFY each claim before citing]`. Difference: health-specific, help for the reporter first,
-  built for people with no audience, designed as infrastructure for an organisation that already
-  campaigns. Lesson taken: reporting platforms decay when nobody on the other end acts.
+- **A0. Why aggregated counts, never a single viral story.**
+  **On the slide:** "Outcry works fast. One account can be contested, or wrong." Then two short cases.
+  *Abuja, 2023.* A bystander said Maitama District Hospital demanded a police report before treating
+  Greatness Olorunfemi. Police, the FCCPC, the Senate and an FCTA panel all moved within days. The
+  panel reported, citing CCTV and witnesses, that she was already dead on arrival and no police report
+  was demanded, while faulting the hospital's handling of her body. The same day the FCTA told
+  hospitals to treat first and ask for police reports afterwards.
+  *Lagos, 2026.* A mother's video said Randle General Hospital refused her card and demanded cash
+  during her daughter's emergency. Within days the Ministry of Health published an investigation
+  disputing her account. THISDAY reported that the wider complaint, cash demands and one payment
+  vendor across 36 public hospitals, was not addressed.
+  **Say:** I am not saying anyone lied. I am saying one story becomes an argument about one story.
+  In Lagos the argument about her refund buried the question about the payment system. Twenty
+  reports of the same thing at the same hospital cannot be answered by disputing one of them. That
+  is why this tool counts patterns, calls them unverified signals, and leaves checking and
+  publishing to an organisation. In reserve: at Ikot Ekpene General Hospital in 2025 the hospital's
+  records contradicted a viral video, the poster retracted, and officials went to the police, which
+  is also the legal risk a lone poster carries.
+  **Sources, in the notes:** `docs/research/prior-art-and-disputed-cases.md`, section 1. Do not say
+  "X post", "nine-member panel" or "cleared" without the qualifications given there.
+- **A. Prior art and the difference.**
+  **On the slide:** a five-row table: who, since when, what became of it.
+  I Paid A Bribe (India, 2010): about 198,000 reports by its own count; offline since 2026.
+  Ushahidi (Kenya, 2008): still active; of 12,795 maps studied in 2012, 93% had fewer than 10 reports.
+  Care Opinion (UK, 2005): 778,000 public patient stories; studies find replies often generic and
+  recorded changes rare in some trusts.
+  Tracka (Nigeria, 2014): works through tracking officers and town halls, not the app alone.
+  SERVICOM (Nigeria, 2004): federal, no statute behind it; its central office logged 30 complaints in 2023.
+  **Say:** the difference is health-specific, help for the reporter first, built for people with no
+  audience, and designed as infrastructure for an organisation that already campaigns. Care Opinion
+  is the closest, and it publishes individual stories and needs the hospital to cooperate; this
+  publishes nothing and assumes no cooperation. Lesson taken, worded as the evidence supports it:
+  reporting tools do not create responsiveness by themselves. In a review of 23 platforms most drew
+  little institutional response (Peixoto and Fox, 2016), and on FixMyStreet people whose first report
+  was fixed were about 57% more likely to report again (Sjoberg, Mellon and Peixoto, 2017). That is
+  why the partner organisation comes first and the bot second.
+  **Do not say:** that I Paid A Bribe caused Bangalore's automated driving tests (the sources support
+  show-cause notices to 20 officers, and a recommendation); "45,000 users" for Ushahidi in 2008;
+  that platforms "decay" (no study shows that); that SERVICOM studies show low awareness in hospitals.
+  **Sources, in the notes:** `docs/research/prior-art-and-disputed-cases.md`, sections 2 and 3.
 - **B. Anonymity versus credibility.** What exists now (rate limits, a duplicate key that cannot be
   linked to anyone after a day, implausible reports held for review, "unverified" on every
   surface, the partner's editorial checks). What is next (optional evidence, partner-verified reports).
