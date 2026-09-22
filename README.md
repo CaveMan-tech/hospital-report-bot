@@ -11,6 +11,41 @@ that it can turn into public pressure.
 > All hospitals and the partner organisation in this repository are fictional. All seeded reports
 > are generated sample data and are labelled as such everywhere they appear.
 
+## Try it (for judges)
+
+Everything below is live. Reports you send go into the same sample data set and are anonymised
+the same way; nothing is stored that could identify you.
+
+**Report, as a patient would**
+
+- Web chat, Nigeria (English or Pidgin): https://web-production-e2ff0.up.railway.app
+- Web chat, Kenya pack: https://web-production-e2ff0.up.railway.app/?pack=ke-nairobi
+- Telegram: https://t.me/opidemo_bot (tap Start, then tell it what happened)
+
+Try a past incident ("last week a nurse at Harmattan General slapped my sister in maternity"),
+then an emergency ("we are at Iroko District emergency now, my husband is bleeding and they want a
+deposit first"). The second skips every question and goes straight to what to do and the law.
+
+**See what the partner organisation sees**
+
+Username: any. Password: `lLH9zWlmDqNzG8Njvp0OeqY`
+
+- Patterns, Nigeria: https://web-production-e2ff0.up.railway.app/analyst
+- Patterns, Kenya: https://web-production-e2ff0.up.railway.app/analyst?pack=ke-nairobi
+- Reports held for review (unknown hospital, possible duplicate):
+  https://web-production-e2ff0.up.railway.app/analyst/review
+- Pack content and verification status, Nigeria:
+  https://web-production-e2ff0.up.railway.app/analyst/content
+- Pack content, Kenya (deliberately unverified, so the bot sends the safe fallback instead of law):
+  https://web-production-e2ff0.up.railway.app/analyst/content?pack=ke-nairobi
+
+Open any pattern for the breakdown, the ready-to-post thread, the share card and the brief. A
+report you send yourself shows up in the count only after you finish the conversation, and only
+if the hospital is one of the fictional ones in the pack.
+
+The password is a demo credential for a demo instance holding fictional data. It will be rotated
+after judging.
+
 ## How it works
 
 ```
